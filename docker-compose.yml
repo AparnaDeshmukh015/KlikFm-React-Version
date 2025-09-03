@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  klikfm-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: dev
+        APP_PATH: /klikfmdev
+    ports:
+      - "80:80"
+    container_name: klikfm-dev-container
+    restart: unless-stopped
+    volumes:
+      # Optional: Mount nginx config for easier development
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
+    networks:
+      - klikfm-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.klikfm.rule=Host(`localhost`)"
+      - "traefik.http.services.klikfm.loadbalancer.server.port=80"
+
+networks:
+  klikfm-network:
+    driver: bridge

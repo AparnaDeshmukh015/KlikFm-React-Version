@@ -1,11 +1,9 @@
-
-FROM node:22.14.0-alpine AS builder
 WORKDIR /usr/src/app
 ENV PATH=/usr/src/app/node_modules/.bin:$PATH
 RUN apk add --no-cache python3 make g++ bash
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install 
 COPY . .
 ARG ENV_FILE=.env.dev
 RUN cp $ENV_FILE .env

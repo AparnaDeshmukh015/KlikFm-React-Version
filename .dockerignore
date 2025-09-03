@@ -1,7 +1,12 @@
 node_modules
-build
-Dockerfile
-.dockerignore
+npm-debug.log
 .git
 .gitignore
+README.md
+Dockerfile
+.dockerignore
 .env.local
+.env.development
+.env.test
+.env.uat
+.env.prod
