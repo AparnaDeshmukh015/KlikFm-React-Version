@@ -829,5 +829,5 @@ export const router = createBrowserRouter(
 
     //  ],)
   ],
-  { basename: "/klikfmdev" }
+  { basename: process.env.REACT_APP_CUSTOM_VARIABLE }
 );
