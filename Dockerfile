@@ -16,10 +16,10 @@ COPY . .
 
 # Copy .env.dev and rename to .env (React picks up at build time)
 # Make sure .env.dev is not excluded in .dockerignore
-COPY .env.dev .env
+COPY .env.staging .env
 
 # Build React app
-RUN npm run build:dev
+RUN npm run build:staging
 
 # ============================
 # 2. Nginx Stage (Serve React)

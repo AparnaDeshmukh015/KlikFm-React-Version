@@ -227,7 +227,7 @@ const WoDocumentUpload = ({
       (f: any, index: any) => index === i
     );
     const fileData = doclist?.filter((f: any, index: any) => index !== i);
-    // console.log(fileToRemove, fileData, "DELETE")
+    
     const updatedDocuments = fileData?.map((doc: any, index: any) => ({
       ...doc,
       DOC_SRNO: index + 1, // Assigning sequential serial numbers starting from 1

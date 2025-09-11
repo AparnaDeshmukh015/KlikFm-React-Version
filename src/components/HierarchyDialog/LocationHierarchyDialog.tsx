@@ -256,7 +256,6 @@ const LocationHierarchyDialog = ({
 
   const updateCheckStates = useCallback(
     (node: TreeNode) => {
-      console.log(node, "nodenode");
       const allChildIds = getAllChildIds(node);
       let newChecked = [...checked];
 
