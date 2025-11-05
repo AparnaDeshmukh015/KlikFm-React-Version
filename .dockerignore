@@ -6,4 +6,4 @@ Dockerfile
 .dockerignore
 README.md
 .env*
-!.env.staging
+!.env.dev
