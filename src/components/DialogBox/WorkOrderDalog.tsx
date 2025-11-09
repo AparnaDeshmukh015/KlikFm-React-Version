@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import ReactSignatureCanvas from "react-signature-canvas";
 import { useTranslation } from "react-i18next";
 import WoDocumentUpload from "../pageComponents/DocumentUpload/WoDocumentUpload";
-import { appName } from "../../utils/pagePath";
+
 import { decryptData } from "../../utils/encryption_decryption";
 import { InputTextarea } from "primereact/inputtextarea";
 
@@ -81,7 +81,6 @@ const WorkOrderDialogBox = ({
     setIsSubmit(false);
     clearErrors();
     setRecitifedStatus(false);
-    setDescriptionlength(0);
   };
   const { t } = useTranslation();
   const [sigPad, setSigpad] = useState<any | null>(singnature);
@@ -249,11 +248,11 @@ const WorkOrderDialogBox = ({
         toast.success(res?.MSG);
         if (header !== "Collaborate") {
           getAPI();
-          navigate(`${appName}/workorderlist`);
+          navigate("/workorderlist");
           setVisible(false);
           setError(false);
         } else {
-          navigate(`${appName}/workorderlist?edit=`);
+          navigate("/workorderlist?edit=");
           getOptionDetails(WO_ID);
           setVisible(false);
           setError(false);
@@ -353,7 +352,6 @@ const WorkOrderDialogBox = ({
           setdocCancel([]);
           setInputDialogVisible();
           setRecitifedStatus(false);
-          setDescriptionlength(0)
         }}
       >
         <form>
@@ -427,8 +425,9 @@ const WorkOrderDialogBox = ({
                 <>
                   <div className=" grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-2 lg:grid-cols-2">
                     <div
-                      className={`${event && watchRemark === "" ? "errorBorder" : ""
-                        }`}
+                      className={`${
+                        event && watchRemark === "" ? "errorBorder" : ""
+                      }`}
                     >
                       <label className="Text_Secondary Helper_Text  ">
                         Remarks <span className="text-red-600"> *</span>
@@ -481,8 +480,9 @@ const WorkOrderDialogBox = ({
                                   </button>
                                 </div>
                                 <div
-                                  className={`${event && !signature ? "errorBorder" : ""
-                                    }`}
+                                  className={`${
+                                    event && !signature ? "errorBorder" : ""
+                                  }`}
                                 >
                                   <ReactSignatureCanvas
                                     {...field}
@@ -505,8 +505,9 @@ const WorkOrderDialogBox = ({
                       />
                     </div>
                     <div
-                      className={`${event && watchVerify === "" ? "errorBorder" : ""
-                        }`}
+                      className={`${
+                        event && watchVerify === "" ? "errorBorder" : ""
+                      }`}
                     >
                       <Field
                         controller={{
@@ -540,10 +541,11 @@ const WorkOrderDialogBox = ({
           {header === "Rectified" ? (
             <>
               <div
-                className={`${header === "Rectified" && event && rectID === ""
-                  ? "errorBorder"
-                  : ""
-                  } mb-2`}
+                className={`${
+                  header === "Rectified" && event && rectID === ""
+                    ? "errorBorder"
+                    : ""
+                } mb-2`}
               >
                 <Field
                   controller={{
@@ -593,13 +595,14 @@ const WorkOrderDialogBox = ({
               </>
               {isShowTextbox && (
                 <div
-                  className={`${header === "Rectified" &&
+                  className={`${
+                    header === "Rectified" &&
                     event &&
                     watchRemark === "" &&
                     isShowTextbox
-                    ? "errorBorder"
-                    : ""
-                    }`}
+                      ? "errorBorder"
+                      : ""
+                  }`}
                 >
                   <Field
                     controller={{
@@ -626,10 +629,11 @@ const WorkOrderDialogBox = ({
                     }}
                   />
                   <label
-                    className={`${Descriptionlength === 250
-                      ? "text-red-600"
-                      : "Text_Secondary"
-                      } Helper_Text`}
+                    className={`${
+                      Descriptionlength === 250
+                        ? "text-red-600"
+                        : "Text_Secondary"
+                    } Helper_Text`}
                   >
                     {t(` ${Descriptionlength}/250 characters.`)}
                   </label>

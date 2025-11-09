@@ -132,32 +132,14 @@ const Table = (props: any) => {
     }
   };
 
-  // const getFilterData = () => {
-  //   console.log(filterData, filters.global.value, !filterData || !filters.global.value, "check")
-  //   if (!filterData || !filters.global.value) return filterData;
-  //   const value: any = filters?.global?.value?.toLowerCase();
-  //   console.log(filterData, filters.global.value, !filterData || !filters.global.value, "check1")
-  //   return props?.columnData?.filter((item: any) => {
-  //     return Object.values(item)?.some((val: any) =>
-  //       val?.toString()?.toLowerCase().includes(value)
-  //     );
-
-  //   });
-
-  // };
-
-  //NEW FILTER CODE ADDED BY ANAND
   const getFilterData = () => {
     if (!filterData || !filters.global.value) return filterData;
-    const value: string = filters?.global?.value?.toLowerCase();
-
-    const fieldsToSearch = props?.filterFields || [];
-
-    return props?.columnData?.filter((item: any) =>
-      fieldsToSearch?.some((field: string) =>
-        item[field]?.toString()?.toLowerCase()?.includes(value)
-      )
-    );
+    const value: any = filters?.global?.value?.toLowerCase();
+    return props?.columnData?.filter((item: any) => {
+      return Object.values(item)?.some((val: any) =>
+        val?.toString()?.toLowerCase().includes(value)
+      );
+    });
   };
 
   useEffect(() => {
@@ -169,18 +151,15 @@ const Table = (props: any) => {
     }
   }, [filters?.global?.value, props?.columnData]);
 
-
   useEffect(() => {
     setFirst(0);
   }, [filterData, rows]);
-  console.log(first, rows, filterData?.slice(first, first + rows), "test")
-  console.log("filterData length:", filterData?.length, "first:", first, "rows:", rows);
+
   return (
     <>
       <DataTable
         className="primeTable"
         value={filterData?.slice(first, first + rows)}
-        // value={filterdataeq}
         showGridlines
         emptyMessage={t("No Data found.")}
         dataKey={props?.dataKey}
@@ -233,10 +212,10 @@ const Table = (props: any) => {
                       ) : (
                         <>
                           {userRole &&
-                            (rowData.FACILITY_GENERIC === "Y" ||
-                              decryptData(
-                                localStorage.getItem(LOCALSTORAGE?.ROLETYPECODE)
-                              ) === ROLETYPECODE?.SYSTEM_ADMIN) ? (
+                          (rowData.FACILITY_GENERIC === "Y" ||
+                            decryptData(
+                              localStorage.getItem(LOCALSTORAGE?.ROLETYPECODE)
+                            ) === ROLETYPECODE?.SYSTEM_ADMIN) ? (
                             <p
                               className="cursor-pointer"
                               onClick={() => {
@@ -540,11 +519,11 @@ const Table = (props: any) => {
       <div className="flex p-4 bg-white flex-row gap-3a justify-between ">
         {filterData?.length > 0 && (
           <div className="mt-3 Text_Secondary Input_label">
-            {`Showing ${first + 1} - ${filterData?.slice(first, first + rows).length + first
-              } of ${filterData?.length}`}
+            {`Showing ${first + 1} - ${
+              filterData?.slice(first, first + rows).length + first
+            } of ${filterData?.length}`}
           </div>
         )}
-
 
         <Paginator
           first={first}
@@ -552,14 +531,14 @@ const Table = (props: any) => {
           totalRecords={filterData?.length}
           onPageChange={onPageChange}
           currentPageReportTemplate="Items per Page:-"
-          rowsPerPageOptions={[15, 25, 50, 75]}
-          alwaysShow={filterData?.length > 0 ? true : false}
+          rowsPerPageOptions={[15, 25, 50, 75].filter(
+            (option) => option <= filterData?.length
+          )}
+          alwaysShow={false}
           template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
         ></Paginator>
       </div>
     </>
-
-
   );
 };
 

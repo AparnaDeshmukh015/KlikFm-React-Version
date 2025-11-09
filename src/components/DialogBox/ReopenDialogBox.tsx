@@ -105,7 +105,6 @@ const ReopenDialogBox = ({
           setValue("REMARKS", null);
           if (!visible) return;
           setVisible(false);
-          setRemrksCount(0);
         }}
       >
         <form>
@@ -128,13 +127,14 @@ const ReopenDialogBox = ({
                 </div>
 
                 <div
-                  className={`${events &&
+                  className={`${
+                    events &&
                     (REMARKS === null ||
                       REMARKS === undefined ||
                       REMARKS.trim() === "")
-                    ? "errorBorder"
-                    : ""
-                    }`}
+                      ? "errorBorder"
+                      : ""
+                  }`}
                 >
                   <Field
                     controller={{

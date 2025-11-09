@@ -23,9 +23,11 @@ import LoaderS from "../../components/Loader/Loader";
 
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../utils/B2BLogin";
+ import loadConfig from "../../config";
 
 const Login: React.FC<any> = () => {
   const { instance, inProgress } = useMsal();
+  const [version, setVersion] = useState<string>("1.0.0");
   const [loading, setLoading] = useState<any | null>(false);
   let curr_loc = useLocation();
   const [error, setError] = useState<any | null>(false);
@@ -88,7 +90,6 @@ const Login: React.FC<any> = () => {
         isMobile = true;
         isValid = true;
       } else {
-        // msg = 'Please Enter valid Mobile Number'
         msg = " We can’t find an account with this mobile number.";
         isMobile = true;
         isValid = false;
@@ -420,6 +421,16 @@ const Login: React.FC<any> = () => {
     })();
   }, [curr_loc?.search !== ""]);
 
+ const getVersion = async () => {
+    const config = await loadConfig();
+    if (config && config?.version)
+      setVersion(config.version);
+  };
+
+  useEffect(() => {
+    getVersion();
+  }, []);
+
   return (
     <>
       <PublicRoute>
@@ -437,7 +448,7 @@ const Login: React.FC<any> = () => {
                   <img className="w-[500px] h-[]" src={Login_BG} alt="" />
                   <img className="w-[50px] h-[17px]" src={Keppel_Logo} alt="" />
                   <span className="font-medium mt-3 text-black ms-1 text-[15px]">
-                    Version: 1.0.1
+                      Version: {version}
                   </span>
                 </div>
               </div>

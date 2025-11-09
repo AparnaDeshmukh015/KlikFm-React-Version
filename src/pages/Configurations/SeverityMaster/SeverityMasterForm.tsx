@@ -77,14 +77,15 @@ const UserMasterForm = (props: any) => {
     payload.ICON_ID = payload?.ICON_ID?.ICON_ID
     try {
       const res = await callPostAPI(ENDPOINTS.saveSeverityMaster, payload);
+
       if (res?.FLAG === true) {
+
         toast?.success(res?.MSG);
         props?.getAPI();
-
         props?.isClick();
-      } else {
-
+      } else if (res?.FLAG === false) {
         toast?.error(res?.MSG);
+        return
       }
 
       const notifcation: any = {
@@ -279,7 +280,7 @@ const UserMasterForm = (props: any) => {
                         valueTemplate={selectedLocationTemplate}
                         itemTemplate={locationOptionTemplate}
                         findKey={"ICON_ID"}
-                        selectedData={dataId?.ICON_ID}
+                        // selectedData={dataId?.ICON_ID}
                         setValue={setValue}
                         invalid={facility_type === "I" ? errors.ICON_ID : ""}
                         className="locationDropdown w-full"

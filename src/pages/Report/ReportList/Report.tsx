@@ -99,6 +99,23 @@ const Report = (props: any) => {
     mode: "onSubmit",
   });
 
+
+
+  // Reusable date parser
+  const parseDateString = (str: string): Date | null => {
+    const formats = [
+      "DD-MM-YYYY HH:mm",
+      "DD-MM-YYYY",
+      "MM-DD-YYYY HH:mm",
+      "MM-DD-YYYY",
+      "DD-MMM-YYYY HH:mm",
+      "DD-MMM-YYYY"
+    ];
+
+    const m = moment(str, formats, true); // strict parsing
+    return m.isValid() ? m.toDate() : null;
+  };
+
   function convertToAoA(obj: any): any[][] {
     const result: any[][] = [];
     for (const key in obj) {
@@ -132,6 +149,124 @@ const Report = (props: any) => {
     return result;
   }
 
+  // const ExportCSV = async (csvData: any, searchData: any, fileName: any) => {
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet("Report");
+
+  //   // Add summary section
+  //   const rowSummary = worksheet.addRow([reportSummary]);
+  //   rowSummary.font = { bold: true };
+  //   rowSummary.fill = {
+  //     type: "pattern",
+  //     pattern: "solid",
+  //     fgColor: { argb: "" },
+  //   };
+  //   rowSummary.border = {
+  //     top: { style: "medium", color: { argb: "FF000000" } },
+  //     bottom: { style: "medium", color: { argb: "FF000000" } },
+  //     left: { style: "medium", color: { argb: "FF000000" } },
+  //     right: { style: "medium", color: { argb: "FF000000" } },
+  //   };
+
+  //   // Add report details
+  //   const summaryJSONData = convertToAoA(reportDetails);
+  //   summaryJSONData.forEach((row) => worksheet.addRow(row));
+  //   worksheet.addRow([]); // Empty row
+
+  //   // Add "Report Details" title (will merge later)
+  //   const detailsTitleRow = worksheet.addRow(["Report Details"]);
+
+  //   // Add headers and data first
+  //   const jobHeaders = csvData.length > 0 ? Object.keys(csvData[0]) : [];
+  //   const headerRow = worksheet.addRow(jobHeaders);
+
+  //   // Style headers
+  //   headerRow.eachCell((cell) => {
+  //     cell.fill = {
+  //       type: "pattern",
+  //       pattern: "solid",
+  //       fgColor: { argb: "#8e724a" },
+  //     };
+  //     cell.font = {
+  //       bold: true,
+  //       color: { argb: "FFFFFFFF" },
+  //     };
+  //     cell.border = {
+  //       top: { style: "thin", color: { argb: "FF000000" } },
+  //       bottom: { style: "thin", color: { argb: "FF000000" } },
+  //       left: { style: "thin", color: { argb: "FF000000" } },
+  //       right: { style: "thin", color: { argb: "FF000000" } },
+  //     };
+  //     cell.alignment = { horizontal: "center" };
+  //   });
+
+  //   csvData.forEach((item: any) => {
+  //     const rowValues = jobHeaders.map((header) => {
+  //       const value = item[header];
+  //       if (typeof value === "string") {
+  //         const parsed = parseDateString(value);
+  //         return parsed ? parsed : value;
+  //       }
+  //       return value;
+  //     })
+
+  //     const row = worksheet.addRow(rowValues);
+  //     row.eachCell((cell) => {
+  //       if (cell.value instanceof Date) {
+  //         cell.numFmt = "dd-mm-yyyy hh:mm"; // date + time
+  //       }
+  //     });
+  //   });
+  //   try {
+  //     const lastCol = worksheet.columns
+  //       ? String.fromCharCode(64 + worksheet.columns.length)
+  //       : "J";
+  //     worksheet.mergeCells(
+  //       `A${detailsTitleRow.number}:${lastCol}${detailsTitleRow.number}`
+  //     );
+  //   } catch (error) {
+  //     worksheet.mergeCells(
+  //       `A${detailsTitleRow.number}:J${detailsTitleRow.number}`
+  //     );
+  //   }
+
+  //   // Apply styling to the merged title
+  //   detailsTitleRow.font = { bold: true };
+  //   detailsTitleRow.fill = {
+  //     type: "pattern",
+  //     pattern: "solid",
+  //     fgColor: { argb: "" },
+  //   };
+  //   detailsTitleRow.border = {
+  //     top: { style: "medium", color: { argb: "FF000000" } },
+  //     bottom: { style: "medium", color: { argb: "FF000000" } },
+  //     left: { style: "medium", color: { argb: "FF000000" } },
+  //     right: { style: "medium", color: { argb: "FF000000" } },
+  //   };
+  //   detailsTitleRow.alignment = { horizontal: "center", vertical: "middle" };
+
+  //   // Auto-fit columns
+  //   worksheet.columns.forEach((column: any) => {
+  //     let maxLength = 0;
+  //     column.eachCell({ includeEmpty: true }, (cell: any) => {
+  //       const columnLength = cell.value ? cell.value.toString().length : 0;
+  //       if (columnLength > maxLength) {
+  //         maxLength = columnLength;
+  //       }
+  //     });
+  //     column.width = Math.min(Math.max(maxLength + 2, 10), 50);
+  //   });
+
+  //   // Generate Excel file
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //   });
+
+  //   FileSaver.saveAs(blob, `${fileName}.xlsx`);
+  // });
+
+
   const ExportCSV = async (csvData: any, searchData: any, fileName: any) => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Report");
@@ -159,7 +294,7 @@ const Report = (props: any) => {
     // Add "Report Details" title (will merge later)
     const detailsTitleRow = worksheet.addRow(["Report Details"]);
 
-    // Add headers and data first
+    // Add headers and data
     const jobHeaders = csvData.length > 0 ? Object.keys(csvData[0]) : [];
     const headerRow = worksheet.addRow(jobHeaders);
 
@@ -170,10 +305,7 @@ const Report = (props: any) => {
         pattern: "solid",
         fgColor: { argb: "#8e724a" },
       };
-      cell.font = {
-        bold: true,
-        color: { argb: "FFFFFFFF" },
-      };
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
       cell.border = {
         top: { style: "thin", color: { argb: "FF000000" } },
         bottom: { style: "thin", color: { argb: "FF000000" } },
@@ -183,32 +315,38 @@ const Report = (props: any) => {
       cell.alignment = { horizontal: "center" };
     });
 
-    // Add all data rows
+    // Add data rows
     csvData.forEach((item: any) => {
-      const row = jobHeaders.map((header) => item[header]);
-      worksheet.addRow(row);
+      const rowValues = jobHeaders.map((header) => {
+        const value = item[header];
+        if (typeof value === "string") {
+          const parsed = parseDateString(value);
+          return parsed ? parsed : value;
+        }
+        return value;
+      });
+
+      const row = worksheet.addRow(rowValues);
+      row.eachCell((cell) => {
+        if (cell.value instanceof Date) {
+          cell.value = new Date(cell.value); // ensure it's a Date object
+        }
+      });
     });
 
+    // Merge "Report Details" title across columns
     try {
       const lastCol = worksheet.columns
         ? String.fromCharCode(64 + worksheet.columns.length)
         : "J";
-      worksheet.mergeCells(
-        `A${detailsTitleRow.number}:${lastCol}${detailsTitleRow.number}`
-      );
-    } catch (error) {
-      worksheet.mergeCells(
-        `A${detailsTitleRow.number}:J${detailsTitleRow.number}`
-      );
+      worksheet.mergeCells(`A${detailsTitleRow.number}:${lastCol}${detailsTitleRow.number}`);
+    } catch {
+      worksheet.mergeCells(`A${detailsTitleRow.number}:J${detailsTitleRow.number}`);
     }
 
-    // Apply styling to the merged title
+    // Style merged title row
     detailsTitleRow.font = { bold: true };
-    detailsTitleRow.fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "" },
-    };
+    detailsTitleRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "" } };
     detailsTitleRow.border = {
       top: { style: "medium", color: { argb: "FF000000" } },
       bottom: { style: "medium", color: { argb: "FF000000" } },
@@ -222,19 +360,16 @@ const Report = (props: any) => {
       let maxLength = 0;
       column.eachCell({ includeEmpty: true }, (cell: any) => {
         const columnLength = cell.value ? cell.value.toString().length : 0;
-        if (columnLength > maxLength) {
-          maxLength = columnLength;
-        }
+        if (columnLength > maxLength) maxLength = columnLength;
       });
       column.width = Math.min(Math.max(maxLength + 2, 10), 50);
     });
 
-    // Generate Excel file
+    // Generate and save Excel file
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-
     FileSaver.saveAs(blob, `${fileName}.xlsx`);
   };
 
@@ -295,7 +430,13 @@ const Report = (props: any) => {
             ? payload?.ASSETNAME.map((item: any) => item?.ASSET_NAME).join(", ")
             : "",
       };
+    } else if (payload?.REPORT_DETAILS?.REPORT_ID === 6) {
+      data = {
+        Start_Date: moment(payload?.START_DATE).format(dateFormat()),
+        End_Date: moment(payload?.END_DATE).format(dateFormat()),
+      };
     }
+
     let fromDate = moment(payload?.START_DATE).format("DD-MM");
     let endDate = moment(payload?.END_DATE).format("DD-MM-YYYY");
     const woTypeCode =
@@ -386,7 +527,18 @@ const Report = (props: any) => {
 
           REPORT_ID: payload?.REPORT_DETAILS?.REPORT_ID,
         };
-      } else if (payload?.REPORT_DETAILS?.REPORT_ID === 3) {
+
+      } else if (payload?.REPORT_DETAILS?.REPORT_ID === 6) {
+        payloadData = {
+          FROM_DATE: moment(payload?.START_DATE).format("YYYY-MM-DD"),
+          TO_DATE: moment(payload?.END_DATE).format("YYYY-MM-DD"),
+
+          REPORT_ID: payload?.REPORT_DETAILS?.REPORT_ID,
+        };
+
+      }
+
+      else if (payload?.REPORT_DETAILS?.REPORT_ID === 3) {
         payloadData = {
           LOCATION_LIST: locationId,
           REPORT_ID: payload?.REPORT_DETAILS?.REPORT_ID,
@@ -448,7 +600,8 @@ const Report = (props: any) => {
                   ? "Work_HisotryReport"
                   : reportID === 5
                     ? "PPM_Schdule"
-                    : ""
+                    : reportID === 6
+                      ? "Anacle_Report_ " : ""
           }${fromDate}_${endDate}`
         );
         let summary_report: any = `${reportID === 1
@@ -461,7 +614,8 @@ const Report = (props: any) => {
                 ? "Work Hisotry Report Summary"
                 : reportID === 5
                   ? "PPM Schdule Report Summary"
-                  : ""
+                  : reportID === 5
+                    ? "Anacle Report Summary" : ""
           }`;
         setReportSummary(summary_report);
         //   ExportCSV(res?.REPORTDATA,  data , );
@@ -695,7 +849,8 @@ const Report = (props: any) => {
             {reportID === 1 ||
               reportID === 2 ||
               reportID === 4 ||
-              reportID === 5 ? (
+              reportID === 5 ||
+              reportID === 6 ? (
               <Field
                 controller={{
                   name: "START_DATE",
@@ -748,7 +903,8 @@ const Report = (props: any) => {
             {reportID === 1 ||
               reportID === 2 ||
               reportID === 4 ||
-              reportID === 5 ? (
+              reportID === 5 ||
+              reportID === 6 ? (
               <Field
                 controller={{
                   name: "END_DATE",
@@ -1117,7 +1273,8 @@ const Report = (props: any) => {
               reportID === 2 ||
               reportID === 3 ||
               reportID === 4 ||
-              reportID === 5 ? (
+              reportID === 5 ||
+              reportID === 6 ? (
               <div className="flex align-items-center">
                 <Buttons
                   type="submit"

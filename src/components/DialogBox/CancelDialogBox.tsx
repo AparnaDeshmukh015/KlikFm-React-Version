@@ -8,7 +8,6 @@ import Field from "../../components/Field";
 import { toast } from "react-toastify";
 import { callPostAPI } from "../../services/apis";
 import { ENDPOINTS } from "../../utils/APIEndpoints";
-import { set } from "date-fns";
 
 const CancelDialogBox = ({
   header,
@@ -23,19 +22,14 @@ const CancelDialogBox = ({
   setIsSubmit
 }: any) => {
   const [visible, setVisible] = useState<boolean>(false);
-  const [Remarklength, setRemarkLength] = useState(0);
+
   const REMARKS = watch('REMARKS');
   const OpenCancelServiceRequestPopUp = () => {
     setVisible(!visible);
   }
-  const handleInputChange = (event: any) => {
-    const value = event.target.value;
-    setRemarkLength(value.length);
-  };
 
   const CloseCancelServiceRequestPopUp = () => {
     setVisible(!visible);
-    setRemarkLength(0)
     setValue("REMARKS", "");
     setIsSubmit(false)
   }
@@ -67,7 +61,6 @@ const CancelDialogBox = ({
       setVisible(!visible);
       toast.success(res.MSG);
       setValue("REMARKS", "");
-      setRemarkLength(0);
       getOptions();
       setIsSubmit(false)
     } else {
@@ -135,27 +128,18 @@ const CancelDialogBox = ({
                       <InputTextarea
                         {...register("REMARKS", {
                           required: "Please fill the requried fields",
-                          onChange: (e: any) => handleInputChange(e),
                         })}
 
                         invalid={errors?.REMARKS}
                         rows={3}
                         setValue={setValue}
-                        maxLength={400}
                         {...field}
                       />
                     );
                   },
                 }}
               />
-              <label
-                className={` ${Remarklength === 400 ? "text-red-600" : "Text_Secondary"
-                  } Helper_Text`}
-              >
-                {(`${Remarklength}/400 characters.`)}
-              </label>
             </div>
-
           </div>
           <div className="flex justify-end mt-3 gap-3">
             {header !== "Review" ? (

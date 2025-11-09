@@ -227,7 +227,7 @@ const WoDocumentUpload = ({
       (f: any, index: any) => index === i
     );
     const fileData = doclist?.filter((f: any, index: any) => index !== i);
-    
+    // console.log(fileToRemove, fileData, "DELETE")
     const updatedDocuments = fileData?.map((doc: any, index: any) => ({
       ...doc,
       DOC_SRNO: index + 1, // Assigning sequential serial numbers starting from 1
@@ -440,12 +440,13 @@ const WoDocumentUpload = ({
         >
           <label
             // htmlFor="dropzone-file"
-            className={`flex flex-col items-center justify-center w-full h-54  ${uploadError === true && DOC_LIST?.length === 0
+            className={`flex flex-col items-center justify-center w-full h-54  ${
+              uploadError === true && DOC_LIST?.length === 0
                 ? "border-2 border-red-600"
                 : CurrDocData?.length <= 0
-                  ? "border-2 border-gray-200 border rounded-lg"
-                  : ""
-              }`}
+                ? "border-2 border-gray-200 border rounded-lg"
+                : ""
+            }`}
           >
             {CurrDocData?.length <= 0 ? (
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -580,8 +581,8 @@ const WoDocumentUpload = ({
                           {doc.DOC_NAME.length > 15
                             ? doc.DOC_NAME.substring(0, 6) + "..."
                             : doc.DOC_NAME
-                              ? doc.DOC_NAME
-                              : doc.DOC_NAME}
+                            ? doc.DOC_NAME
+                            : doc.DOC_NAME}
                           {doc.DOC_NAME.length > 15
                             ? doc.DOC_EXTENTION === ""
                               ? fileExtension
@@ -605,7 +606,7 @@ const WoDocumentUpload = ({
           className="imageContainer"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-        // className={`flex flex-col items-center justify-center w-full h-54
+          // className={`flex flex-col items-center justify-center w-full h-54
         >
           {loading ? (
             <div className="imageContainer  flex justify-center items-center">

@@ -11,7 +11,7 @@ import { callPostAPI } from "../../../services/apis";
 import { ENDPOINTS } from "../../../utils/APIEndpoints";
 import Radio from "../../../components/Radio/Radio";
 import { useTranslation } from "react-i18next";
-import {  saveTracker } from "../../../utils/constants";
+import { saveTracker } from "../../../utils/constants";
 import {
   eventNotification,
   helperEventNotification,
@@ -22,7 +22,7 @@ import { decryptData } from "../../../utils/encryption_decryption";
 import { validation } from "../../../utils/validation";
 
 const UserRoleMasterForm = (props: any) => {
-  
+
   const { t } = useTranslation();
 
   let [roletypeOptions, setRoletypeOptions] = useState([]);
@@ -38,7 +38,7 @@ const UserRoleMasterForm = (props: any) => {
     .filter((detail: any) => detail.URL === pathname)[0];
   const { search } = useLocation();
   const getId: any = localStorage.getItem("Id")
-  const dataId = search === '?edit=' ? JSON.parse(getId):null;
+  const dataId = search === '?edit=' ? JSON.parse(getId) : null;
   const {
     register,
     handleSubmit,
@@ -52,18 +52,18 @@ const UserRoleMasterForm = (props: any) => {
       PARA: props?.selectedData || search === '?edit='
         ? { para1: `${props?.headerName}`, para2: "Updated" }
         : { para1: `${props?.headerName}`, para2: "Added" },
-      ROLE_ID:  search === '?edit=' ? dataId?.ROLE_ID : 0,
+      ROLE_ID: search === '?edit=' ? dataId?.ROLE_ID : 0,
       ROLE_NAME: search === '?edit=' ? dataId?.ROLE_NAME : "",
-      ROLE_TYPE:search === '?edit='?
-         roletypeOptions.filter(
+      ROLE_TYPE: search === '?edit=' ?
+        roletypeOptions.filter(
           (item: any) =>
             item?.ROLETYPE_NAME === dataId?.ROLETYPE_NAME
         )[0]
         : "",
       ASSIGN_ADD: search === '?edit=' ? dataId?.ASSIGN_ADD : false,
-      REOPEN_ADD: search === '?edit=' ? dataId?.REOPEN_ADD: false,
-      ACTIVE:search === '?edit=' ? dataId?.ACTIVE: true,
-      ISREDIRECT:search === '?edit=' ? dataId?.ISREDIRECT: false,
+      REOPEN_ADD: search === '?edit=' ? dataId?.REOPEN_ADD : false,
+      ACTIVE: search === '?edit=' ? dataId?.ACTIVE : true,
+      ISREDIRECT: search === '?edit=' ? dataId?.ISREDIRECT : false,
       FACILITY_GENERIC: ""
     },
     mode: "all",
@@ -100,7 +100,7 @@ const UserRoleMasterForm = (props: any) => {
     payload.REOPEN_ADD = payload?.REOPEN_ADD ? 1 : 0;
     payload.ISREDIRECT = payload?.ISREDIRECT ? 1 : 0;
     try {
-    
+
       const res = await callPostAPI(ENDPOINTS.saveUserRoleMaster, payload);
       if (res?.FLAG === true) {
         toast?.success(res?.MSG);
@@ -118,7 +118,7 @@ const UserRoleMasterForm = (props: any) => {
         props?.getAPI();
         props?.isClick();
       } else {
-        toast?.success(res?.MSG)
+        toast?.error(res?.MSG)
       }
     } catch (error: any) {
       toast.error(error);
@@ -131,7 +131,7 @@ const UserRoleMasterForm = (props: any) => {
       await saveTracker(currentMenu)
     })();
   }, []);
- 
+
   useEffect(() => {
     if ((!isSubmitting && Object?.values(errors)[0]?.type === "required") || (!isSubmitting && Object?.values(errors)[0]?.type === "validate")) {
       const check: any = Object?.values(errors)[0]?.message;
@@ -186,17 +186,17 @@ const UserRoleMasterForm = (props: any) => {
                       <Select
                         options={roletypeOptions}
                         {...register("ROLE_TYPE", {
-                          required: search === '?add=' ?"Please fill the required fields." :'',
+                          required: search === '?add=' ? "Please fill the required fields." : '',
                         })}
                         label="Role Type"
-                        require={search === '?add='?true : false}
+                        require={search === '?add=' ? true : false}
                         optionLabel="ROLETYPE_NAME"
-                       
+
                         findKey={"ROLETYPE_CODE"}
                         disabled={search === '?edit=' ? true : false}
                         selectedData={dataId?.ROLETYPE_CODE}
                         setValue={setValue}
-                        invalid={search === '?add=' ?errors.ROLE_TYPE:""}
+                        invalid={search === '?add=' ? errors.ROLE_TYPE : ""}
                         {...field}
                       />
                     );
@@ -206,32 +206,32 @@ const UserRoleMasterForm = (props: any) => {
               />
             </div>
             {/* {props?.selectedData?.FACILITY_ID !== 0 && ( */}
-              <Field
-                controller={{
-                  name: "FACILITY_GENERIC",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <>
-                        <Radio
-                          {...register("FACILITY_GENERIC", {
-                            required: t("Please fill the required fields."),
-                          })}
-                          labelHead="Building Generic"
-                          options={genericLabel}
-                          selectedData={
-                            (props?.selectedData?.FACILITY_GENERIC === "YES" ? "Y" : "N")
-                          }
-                          disabled={search === '?edit=' ? true : false}
-                          
-                          setValue={setValue}
-                          {...field}
-                        />
-                      </>
-                    );
-                  },
-                }}
-              />
+            <Field
+              controller={{
+                name: "FACILITY_GENERIC",
+                control: control,
+                render: ({ field }: any) => {
+                  return (
+                    <>
+                      <Radio
+                        {...register("FACILITY_GENERIC", {
+                          required: t("Please fill the required fields."),
+                        })}
+                        labelHead="Building Generic"
+                        options={genericLabel}
+                        selectedData={
+                          (props?.selectedData?.FACILITY_GENERIC === "YES" ? "Y" : "N")
+                        }
+                        disabled={search === '?edit=' ? true : false}
+
+                        setValue={setValue}
+                        {...field}
+                      />
+                    </>
+                  );
+                },
+              }}
+            />
             {/* )} */}
 
 

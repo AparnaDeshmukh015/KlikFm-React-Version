@@ -8,7 +8,7 @@ import "./AssetScheduleForm.css";
 import { validation } from "../../../utils/validation";
 import { LABELS, OPTIONS, convertTime } from "../../../utils/constants";
 import { useEffect, useState } from "react";
-import TimeCalendar from "../../Calendar/TimeCalendar";
+
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -21,7 +21,10 @@ import { toast } from "react-toastify";
 import moment from "moment";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { appName } from "../../../utils/pagePath";
+
+import { scheduler } from "timers/promises";
+import { inputElement, timeInputField, radioElement} from "./HelperRealSchedular"
+import {handleFormSubmit, getScheduleOption} from "./HelperReal";
 const AssetSchedule = ({
   ASSET_FOLDER_DATA,
   register,
@@ -52,17 +55,21 @@ const AssetSchedule = ({
   setLocationError,
   setTypeError,
   setGroupError,
-  setAssetNameError
+  setAssetNameError,
 }: any) => {
   const { t } = useTranslation();
-  const watchScheduler = watchAll?.SCHEDULER;
+  const FACILITY: any = localStorage.getItem("FACILITYID");
+  const FACILITYID: any = JSON.parse(FACILITY);
 
-  // let scheduleWatch: any = scheduleId ? scheduleId : watchAll?.SCHEDULE_ID;
+  if (FACILITYID) {
+    var facility_type: any = FACILITYID?.FACILITY_TYPE;
+  }
+  const watchScheduler = watchAll?.SCHEDULER;
   let { search } = useLocation();
   const [selectedData, setSelectedData] = useState<any | null>([]);
   const [editSelectedData, setEditSelectedData] = useState<any | null>([]);
-  //const [errorData, setError] = useState<any | null>(false);
   const [errorName, setErrorName] = useState<any | null>(false);
+  const [errorreq, seterrorreq] = useState<any | null>(false);
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
     scheduleId
   );
@@ -79,123 +86,7 @@ const AssetSchedule = ({
   const [data, setData] = useState<{ DAY_CODE: number; DAY_DESC: string }>();
   const { watch } = useForm();
   const SCHEDULER_PERIOD: any = watch("SCHEDULER.PERIOD");
-
-  const timeInputField = (labelName: any, registerName: any) => {
-    return (
-      <div className="flex justify-start mb-2">
-        <div className="w-36">
-          <label className="Text_Secondary Input_Label mr-2">{labelName}</label>
-        </div>
-        <div className="w-36">
-          <Field
-            controller={{
-              name: registerName,
-              control: control,
-              render: ({ field }: any) => {
-                return (
-                  <TimeCalendar
-                    {...register(registerName, {
-                      required: "AMC expiry date is Required.",
-                    })}
-                    setValue={setValue}
-                    {...field}
-                  />
-                );
-              },
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const inputElement = (
-    labelName: any,
-    registerName: any,
-    lastLabel: any = null,
-    validationType: any
-  ) => {
-    return (
-      <div className="flex justify-start mb-2">
-        <div className="w-36">
-          <label className="Text_Secondary Input_Label mr-2">{labelName}</label>
-        </div>
-        <div className="w-36 mr-2">
-          <Field
-            controller={{
-              name: registerName,
-              control: control,
-              render: ({ field }: any) => {
-                return (
-                  <InputField
-                    {...register(registerName, {
-                      validate: (fieldValue: any) => {
-                        return validation[validationType](
-                          fieldValue,
-                          registerName,
-                          setValue
-                        );
-                      },
-                    })}
-                    require={true}
-                    invalid={errors?.registerName}
-                    setValue={setValue}
-                    {...field}
-                  />
-                );
-              },
-            }}
-          />
-        </div>
-        {lastLabel && (
-          <div className="w-36">
-            <label className="Text_Secondary Input_Label mr-2">
-              {lastLabel}
-            </label>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const radioElement = (
-    labelHead: any,
-    registerName: any,
-    options: any,
-    selectedData: any
-  ) => {
-    return (
-      <div className="flex justify-start mb-2">
-        <div className="w-36">
-          <label className="Text_Secondary Input_Label mr-2">{labelHead}</label>
-        </div>
-        <div className="w-80">
-          <Field
-            controller={{
-              name: registerName,
-              control: control,
-              render: ({ field }: any) => {
-                return (
-                  <>
-                    <Radio
-                      {...register(registerName, {
-                        required: t("Please fill the required fields.."),
-                      })}
-                      options={options}
-                      selectedData={selectedData}
-                      setValue={setValue}
-                      {...field}
-                    />
-                  </>
-                );
-              },
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
+ 
   const getTaskList = async () => {
     try {
       if (watchAll?.TYPE?.ASSETTYPE_ID) {
@@ -225,8 +116,6 @@ const AssetSchedule = ({
   }>();
 
   const SCHEDULER_WEEKLY_1_EVERY_WEEK = watch("SCHEDULER.WEEKLY_1_EVERY_WEEK");
-  // JSX Elements
-
   const SCHEDULER_DAILY_EVERY_STARTAT = watch("SCHEDULER.DAILY_EVERY_STARTAT"); // Start time
   const SCHEDULER_DAILY_EVERY_ENDAT = watch("SCHEDULER.DAILY_EVERY_ENDAT");
   const SCHEDULER_DAILY_ONCE_EVERY = watch("SCHEDULER.DAILY_ONCE_EVERY");
@@ -268,9 +157,7 @@ const AssetSchedule = ({
       toast.error(" Please add number of weeks required");
       return;
     }
-    // const startDate = moment(startEndDate?.data.startDate).format('hh:mm');
-    // const endDate = moment(startEndDate?.data.endDate).format('hh:mm');
-
+   
     if (
       startEndDate?.SCHEDULER_DAILY_ONCE_EVERY?.key === "E" &&
       startEndDate.data.startDate === "00:00" &&
@@ -297,7 +184,7 @@ const AssetSchedule = ({
       return;
     }
 
-    handleFormSubmit();
+    handleFormSubmit(watchAll, setErrorName, seterrorreq, setVisible);
   };
 
   useEffect(() => {
@@ -334,136 +221,13 @@ const AssetSchedule = ({
     );
   }, [SCHEDULER_PERIOD]);
 
-  const getScheduleOption = (selectedData: any) => {
-    if (selectedData) {
-      setValue(
-        "SCHEDULER.DAILY_ONCE_AT_TIME",
-        selectedData !== "0"
-          ? convertTime(selectedData?.DAILY_ONCE_AT_TIME)
-          : "00:00"
-      );
-      // Every
-      setValue(
-        "SCHEDULER.DAILY_ONCE_EVERY_DAYS",
-        selectedData !== "0" ? selectedData?.DAILY_ONCE_EVERY_DAYS : 0
-      );
-
-      //// Multiple
-      setValue(
-        "SCHEDULER.DAILY_EVERY_PERIOD",
-        selectedData !== "0" ? selectedData?.DAILY_EVERY_PERIOD : 0
-      );
-      setValue(
-        "SCHEDULER.DAILY_EVERY_STARTAT",
-        selectedData !== "0"
-          ? convertTime(selectedData?.DAILY_EVERY_STARTAT)
-          : "00:00"
-      );
-      setValue(
-        "SCHEDULER.DAILY_EVERY_ENDAT",
-        selectedData !== "0"
-          ? convertTime(selectedData?.DAILY_EVERY_ENDAT)
-          : "00:00"
-      );
-
-      //Periodic Weekly
-      //// On
-      setValue(
-        "SCHEDULER.WEEKLY_1_WEEKDAY",
-        selectedData !== "0" ? selectedData?.WEEKLY_1_WEEKDAY : "0"
-      );
-      //// Every
-      setValue(
-        "SCHEDULER.WEEKLY_1_EVERY_WEEK",
-        selectedData !== "0" ? selectedData?.WEEKLY_1_EVERY_WEEK : "0"
-      );
-      //// Prefered Time
-      setValue(
-        "SCHEDULER.WEEKLY_1_PREFERED_TIME",
-        selectedData !== "0"
-          ? convertTime(selectedData?.WEEKLY_1_PREFERED_TIME)
-          : "00:00"
-      );
-
-      /// Periodic Monthly
-      //// Month Option
-      if (selectedData?.MONTHLY_1_MONTHDAY) {
-      } else if (selectedData?.MONTHLY_2_WEEK_NUM) {
-      }
-      setValue(
-        "SCHEDULER.MONTHLY_1_MONTHDAY",
-        selectedData !== "0" ? selectedData?.MONTHLY_1_MONTHDAY : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_1_MONTH_NUM",
-        selectedData !== "0" ? selectedData?.MONTHLY_1_MONTH_NUM : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_1_PREFERED_TIME",
-        selectedData !== "0"
-          ? convertTime(selectedData?.MONTHLY_1_PREFERED_TIME)
-          : "00:00"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_2ND_MONTHDAY",
-        selectedData !== "0" ? selectedData?.MONTHLY_2ND_MONTHDAY : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_2ND_MONTH_NUM",
-        selectedData !== "0" ? selectedData?.MONTHLY_2ND_MONTH_NUM : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_2ND_PREFERED_TIME",
-        selectedData !== "0"
-          ? convertTime(selectedData?.MONTHLY_2ND_PREFERED_TIME)
-          : "00:00"
-      );
-      ////Week
-      setValue(
-        "SCHEDULER.MONTHLY_2_WEEK_NUM",
-        selectedData !== "0" ? selectedData?.MONTHLY_2_WEEK_NUM : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_2_WEEKDAY",
-        selectedData !== "0" ? selectedData?.MONTHLY_2_WEEKDAY : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_2_MONTH_NUM",
-        selectedData !== "0" ? selectedData?.MONTHLY_2_MONTH_NUM : "0"
-      );
-      setValue(
-        "SCHEDULER.MONTHLY_2_WEEK_PREFERED_TIME",
-        selectedData !== "0"
-          ? convertTime(selectedData?.MONTHLY_2_WEEK_PREFERED_TIME)
-          : "00:00"
-      );
-
-      //Run Hour Based
-      setValue(
-        "SCHEDULER.RUN_HOURS",
-        selectedData !== "0" ? selectedData?.RUN_HOURS : "0"
-      );
-      setValue(
-        "SCHEDULER.RUN_AVG_DAILY",
-        selectedData !== "0" ? selectedData?.RUN_AVG_DAILY : "0"
-      );
-      setValue(
-        "SCHEDULER.RUN_THRESHOLD_MAIN_TRIGGER",
-        selectedData !== "0" ? selectedData?.RUN_THRESHOLD_MAIN_TRIGGER : "0"
-      );
-      setValue("SCHEDULER.SCHEDULE_ID", selectedData?.SCHEDULE_ID || "");
-    }
-  };
+  
 
   const getScheduleDetails = async (
-
     id?: any,
     scheduleList?: any,
     typeStatus?: any
   ) => {
-
-
-
     if (watchAll?.TYPE !== null || watchAll?.TYPE !== "") {
       const res = await callPostAPI(
         ENDPOINTS.GET_SCHEDULE_DETAILS,
@@ -474,14 +238,15 @@ const AssetSchedule = ({
       );
 
       if (res?.FLAG === 1) {
-        getScheduleOption(res?.SCHEDULEDETAILS[0]);
-        setSelectedData(res?.SCHEDULEDETAILS[0]);
+        getScheduleOption(res?.SCHEDULEDETAILS[0],setValue, convertTime);
+        setSelectedData(res?.SCHEDULEDETAILS[0],);
         if (scheduleList === "scheduleId") {
           setSelectedScheduleId(id);
         }
 
-
-        getSelectedScheduleId(res?.SCHEDULEDETAILS[0]?.SCHEDULE_ID ?? fromEdit ?? 0);
+        getSelectedScheduleId(
+          res?.SCHEDULEDETAILS[0]?.SCHEDULE_ID ?? fromEdit ?? 0
+        );
 
         setEditSelectedData(res?.SCHEDULEDETAILS);
         // let tasklistOptionsData: any = options ? options?.tasklistOptions : [];
@@ -539,8 +304,6 @@ const AssetSchedule = ({
     }
   };
 
-
-
   useEffect(() => {
     (async function () {
       if (watchAll?.TYPE !== null && scheduleId === 0) {
@@ -550,12 +313,11 @@ const AssetSchedule = ({
           setScheduleTaskList([]);
           setOptions({ ...options, tasklistOptions: [] });
           // await getTaskList();
-          getScheduleOption(0);
+          getScheduleOption(0,setValue, convertTime);
           setSelectedData(0);
         }
       } else if (scheduleId !== 0 && watchAll?.TYPE !== null) {
         if (search === "?edit=" && assetTypeState === false) {
-
           await getScheduleDetails("", "", true);
         } else {
           if (status === "create") {
@@ -569,7 +331,7 @@ const AssetSchedule = ({
 
   const handleCreate = (status: any) => {
     if (status === "create" && watchAll?.SCHEDULE_ID !== 0) {
-      getScheduleOption("0");
+      getScheduleOption("0",setValue, convertTime);
       setValue("SCHEDULER.SCHEDULE_NAME", "");
       setSelectedData("0");
       setStatus(status);
@@ -579,7 +341,7 @@ const AssetSchedule = ({
         setStatus("edit");
 
         setSelectedScheduleId(editSelectedData[0]?.SCHEDULE_ID);
-        getScheduleOption(editSelectedData[0]);
+        getScheduleOption(editSelectedData[0],setValue, convertTime);
         setSelectedData(editSelectedData[0]);
         setDisabled(false);
         setValue(
@@ -590,7 +352,7 @@ const AssetSchedule = ({
         setStatus("create");
         setSelectedData("0");
         setDisabled(false);
-        getScheduleOption("0");
+        getScheduleOption("0", setValue, convertTime);
         setValue(
           "SCHEDULER.DAILY_ONCE_EVERY",
           selectedData !== "0" ? editSelectedData[0]?.DAILY_ONCE_EVERY : "O"
@@ -599,31 +361,18 @@ const AssetSchedule = ({
     }
   };
 
-
-
-  const handleFormSubmit = () => {
-    if (!watchAll?.SCHEDULER?.SCHEDULE_NAME && !watchAll?.SCHEDULER?.PERIOD) {
-      toast.error("Please fill in all required fields.");
-      // setError(true);
-      setErrorName(true);
-    } else if (!watchAll?.SCHEDULER?.SCHEDULE_NAME) {
-      toast.error("Please fill in all required fields.");
-      setErrorName(true);
-    } else if (!watchAll?.SCHEDULER?.PERIOD) {
-      toast.error("Please fill in all required fields.");
-    } else {
-      setVisible(false);
-    }
-  };
+ 
 
   const navigate: any = useNavigate();
   const handleRedirect = () => {
-    setScheduleGroupStatus(true)
-    localStorage.setItem("schedulePage", "assetSchedule")
-    navigate(`${appName}/infraschedule`, { state: { typewatch: typewatch, Mode: Mode } });
+    setScheduleGroupStatus(true);
+    localStorage.setItem("schedulePage", "assetSchedule");
+    navigate("/infraschedule", {
+      state: { typewatch: typewatch, Mode: Mode },
+    });
   };
   const handleCalendarRedirect = () => {
-    navigate(`${appName}/ppmSchedule`);
+    navigate("/ppmSchedule");
   };
 
   useEffect(() => {
@@ -643,16 +392,11 @@ const AssetSchedule = ({
     setOptions({ ...options, tasklistOptions: [] });
   }, [watchAll?.GROUP]);
 
-
   // chnages by priyanka
 
-  const FACILITY: any = localStorage.getItem("FACILITYID");
-  const FACILITYID: any = JSON.parse(FACILITY);
+  
 
-  if (FACILITYID) {
-    var facility_type: any = FACILITYID?.FACILITY_TYPE;
 
-  }
 
   return (
     <div className="mt-1 grid grid-cols-1">
@@ -680,16 +424,19 @@ const AssetSchedule = ({
                         className="Primary_Button"
                         onClick={() => {
                           if (allFieldsFilled === false) {
-
                             toast.error("Please select required field");
-                            const locationStatus = watchAll?.LOCATION === "" ? true : false;
+                            const locationStatus =
+                              watchAll?.LOCATION === "" ? true : false;
                             setLocationError(locationStatus);
-                            let groupStatus = watchAll?.GROUP === "" ? true : false
+                            let groupStatus =
+                              watchAll?.GROUP === "" ? true : false;
                             setGroupError(groupStatus);
-                            const typeStatus = watchAll?.TYPE === null ? true : false;
-                            setTypeError(typeStatus)
-                            const assetNameStatus = watchAll?.ASSET_NAME === "" ? true : false;
-                            setAssetNameError(assetNameStatus)
+                            const typeStatus =
+                              watchAll?.TYPE === null ? true : false;
+                            setTypeError(typeStatus);
+                            const assetNameStatus =
+                              watchAll?.ASSET_NAME === "" ? true : false;
+                            setAssetNameError(assetNameStatus);
                           } else {
                             handleRedirect();
                           }
@@ -705,7 +452,7 @@ const AssetSchedule = ({
                           setVisible(true);
                           setValue("SCHEDULER.SCHEDULE_NAME", "");
                           handleCreate("create");
-                          getScheduleOption("0");
+                          getScheduleOption("0",setValue, convertTime);
                           setSelectedData("0");
                           setStatus("create");
                         }}
@@ -729,23 +476,40 @@ const AssetSchedule = ({
                         <i className="pi pi-calendar mr-2"></i>
                         Calendar view
                       </p>
-                      {scheduleId !== 0 || selectedScheduleId !== 0 || fromEdit !== 0 ?
+                      {scheduleId !== 0 ||
+                        selectedScheduleId !== 0 ||
+                        fromEdit !== 0 ? (
                         <Buttons
                           className="Primary_Button  w-20 mr-2"
                           label={"Edit Schedule"}
                           onClick={() => {
-                            localStorage.setItem("schedulePage", "assetSchedule")
-                            navigate(`${appName}/infraschedule`, { state: { selectformscheduleId: selectedScheduleId ? selectedScheduleId : scheduleId, Mode: Mode, selectedLocationSchedule: selectedLocationSchedule, ASSET_FOLDER_DATA: ASSET_FOLDER_DATA } });
+                            localStorage.setItem(
+                              "schedulePage",
+                              "assetSchedule"
+                            );
+                            navigate("/infraschedule", {
+                              state: {
+                                selectformscheduleId: selectedScheduleId
+                                  ? selectedScheduleId
+                                  : scheduleId,
+                                Mode: Mode,
+                                selectedLocationSchedule:
+                                  selectedLocationSchedule,
+                                ASSET_FOLDER_DATA: ASSET_FOLDER_DATA,
+                              },
+                            });
                           }}
-                        /> : <Buttons
+                        />
+                      ) : (
+                        <Buttons
                           type="submit"
                           className="Primary_Button"
                           onClick={() => {
-
                             handleRedirect();
                           }}
                           label={"Add Schedule"}
-                        />}
+                        />
+                      )}
                     </>
                   ) : (
                     <>
@@ -781,7 +545,6 @@ const AssetSchedule = ({
                   field=""
                   header="#"
                   body={(rowData: any) => {
-
                     return (
                       <Field
                         controller={{
@@ -795,12 +558,12 @@ const AssetSchedule = ({
                                 type="radio"
                                 value={rowData?.SCHEDULE_ID}
                                 checked={
-                                  facility_type === "R" ? 
-                                  rowData?.SCHEDULE_ID ===
-                                  (selectedScheduleId
-                                    ? selectedScheduleId
-                                    : scheduleId) : 
-                                    rowData?.SCHEDULE_ID ===scheduleId
+                                  facility_type === "R"
+                                    ? rowData?.SCHEDULE_ID ===
+                                    (selectedScheduleId
+                                      ? selectedScheduleId
+                                      : scheduleId)
+                                    : rowData?.SCHEDULE_ID === scheduleId
                                 }
                                 onChange={async () => {
                                   setAssetTypeState(true);
@@ -811,7 +574,7 @@ const AssetSchedule = ({
                                   );
                                   setSelectedScheduleId(rowData?.SCHEDULE_ID);
                                   setSelectedSchedule(rowData?.SCHEDULE_ID);
-                                  await getTaskList()
+                                  await getTaskList();
                                 }}
                               />
                             );
@@ -847,28 +610,6 @@ const AssetSchedule = ({
                     return <label> {rowData?.OCCURS}</label>;
                   }}
                 />
-
-                {/* {facility_type === "I" && <Column
-                  field="FREQUENCY_TYPE"
-                  className="w-96"
-                  header={t("Frequency")}
-                  body={(rowData: any) => {
-                    return <label> {rowData?.FREQUENCY_TYPE}</label>;
-                  }}
-                />
-                } */}
-                {/* {
-                  facility_type === "I" && <Column
-                    field="PERIOD"
-                    className="w-96"
-                    header={t("Occurs")}
-                    body={(rowData: any) => {
-                      return <label> {rowData?.PERIOD}</label>;
-                    }}
-                  />
-                } */}
-
-
               </DataTable>
             )}
           </div>
@@ -929,16 +670,17 @@ const AssetSchedule = ({
                           <Select
                             options={issueList}
                             {...register("SCHEDULER.REQ_ID" as any, {
+                              // required: "Please fill the required fields.",
                               validate: () => {
                                 if (
-                                  !watchAll?.SCHEDULE_ID &&
-                                  !watchScheduler?.Record
+                                  errorreq
                                 ) {
                                   return t("Please fill the required fields.");
                                 }
                                 return true;
                               },
                             })}
+                            invalid={errorreq === true ? true : false}
                             optionLabel="REQ_DESC"
                             findKey={"REQ_ID"}
                             selectedData={
@@ -1019,21 +761,22 @@ const AssetSchedule = ({
                     "Time in Days",
                     "SCHEDULER.DAILY_ONCE_EVERY",
                     OPTIONS?.ScheduleDailyLabel,
-                    selectedData?.DAILY_ONCE_EVERY || "O"
+                    selectedData?.DAILY_ONCE_EVERY || "O",
+                       Field, control,register, setValue
                   )}
 
                   {/* ONCE-PERIODIC DAILY */}
                   {watchScheduler?.DAILY_ONCE_EVERY?.key === "O" && (
                     <div>
                       {/* SCHEDULER.DAILY_ONCE_AT_TIME */}
-                      {timeInputField("At", "SCHEDULER.DAILY_ONCE_AT_TIME")}
+                      {timeInputField("At", "SCHEDULER.DAILY_ONCE_AT_TIME", Field, control,register, setValue)}
 
                       {/* SCHEDULER.DAILY_ONCE_EVERY_DAYS */}
                       {inputElement(
                         "Every",
                         "SCHEDULER.DAILY_ONCE_EVERY_DAYS",
                         "Day(s)",
-                        "onlyDay"
+                        "onlyDay" ,Field, control,register, setValue, validation, errors
                       )}
                     </div>
                   )}
@@ -1046,19 +789,19 @@ const AssetSchedule = ({
                         "Hours",
                         "SCHEDULER.DAILY_EVERY_PERIOD",
                         "Hr(s)",
-                        "onlyHours"
+                        "onlyHours", Field, control,register, setValue, validation, errors
                       )}
 
                       {/* SCHEDULER.DAILY_EVERY_STARTAT */}
                       {timeInputField(
                         "Starting Time",
-                        "SCHEDULER.DAILY_EVERY_STARTAT"
+                        "SCHEDULER.DAILY_EVERY_STARTAT",Field, control,register, setValue
                       )}
 
                       {/* SCHEDULER.DAILY_EVERY_ENDAT */}
                       {timeInputField(
                         "Ending Time",
-                        "SCHEDULER.DAILY_EVERY_ENDAT"
+                        "SCHEDULER.DAILY_EVERY_ENDAT",Field, control,register, setValue
                       )}
                     </div>
                   )}
@@ -1105,18 +848,15 @@ const AssetSchedule = ({
                     "Every",
                     "SCHEDULER.WEEKLY_1_EVERY_WEEK",
                     "Week(s)",
-                    "onlyWeek"
+                    "onlyWeek", Field, control,register, setValue, validation, errors
                   )}
 
                   {timeInputField(
                     "Prefered Time",
-                    "SCHEDULER.WEEKLY_1_PREFERED_TIME"
+                    "SCHEDULER.WEEKLY_1_PREFERED_TIME",Field, control,register, setValue
                   )}
                 </div>
               )}
-
-              {/* Completed */}
-              {/* PERIODIC MONTHLY */}
 
               {watchScheduler?.PERIOD?.PERIOD === "M" && (
                 <>
@@ -1158,7 +898,6 @@ const AssetSchedule = ({
                     </div>
                   </div>
 
-                  {/* When Select on FIXED DAY of Month Option OF PERIODIC MONTHLY */}
 
                   {watchScheduler?.MONTH_OPTION?.MONTH_OPTION === "1" && (
                     <>
@@ -1171,7 +910,8 @@ const AssetSchedule = ({
                           ? "O"
                           : selectedData?.MONTHLY_2ND_MONTHDAY === 0
                             ? "O"
-                            : "T"
+                            : "T",
+                            Field, control,register, setValue
                       )}
 
                       {/* MONHLY ONCE SELECT OF PERIODIC MONTHLY*/}
@@ -1180,17 +920,17 @@ const AssetSchedule = ({
                         "Day",
                         "SCHEDULER.MONTHLY_1_MONTHDAY",
                         "of",
-                        "onlyDay"
+                        "onlyDay", Field, control,register, setValue, validation, errors
                       )}
                       {inputElement(
                         "Every",
                         "SCHEDULER.MONTHLY_1_MONTH_NUM",
                         "Month(s)",
-                        "onlyMonth"
+                        "onlyMonth", Field, control,register, setValue, validation, errors
                       )}
                       {timeInputField(
                         "Prefered Time",
-                        "SCHEDULER.MONTHLY_1_PREFERED_TIME"
+                        "SCHEDULER.MONTHLY_1_PREFERED_TIME",Field, control,register, setValue
                       )}
 
                       {/* MONHLY TWICE SELECT OF PERIODIC MONTHLY */}
@@ -1202,17 +942,17 @@ const AssetSchedule = ({
                             "Day",
                             "SCHEDULER.MONTHLY_2ND_MONTHDAY",
                             "of",
-                            "onlyDay"
+                            "onlyDay", Field, control,register, setValue, validation, errors
                           )}
                           {inputElement(
                             "Every",
                             "SCHEDULER.MONTHLY_2ND_MONTH_NUM",
                             "Month(s)",
-                            "onlyMonth"
+                            "onlyMonth", Field, control,register, setValue, validation, errors
                           )}
                           {timeInputField(
                             "Prefered Time",
-                            "SCHEDULER.MONTHLY_2ND_PREFERED_TIME"
+                            "SCHEDULER.MONTHLY_2ND_PREFERED_TIME",Field, control,register, setValue
                           )}
                         </>
                       )}
@@ -1295,12 +1035,13 @@ const AssetSchedule = ({
                         "Every",
                         "SCHEDULER.MONTHLY_2_MONTH_NUM",
                         "Months",
-                        "onlyMonth"
+                        "onlyMonth",
+                        Field, control,register, setValue, validation, errors
                       )}
 
                       {timeInputField(
                         "Prefered Time",
-                        "SCHEDULER.MONTHLY_2_WEEK_PREFERED_TIME"
+                        "SCHEDULER.MONTHLY_2_WEEK_PREFERED_TIME",Field, control,register, setValue
                       )}
                     </>
                   )}
@@ -1452,13 +1193,9 @@ const AssetSchedule = ({
             <TaskAndDoc
               errors={errors}
               setValue={setValue}
-              // register={register}
               control={control}
-              // watchAll={watchAll}
               tasklistOptions={options?.tasklistOptions}
-              // taskList={taskList}
               watch={watch}
-              // selectedData={taskList}
               getValues={getValues}
               disabled={disabled}
             />

@@ -23,7 +23,7 @@ import { Calendar } from "primereact/calendar";
 import moment from "moment";
 import { dateFormat, dateFormat1, formateDate } from "../../../utils/constants";
 import { Card } from "primereact/card";
-import { appName } from "../../../utils/pagePath";
+
 import * as xlsx from "xlsx";
 import FileSaver from "file-saver";
 import { priorityIconList } from "../../../utils/constants";
@@ -1810,12 +1810,12 @@ const WorkOrderMasterReal = (props: any) => {
   // }, [selectedFacility, pathname, currentMenu, search]);
 
   const handlerServiceRequest = () => {
-    navigate(`${appName}/servicerequestlist?add=`);
+    navigate(`/servicerequestlist?add=`);
   };
 
   const GetWorkOrderFormWoId = (rowItem: any) => {
     // props?.isForm({ rowItem });
-    navigate(`${appName}/workorderlist?edit=`);
+    navigate(`/workorderlist?edit=`);
     localStorage.setItem("Id", JSON.stringify(rowItem));
     localStorage.setItem("WO_ID", JSON.stringify(rowItem?.WO_ID));
   };

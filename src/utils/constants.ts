@@ -8,6 +8,7 @@ import { ExportCSV } from "./helper";
 global.Buffer = require('buffer').Buffer;
 
 export const enCryptionFlag: boolean = true;
+export const isAws:boolean = true;
 export const COOKIES = {
   ACCESS_TOKEN: "accessToken",
   REFERESH_TOKEN: "refreshToken",

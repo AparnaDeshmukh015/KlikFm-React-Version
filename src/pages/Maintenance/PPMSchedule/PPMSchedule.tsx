@@ -64,11 +64,8 @@ const PPMSchedule = (props: any) => {
   const onSubmit = async () => {
   };
   const handleSelectedEvent = (event: any) => {
-
-    navigate(PATH.PPMSCHEDULEDETAILS, { state: { schedule_id: event?.schedule_id, functionCode: currentMenu?.FUNCTION_CODE } })
+    navigate(PATH.PPMSCHEDULEDETAILS, { state: { schedule_id: event?.id, functionCode: currentMenu?.FUNCTION_CODE } })
   }
-
-  console.log(currentMenu, "currentMenu")
   const FACILITY: any = localStorage.getItem("FACILITYID");
   const FACILITYID: any = JSON.parse(FACILITY);
 

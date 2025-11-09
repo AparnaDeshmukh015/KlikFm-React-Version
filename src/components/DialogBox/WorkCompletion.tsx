@@ -34,8 +34,6 @@ const WorkCompletion = ({
 
   const CloseCancelServiceRequestPopUp = () => {
     setVisible(!visible);
-    setValue("REMARKS", null);
-    setRemrksCount(0);
   };
 
   const RejectServiceRequest = () => {

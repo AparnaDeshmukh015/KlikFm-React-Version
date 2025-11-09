@@ -18,7 +18,7 @@ import "../../../components/Table/Table.css";
 import "../../../components/Checkbox/Checkbox.css";
 import "../../../components/Button/Button.css";
 import { saveTracker } from "../../../utils/constants";
-import { appName } from "../../../utils/pagePath";
+
 
 const LocationTypeMaster = () => {
   const { t } = useTranslation();
@@ -258,7 +258,7 @@ const LocationMasterTable = ({ locationMasterList, handleEditClick }: any) => {
             <>
               <p>
                 <Link
-                  to={`${appName}/locationtype?edit=`}
+                  to={`/locationtype?edit=`}
                   onClick={() => handleEditClick(rowData)}
                 >
                   {rowData?.LOCATIONTYPE_NAME}

@@ -264,6 +264,7 @@ export const ENDPOINTS = {
   INFRA_SAVE_SCHEDULE_LIST: "Asset/saveScheduleAssetInfra",
   REPORT_TEMPLATE_MASTER_LIST: "Report/gettemplatemasterList",
   SAVE_REPORT_TEMPLATE: "Report/savereportteamplate",
-  Deleted_Image: "Helpdesk/deleteDocument",
-  LOCATION_EQUIPMENT_HIERARCHY_LIST: "Equipment/getLocationHierarchyList"
+  Deleted_Image:"Helpdesk/deleteDocument",
+  deleteRectifyComment: "Helpdesk/DeleteRectifiedComment", 
+    Image__Upload: "Helpdesk/uploadfilesonaws",
 };

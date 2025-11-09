@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { callPostAPI } from "../../../services/apis";
 import { ENDPOINTS } from "../../../utils/APIEndpoints";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
-import TableListLayout from "../../../layouts/TableListLayout/TableListLayout";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Card } from "reactstrap";
@@ -12,7 +11,6 @@ import { InputText } from "primereact/inputtext";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import MultiSelects from "../../../components/MultiSelects/MultiSelects";
 import { toast } from "react-toastify";
 import DialogBox from "../../../components/DialogBox/DialogBox";
 import HierarchyDialog from "../../../components/HierarchyDialog/HierarchyDialog";
@@ -30,19 +28,13 @@ import { FileUpload } from "primereact/fileupload";
 import { PATH } from "../../../utils/pagePath";
 
 
-const NewInfraScheduleMaster = (props: any) => {
+const NewInfraScheduleMaster = () => {
   const { t } = useTranslation();
   let { pathname } = useLocation();
   const [selectedFacility, menuList]: any = useOutletContext();
   const currentMenu = menuList
     ?.flatMap((menu: any) => menu?.DETAIL)
     .filter((detail: any) => detail.URL === pathname)[0];
-
-  const FACILITY: any = localStorage.getItem("FACILITYID");
-  const FACILITYID: any = JSON.parse(FACILITY);
-  if (FACILITYID) {
-    var facility_type: any = FACILITYID?.FACILITY_TYPE;
-  }
   const filterDefaultValues: any = {
     SCHEDULE_NAME: { value: null, matchMode: FilterMatchMode.CONTAINS },
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -58,7 +50,6 @@ const NewInfraScheduleMaster = (props: any) => {
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
   const [visibleEquipmentlist, showEquipmentlist] = useState(false);
   const [selectedKey, setSelectedKey] = useState<any[]>([]);
-  const [selectedNodeKey, setselectedNodeKey] = useState("");
   const [nodes, setNodes] = useState<any | null>([]);
   const [filteredData, setFilteredData] = useState<any | null>(nodes);
   const [assetTreeDetails, setAssetTreeDetails] = useState<any | null>([]);
@@ -84,7 +75,7 @@ const NewInfraScheduleMaster = (props: any) => {
     setVisible(true);
   };
 
-  const handelDelete = async (selectedData: any, index: any, rowData: any) => {
+  const handelDelete = async (selectedData: any) => {
     let payload = {
       SCHEDULE_ID: selectedData?.SCHEDULE_ID,
       PARA: {
@@ -101,10 +92,12 @@ const NewInfraScheduleMaster = (props: any) => {
       );
       if (res?.FLAG === true) {
         toast.success(res?.MSG);
+        setGlobalFilterValue("");
         getAPI();
       } else {
         toast.error(res?.MSG);
-        getAPI();
+        // setGlobalFilterValue("");
+        // getAPI();
       }
     } catch (error: any) {
       toast?.error(error);
@@ -113,14 +106,9 @@ const NewInfraScheduleMaster = (props: any) => {
 
   const {
     register,
-    handleSubmit,
     control,
     setValue,
-    getValues,
-    resetField,
-    watch,
-    reset,
-    formState: { errors, isSubmitting },
+    formState: { },
   } = useForm({
     defaultValues: {
       REMARKS: "",
@@ -179,13 +167,7 @@ const NewInfraScheduleMaster = (props: any) => {
         downloadInfraScheduleData("AS0012_L", "Schedule Equipment Link");
       },
     },
-    // {
-    //   label: "Download Data",
-    //   icon: "pi pi-download",
-    //   command: () => {
-    //     ExportCSV(props?.columnData, currentMenu?.FUNCTION_DESC+new Date());
-    //   },
-    // },
+
   ];
 
 
@@ -199,9 +181,6 @@ const NewInfraScheduleMaster = (props: any) => {
   };
   const handleEquipmentClick = (rowData: any, hasAssets: boolean) => {
     setHasAsset(hasAssets);
-
-    // return
-
     if (
       rowData?.ASSETS !== "" &&
       rowData?.ASSETS !== null &&
@@ -221,17 +200,10 @@ const NewInfraScheduleMaster = (props: any) => {
     setSelectedSchedule(rowData); // optional
     setShowEquipmentDialog(true); // optional
   };
-
-  // const removeSelectedItem = (keyToRemove: number) => {
-  //     setSelectedAssetsnodes(prev => prev?.filter(item => item?.asset_id !== keyToRemove));
-  // };
   const removeSelectedItem = (assetId: any) => {
-    // Remove from list
     setSelectedAssetsnodes((prev) =>
       prev.filter((item) => item.asset_id !== assetId)
     );
-
-    // Also remove from checked keys
     setSelectedKey((prev) => prev.filter((id: any) => id !== assetId));
   };
 
@@ -330,25 +302,7 @@ const NewInfraScheduleMaster = (props: any) => {
     }
   };
 
-
-  // const onGlobalFilterChange = (e: any) => {
-  //   const value = e.target.value;
-  //   console.log(value, "value");
-  //   setGlobalFilterValue(value);
-
-  //   if (value === "") {
-  //     setTableData(originalTableData);
-  //   } else {
-  //     const filteredData = originalTableData?.filter((item: any) => {
-  //       return item.SCHEDULE_NAME?.toString().toLowerCase().includes(value?.toString().toLowerCase());
-  //     });
-  //     console.log(filteredData, "filteredData");
-  //     setTableData(filteredData);
-  //   }
-  //   console.log(filteredData, originalTableData, "data")
-  // };
-
-  // new search filter added by anand date 19082025
+  // new search filter added by anand date 19-08-2025
   const onGlobalFilterChange = (e: any) => {
     const value = e.target.value;
     setGlobalFilterValue(value);
@@ -381,7 +335,7 @@ const NewInfraScheduleMaster = (props: any) => {
 
       return matchesSchedule || matchesAssets;
     });
-    console.log(filteredData);
+
     setTableData(filteredData);
   };
 
@@ -429,7 +383,7 @@ const NewInfraScheduleMaster = (props: any) => {
       <Dialog
         // header="Equipment Details"
         visible={showEquipmentDialog}
-        onHide={() => setShowEquipmentDialog(false)}
+        onHide={() => handleCancelEquipment()}
         style={{ width: "40vw" }}
         modal
         footer={
@@ -500,9 +454,7 @@ const NewInfraScheduleMaster = (props: any) => {
           setNodes={setNodes}
           assetTreeDetails={assetTreeDetails}
           setAssetTreeDetails={setAssetTreeDetails}
-          // setselectedNodeKey={setselectedNodeKey}
           setSelectedAssetsnodes={setSelectedAssetsnodes}
-
           selectedAssetsnodes={selectedAssetsnodes}
           handleNodeSelection={handleNodeSelection}
           isCheckbox={true}
@@ -569,7 +521,6 @@ const NewInfraScheduleMaster = (props: any) => {
 
       <DataTable
         value={tableData?.slice(first, first + rows)}
-        // header={currentMenu?.FUNCTION_DESC}
         showGridlines
         emptyMessage={"No Data found."}
         globalFilterFields={["SCHEDULE_NAME", "ASSETS"]}
@@ -623,8 +574,7 @@ const NewInfraScheduleMaster = (props: any) => {
                   handelDelete={async () => {
                     await handelDelete(
                       { ...rowItem },
-                      rowDetails?.rowIndex,
-                      rowData
+
                     );
                   }}
                 />

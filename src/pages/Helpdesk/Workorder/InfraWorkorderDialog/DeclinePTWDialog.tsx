@@ -20,6 +20,7 @@ const DeclinePTWDialog = ({
   Action_Code,
   setTestingOnHold,
   selectedComments,
+  visibleTestingOhHold,
 }: any) => {
   const [visible, setVisible] = useState<boolean>(false);
 
@@ -40,7 +41,6 @@ const DeclinePTWDialog = ({
 
     mode: "onSubmit",
   });
-
   const watchAll: any = watch();
   const OpenDeclinePTWApprovalPopUp = () => {
     setVisible(!visible);
@@ -66,12 +66,12 @@ const DeclinePTWDialog = ({
           header === "Return For Edit"
             ? 131
             : header === "Edit Comments"
-            ? 148
-            : [113]?.some((num) => Action_Code?.includes(num)) == true
-            ? 113
-            : [121]?.some((num) => Action_Code?.includes(num)) == true
-            ? 121
-            : 121,
+              ? 148
+              : [113]?.some((num) => Action_Code?.includes(num)) == true
+                ? 113
+                : [121]?.some((num) => Action_Code?.includes(num)) == true
+                  ? 121
+                  : 121,
         REMARKS: watchAll?.REMARKS,
       };
 
@@ -90,20 +90,20 @@ const DeclinePTWDialog = ({
         header === "Return For Edit"
           ? 131
           : header === "Edit Comments"
-          ? 148
-          : header === "Testing On Hold"
-          ? 125
-          : [121]?.some((num) => Action_Code?.includes(num)) == true
-          ? 121
-          : [113]?.some((num) => Action_Code?.includes(num)) == true
-          ? 113
-          : header === "Fail"
-          ? [140]?.some((num) => Action_Code?.includes(num)) == true
-            ? 140
-            : [142]?.some((num) => Action_Code?.includes(num)) == true
-            ? 142
-            : 128
-          : 125,
+            ? 148
+            : header === "Testing On Hold"
+              ? 125
+              : [121]?.some((num) => Action_Code?.includes(num)) == true
+                ? 121
+                : [113]?.some((num) => Action_Code?.includes(num)) == true
+                  ? 113
+                  : header === "Fail"
+                    ? [140]?.some((num) => Action_Code?.includes(num)) == true
+                      ? 140
+                      : [142]?.some((num) => Action_Code?.includes(num)) == true
+                        ? 142
+                        : 128
+                    : 125,
       REMARKS: charLenth,
     };
 
@@ -112,11 +112,14 @@ const DeclinePTWDialog = ({
     } else setRemarkLength(0);
   };
 
-  useEffect(() => {
-    if (header === "Testing On Hold") {
-      setVisible(true);
-    }
-  }, [header === "Testing On Hold"]);
+  // useEffect(() => {
+  //   if (header === "Testing On Hold") {
+
+  //     console.log("visible", visible)
+  //     setVisible(true);
+  //   }
+  // }, [header === "Testing On Hold"]);
+
   useEffect(() => {
     if (header === "Edit Comments") {
       indexgetStatus = { ACTION_ID: 148, REMARKS: "" };
@@ -125,6 +128,7 @@ const DeclinePTWDialog = ({
 
   useEffect(() => {
     if (header === "Testing On Hold") {
+      setVisible(visibleTestingOhHold);
       indexgetStatus = { ACTION_ID: 125, REMARKS: "" };
     }
   }, [header === "Testing On Hold"]);
@@ -183,17 +187,16 @@ const DeclinePTWDialog = ({
               <p className="Text_Secondary Input_Label">
                 Remarks (Max 250 characters)
                 {header !== "Decline" &&
-                header !== "Fail" &&
-                header !== "Testing On Hold" ? (
+                  header !== "Fail" &&
+                  header !== "Testing On Hold" ? (
                   <span className="text-red-600"> *</span>
                 ) : (
                   <></>
                 )}
               </p>
               <div
-                className={`${
-                  header !== "Fail" && errors?.REMARKS ? "errorBorder" : ""
-                }`}
+                className={`${header !== "Fail" && errors?.REMARKS ? "errorBorder" : ""
+                  }`}
               >
                 <Field
                   controller={{
@@ -205,16 +208,16 @@ const DeclinePTWDialog = ({
                           {...register("REMARKS", {
                             required:
                               header === "Decline" ||
-                              header === "Fail" ||
-                              header === "Testing On Hold"
+                                header === "Fail" ||
+                                header === "Testing On Hold"
                                 ? ""
                                 : "Please fill the requried fields",
                             onChange: (e: any) => handleInputChange(e),
                           })}
                           invalid={
                             header === "Decline" ||
-                            header === "Fail" ||
-                            header !== "Testing On Hold"
+                              header === "Fail" ||
+                              header !== "Testing On Hold"
                               ? ""
                               : errors?.REMARKS
                           }
@@ -222,8 +225,8 @@ const DeclinePTWDialog = ({
                           maxLength={250}
                           placeholder={
                             header === "Decline" ||
-                            header === "Fail" ||
-                            header == "Testing On Hold"
+                              header === "Fail" ||
+                              header == "Testing On Hold"
                               ? "Provide additional details (Optional)"
                               : "Provide additional details"
                           }
@@ -236,9 +239,8 @@ const DeclinePTWDialog = ({
                 />
               </div>
               <label
-                className={` ${
-                  remarkLength === 250 ? "text-red-600" : "Text_Secondary"
-                } Helper_Text`}
+                className={` ${remarkLength === 250 ? "text-red-600" : "Text_Secondary"
+                  } Helper_Text`}
               >
                 {`${remarkLength}/250 characters`}
               </label>
@@ -311,9 +313,9 @@ const DeclinePTWDialog = ({
                     type="button"
                     label={"Submit"}
                     onClick={() => SavePTWApprovalPopUp()}
-                    // payload={indexgetStatus}
-                    // Actioncode={indexgetStatus?.ACTION_ID}
-                    // CloseDeclinePTWApprovalPopUp={CloseDeclinePTWApprovalPopUp}
+                  // payload={indexgetStatus}
+                  // Actioncode={indexgetStatus?.ACTION_ID}
+                  // CloseDeclinePTWApprovalPopUp={CloseDeclinePTWApprovalPopUp}
                   />
                 </>
               )}

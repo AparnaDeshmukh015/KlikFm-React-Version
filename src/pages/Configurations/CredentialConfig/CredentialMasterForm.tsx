@@ -10,7 +10,7 @@ import { saveTracker } from "../../../utils/constants";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { validation } from "../../../utils/validation";
 import Button from "../../../components/Button/Button";
-import { appName } from "../../../utils/pagePath";
+
 
 // import { colors } from "@mui/material";
 
@@ -92,7 +92,7 @@ const CredentialConfigMasterForm = (props: any) => {
     }, [IsSubmit, callPostAPI, toast, props?.getAPI, props?.isClick, props?.functionCode, props?.selectedData]);
 
     const GetOpenList = () => {
-        navigate(`${appName}/credentiaconfigllist`);
+        navigate(`/credentiaconfigllist`);
     };
     useEffect(() => {
         if ((!isSubmitting && Object?.values(errors)[0]?.type === "required") || (!isSubmitting && Object?.values(errors)[0]?.type === "validate")) {

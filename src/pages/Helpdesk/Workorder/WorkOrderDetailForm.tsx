@@ -3,14 +3,8 @@ import { useEffect, useState, memo } from "react";
 import { useForm } from "react-hook-form";
 import "../../Dashboard/Dashboard.css";
 import { Tooltip } from "primereact/tooltip";
-import {
-  TabView,
-  TabPanel,
-  TabPanelHeaderTemplateOptions,
-} from "primereact/tabview";
+import { TabView, TabPanel, TabPanelHeaderTemplateOptions, } from "primereact/tabview";
 import "./WorkorderMaster.css";
-import userIcon from "../../../assest/images/Avatar.png";
-import timeIcon from "../../../assest/images/bx-time.png";
 import noDataIcon from "../../../assest/images/nodatafound.png";
 import reviewIcon from "../../../assest/images/IconContainer.png";
 import { useTranslation } from "react-i18next";
@@ -23,14 +17,7 @@ import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { Checkbox } from "primereact/checkbox";
 import Buttons from "../../../components/Button/Button";
 import Select from "../../../components/Dropdown/Dropdown";
-import { Timeline } from "primereact/timeline";
-import {
-  dateFormat,
-  formateDate,
-  LOCALSTORAGE,
-  onlyDateFormat,
-  saveTracker,
-} from "../../../utils/constants";
+import { dateFormat, formateDate, isAws, LOCALSTORAGE, onlyDateFormat, saveTracker, } from "../../../utils/constants";
 import WORedirectDialogBox from "../../../components/WorkorderDialogBox/WORedirectDialogBox";
 import { Badge } from "primereact/badge";
 import moment from "moment";
@@ -38,121 +25,31 @@ import { callPostAPI } from "../../../services/apis";
 import { ENDPOINTS } from "../../../utils/APIEndpoints";
 import SidebarVisibal from "./SidebarVisibal";
 import { v4 as uuidv4 } from "uuid";
-import WorkOrderDialogBox from "../../../components/DialogBox/WorkOrderDalog";
-import CountdownTimer from "./ShowCounter";
-
+import WorkOrderDialogBox from "../../../components/DialogBox/WorkOrderDalog"
 import { Dialog } from "primereact/dialog";
-import LoaderS from "../../../components/Loader/Loader";
 import { helperEventNotification } from "../../../utils/eventNotificationParameter";
-import { appName } from "../../../utils/pagePath";
+
 import { decryptData } from "../../../utils/encryption_decryption";
-
-import DateTimeDisplay from "./DateTimeDisplay";
-
 import LoaderFileUpload from "../../../components/Loader/LoaderFileUpload";
 import ReopenDialogBox from "../../../components/DialogBox/ReopenDialogBox";
 import { MultiSelect } from "primereact/multiselect";
 import ImageGalleryComponent from "../ImageGallery/ImageGallaryComponent";
 import { clearFilters } from "../../../store/filterstore";
 import { useDispatch } from "react-redux";
-interface taskDetails {
-  TASK_ID: any;
-  TASK_NAME: any;
-}
-
-interface docType {
-  DOC_SRNO: any;
-  DOC_NAME: string;
-  DOC_DATA: any;
-  DOC_EXTENTION: string;
-  DOC_SYS_NAME: any;
-  ISDELETE: any;
-  DOC_TYPE: any;
-}
-
-interface partList {
-  PART_ID: string;
-  PART_CODE: string;
-  UOM_CODE: any;
-  UOM_NAME: any;
-  PART_NAME: any;
-  STOCK: any;
-  USED_QUANTITY: any;
-}
-
-interface docType {
-  DOC_SRNO: any;
-  DOC_NAME: string;
-  DOC_DATA: any;
-  DOC_EXTENTION: string;
-  DOC_SYS_NAME: any;
-  ISDELETE: any;
-  DOC_TYPE: any;
-}
-
-interface FormValues {
-  // SIG: ReactSignatureCanvas | null;
-  RAISED_BY: string | null;
-  STRUCTURE_ID: string | null;
-  ASSET_NONASSET: string | null;
-  ASSETTYPE: string | null;
-  REQ_DESC: string | null;
-  DESCRIPTION: string;
-  SEVERITY_CODE: string;
-  TASK_DES: string;
-  WORK_ORDER_NO: string;
-  WO_NO: string | null;
-  SEVERITY_DESC: string;
-  WO_TYPE: string;
-  LOCATION_NAME: string;
-  LOCATION_DESCRIPTION: string;
-  ASSET_NAME: string;
-  ASSETGROUP_NAME: string;
-  ASSETTYPE_NAME: string;
-  WO_DATE: string;
-  WO_REMARKS: string;
-  SEVERITY: string;
-  REMARK: string;
-  PHONE_NO: number;
-  EMAIL_ID: any;
-  STATUS_DESC: string | null;
-  TASKDETAILS: taskDetails[];
-  PART_LIST: partList[];
-  ASSIGN_TEAM_ID: string;
-  TEAM_NAME: string;
-  TECH_NAME: string;
-  STATUS_CODE: string;
-  DOC_LIST: docType[];
-  PARTS_TYPE: string;
-  REQ_ID: string;
-  ASSET_ID: string;
-  MODE: string;
-  LOCATION_ID: string;
-  REQUESTTITLE_ID: string;
-  CURRENT_STATUS: any;
-  TECH_ID: any;
-  RAISEDBY_ID: any;
-  ASSETTYPE_ID: any;
-  ASSETGROUP_ID: any;
-  LAST_MAINTANCE_DATE: any;
-  WARRANTY_END_DATE: any;
-  TASK_NAME: any;
-  BILL_DATE: any;
-  VERIFY: any;
-}
-
-interface TimelineEvent {
-  status?: string;
-  date?: string;
-  icon?: string;
-  color?: string;
-  image?: string;
-  id?: any;
-}
-
+import { ActivityTimelineRE } from "./WorkOrderHelperRE.tsx/ActivityTimelineRE";
+import { ShowAssigneeList } from "./InfraWorkrderHelper/ShowAssigneeList";
+import { ReporterDetails } from "./WorkOrderHelperRE.tsx/ReporterDetails";
+import { RectifiedDetails } from "./WorkOrderHelperRE.tsx/RectifiedDetails";
+import { CompletedDetails } from "./WorkOrderHelperRE.tsx/CompletedDetails";
+import { TimelineHeaderRE } from "./WorkOrderHelperRE.tsx/TimelineHeaderRE";
+import { AcceptedDetails } from "./WorkOrderHelperRE.tsx/AcceptedDetails";
+import { EquipmentSummaryDetails } from "./WorkOrderHelperRE.tsx/EquipmentSummaryDetails";
+import { SLATimeDuration } from "./WorkOrderHelperRE.tsx/SLATimeDuration";
+import NoItemToShow from "./InfraWorkrderHelper/NoItemToShow";
+import {taskDetails, docType, FormValues} from "./Utils/helper"
+import { helperAwsFileupload, helperGetWorkOrderAwsDoclist } from "../ServiceRequest/utils/helperAwsFileupload";
 let WO_ID: number;
 const WorkOrderDetailForm = (props: any) => {
-  // let LocationDescList: any = []
   const dispatch = useDispatch();
   const location: any = useLocation();
   const navigate: any = useNavigate();
@@ -166,7 +63,6 @@ const WorkOrderDetailForm = (props: any) => {
   const [facilityStatus, setFacilityStatus] = useState<any | null>(null);
   const [isloading, setisloading] = useState<any | null>(false);
   const [DocTitle, setDocTitle] = useState<any | null>("");
-
   const currentMenu = menuList
     ?.flatMap((menu: any) => menu?.DETAIL)
     .filter((detail: any) => detail.URL === pathname)[0];
@@ -184,41 +80,24 @@ const WorkOrderDetailForm = (props: any) => {
   const [loading, setLoading] = useState<any | null>(false);
   const [status, setStatus] = useState<any | null>(false);
   const [currentStatus, setCurrentStatus] = useState<any | null>();
-  // const [selectedParts, setSelectedParts] = useState<any | null>([]);
   const [IsVisibleMaterialReqSideBar, setVisibleMaterialReqSideBar] =
     useState<boolean>(false);
   const [signatureDoc, setSignatureDoc] = useState<any | null>([]);
   const [materiallist, setMaterialRequest] = useState<any | null>([]);
-  // const [CheckPartOptionsList, setCheckPartOptionsList] = useState<any | null>(
-  //   []
-  // );
-
   const [asssetGroup, setasssetGroup] = useState<any | null>();
   const [asssetType, setasssetType] = useState<any | null>();
   const [asssetName, setasssetName] = useState<any | null>();
   const [issueName, setissueName] = useState<any | null>();
-
   const [partMatOptions, setMaterialPartOptions] = useState<any | null>([]);
   let [imgSrc, setImgSrc] = useState<any | null>();
   const [subStatus, setSubStatus] = useState<any | null>();
   const [approvalStatus, setApprovalStatus] = useState<any | null>(false);
   const [editStatus, setEditStatus] = useState<any | null>(false);
-  // const [userId, setUserId] = useState<any | null>();
-
   let [locationtypeOptions, setlocationtypeOptions] = useState([]);
   const [EquipmentGroup, setEquipmentGroup] = useState<any | null>([]);
   const [type, setType] = useState<any | null>([]);
   const [assetList, setAssetList] = useState<any | null>([]);
-
   const [reassignVisible, setReassignVisible] = useState<boolean>(false);
-  const [dateTimeAfterThreeDays, setDateTimeAfterThreeDays] = useState<
-    number | null
-  >(null);
-
-  const [CompDays, setCompDays] = useState<any | null>(0);
-  const [CompHours, setCompHours] = useState<any | null>(0);
-  const [CompMinutes, setCompMinutes] = useState<any | null>(0);
-  const [CompSeconds, setCompSeconds] = useState<any | null>(0);
   const [localGroupId, setLocalGroupID] = useState<any | null>("");
   const [localAssetTypeId, setLocalAssetTypId] = useState<any | null>("");
   const [localAssetId, setLocalAssetId] = useState<any | null>("");
@@ -242,12 +121,10 @@ const WorkOrderDetailForm = (props: any) => {
       }
       return task;
     });
-
     setTaskList(updatedTasklistOptions);
     setEditTaskList(updatedTasklistOptions);
     setValue("TASKDETAILS", updatedTasklistOptions);
   };
-
   const {
     register,
     handleSubmit,
@@ -380,8 +257,16 @@ const WorkOrderDetailForm = (props: any) => {
 
         await helperEventNotification(eventPayload);
       }
-    } catch (error: any) {}
+    } catch (error: any) { }
   };
+
+  function base64ToFile(base64: string, fileName: string, mimeType?: string): File {
+  const bstr = atob(base64);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  return new File([u8arr], fileName, { type: mimeType });
+}
 
   const handlingStatus = async (
     eventNotificationStatus?: any,
@@ -398,6 +283,7 @@ const WorkOrderDetailForm = (props: any) => {
     let eventType: any = "";
     let eventPara: any = "";
     let TYPE: any = "";
+    let result:any="";
     if (REMARK === "CANCELLED" || type === "") {
       eventType = "CANCELLED";
       eventPara = { para1: `Redirect Request`, para2: "Cancelled" };
@@ -429,6 +315,7 @@ const WorkOrderDetailForm = (props: any) => {
       if (sigPad !== "") {
         eventType = "COMP";
         eventPara = { para1: `Work order`, para2: "Completed" };
+         result =isAws === true ? base64ToFile(sigPad, "DigitalSignatue"):sigPad?.split("image/png;base64,")[1];
         isValid = true;
       } else {
         isValid = false;
@@ -444,9 +331,9 @@ const WorkOrderDetailForm = (props: any) => {
       setIsSubmit(true);
     }
 
-    const data = sigPad;
+  
 
-    const result: any = data?.split("image/png;base64,")[1];
+    
     const payloadDoc: any = {
       DOC_SRNO: 1,
       DOC_NAME: "Digital_Sign" + WO_ID,
@@ -464,7 +351,7 @@ const WorkOrderDetailForm = (props: any) => {
         (doc: any) => doc.UPLOAD_TYPE === "A" || doc.UPLOAD_TYPE === "B"
       );
     }
-
+       
     const payload: any = {
       ACTIVE: 1,
       WO_ID: selectedDetails?.WO_ID,
@@ -476,8 +363,8 @@ const WorkOrderDetailForm = (props: any) => {
         REMARK === "Acknowledge" || REMARK === "CONTINUE"
           ? ""
           : REMARK !== "" || REMARK !== undefined
-          ? REMARK
-          : "",
+            ? REMARK
+            : "",
       SUB_STATUS: selectedDetails?.SUB_STATUS,
       DOC_LIST: currentStatus === 4 ? [payloadDoc] : docfilterList,
       DOC_DATE: moment(new Date()).format("DD-MM-YYYY"),
@@ -490,7 +377,8 @@ const WorkOrderDetailForm = (props: any) => {
       RECT_ID:
         selectedDetails?.RECT_ID !== null ? selectedDetails?.RECT_ID : RECT_ID,
     };
-
+    console.log("payload", payload);
+ 
     try {
       if (isValid === true) {
         const res = await callPostAPI(
@@ -499,7 +387,12 @@ const WorkOrderDetailForm = (props: any) => {
           "HD001"
         );
         setValue("TASK_NAME", "");
+
         if (res.FLAG === true) {
+          if(payload?.DOC_LIST.length>0 && isAws === true){
+          
+          helperAwsFileupload(payload?.DOC_LIST)
+          }
           toast.success(res?.MSG);
           if (REMARK === "Acknowledge" || REMARK === "CONTINUE") {
             setIsSubmit(false);
@@ -529,122 +422,6 @@ const WorkOrderDetailForm = (props: any) => {
     }
   };
 
-  function getCountdown() {
-    const date =
-      currentStatus === 1
-        ? selectedDetails?.ACKNOWLEDGED_WITHIN_MS
-        : currentStatus === 3
-        ? selectedDetails?.RECTIFIED_WITHIN_MS
-        : currentStatus === 5 && selectedDetails?.RECTIFIED_WITHIN_MS === null
-        ? selectedDetails?.ACKNOWLEDGED_WITHIN_MS
-        : selectedDetails?.RECTIFIED_WITHIN_MS;
-
-    const NOW_IN_MS = selectedDetails?.CURRENT_TIME_MS;
-
-    const gettime = NOW_IN_MS - date;
-    const finalTime = NOW_IN_MS - gettime;
-
-    setDateTimeAfterThreeDays(finalTime);
-  }
-
-  const initialTime =
-    selectedDetails?.CURRUENT_TIME !== null
-      ? new Date(selectedDetails.CURRUENT_TIME)
-      : new Date();
-
-  useEffect(() => {
-    if (currentStatus) {
-      if (
-        selectedDetails?.RECTIFIED_WITHIN !== undefined ||
-        selectedDetails?.ACKNOWLEDGED_WITHIN !== undefined
-      ) {
-        if (
-          selectedDetails?.RECTIFIED_WITHIN !== null ||
-          selectedDetails?.ACKNOWLEDGED_WITHIN !== null
-        ) {
-          getCountdown();
-        }
-      }
-    }
-  }, [
-    selectedDetails?.RECTIFIED_WITHIN,
-    selectedDetails?.ACKNOWLEDGED_WITHIN,
-    currentStatus,
-  ]);
-
-  const StatusEvents = [
-    {
-      id: 1,
-      title: selectedDetails?.IS_REOPEN == true ? "Re-open" : "Open",
-      date:
-        selectedDetails?.IS_REOPEN == true
-          ? selectedDetails?.REOPEN_AT === null
-            ? ""
-            : formateDate(selectedDetails?.REOPEN_AT)
-          : selectedDetails?.REPORTED_AT === null
-          ? ""
-          : formateDate(selectedDetails?.REPORTED_AT),
-      status: currentStatus === 1 ? true : false,
-      progress: true,
-    },
-    {
-      id: 3,
-      title: "In Progress",
-      date:
-        currentStatus === 1
-          ? null
-          : selectedDetails?.ATTEND_AT == null
-          ? ""
-          : formateDate(selectedDetails?.ATTEND_AT),
-      status: currentStatus === 3 ? true : false,
-      progress: true,
-    },
-    {
-      id: 5,
-      title: "On Hold",
-      date:
-        currentStatus !== 5
-          ? null
-          : selectedDetails?.ONHOLD_AT == null
-          ? ""
-          : formateDate(selectedDetails?.ONHOLD_AT),
-      status: currentStatus === 5 ? true : false,
-      progress: true,
-    },
-    {
-      id: 4,
-      title: "Rectified",
-      date:
-        selectedDetails?.RECTIFIED_AT == null
-          ? ""
-          : formateDate(selectedDetails?.RECTIFIED_AT),
-      status: currentStatus === 4 ? true : false,
-      progress: true,
-    },
-    {
-      id: 7,
-      title: "Completed",
-      date:
-        selectedDetails?.COMPLETED_AT === null
-          ? ""
-          : formateDate(selectedDetails?.COMPLETED_AT),
-      status: currentStatus === 7 ? true : false,
-      progress: false,
-    },
-    {
-      id: 6,
-      title: "Cancelled",
-      date:
-        currentStatus >= 6
-          ? selectedDetails?.CANCELLED_AT == null
-            ? ""
-            : formateDate(selectedDetails?.CANCELLED_AT)
-          : "",
-      status: currentStatus === 6 ? true : false,
-      progress: false,
-    },
-  ];
-
   useEffect(() => {
     if (location?.state !== null) {
       (async function () {
@@ -652,20 +429,8 @@ const WorkOrderDetailForm = (props: any) => {
         await getOptionDetails(WO_ID);
       })();
     }
-  }, [location?.state]);
+  }, [location?.state])
 
-  const customizedMarker = (item: TimelineEvent) => {
-    return (
-      <span
-        className="flex w-2rem h-2rem align-items-center justify-content-center  border-circle z-1 shadow-1"
-        style={{ color: item.date && item?.id !== 5 ? "#55A629" : "#7E8083" }}
-      >
-        <i
-          className={`pi ${item.status ? "pi-circle-fill" : "pi-circle"} `}
-        ></i>
-      </span>
-    );
-  };
 
   const formatServiceRequestList = (list: any) => {
     let WORK_ORDER_LIST = list;
@@ -673,8 +438,6 @@ const WorkOrderDetailForm = (props: any) => {
     WORK_ORDER_LIST = WORK_ORDER_LIST.map((element: any) => {
       return {
         ...element,
-        // ACKNOWLEDGED_WITHIN: "2024-11-05T02:28:20.1258664+00:00",
-        //CURRENT_DATE: "2024-11-05T02:20:10.1258664+00:00"
       };
     });
     return WORK_ORDER_LIST;
@@ -691,7 +454,6 @@ const WorkOrderDetailForm = (props: any) => {
       );
 
       if (res && res.FLAG === 1) {
-        // props?.getAPI();
         setLocalGroupID(res?.WORKORDERDETAILS[0]?.ASSETGROUP_ID);
         setLocalAssetTypId(res?.WORKORDERDETAILS[0]?.ASSETTYPE_ID);
         setLocalAssetId(res?.WORKORDERDETAILS[0]?.ASSET_ID);
@@ -718,8 +480,6 @@ const WorkOrderDetailForm = (props: any) => {
             setlocationtypeOptions(location);
           }
         }
-
-        // getRequestList(res?.WORKORDERDETAILS[0]?.ASSETGROUP_ID, res?.WORKORDERDETAILS[0]?.ASSET_NONASSET,res?.WORKORDERDETAILS[0]?.REQ_ID )
         if (
           res?.WORKORDERDETAILS[0]?.CURRENT_STATUS === 1 ||
           res?.WORKORDERDETAILS[0]?.CURRENT_STATUS === 3
@@ -748,10 +508,8 @@ const WorkOrderDetailForm = (props: any) => {
 
         setTechnicianList(res?.ASSIGNTECHLIST);
         setTimelineList(res?.ACTIVITYTIMELINELIST);
-        // const updatedServiceRequestList: any = formatServiceRequestList(res?.WORKORDERDETAILS);
-
         setStatus(res?.WORKORDERDETAILS[0]?.STATUS_DESC);
-        setCurrentStatus(res?.WORKORDERDETAILS[0]?.CURRENT_STATUS);
+        setCurrentStatus(res?.WORKORDERDETAILS[0]?.CURRENT_STATUS)
         setValue("WORK_ORDER_NO", res?.WORKORDERDETAILS[0]?.WO_NO);
         setValue("WO_TYPE", res?.WORKORDERDETAILS[0]?.WO_TYPE);
         setValue("RAISED_BY", res?.WORKORDERDETAILS[0]?.USER_NAME);
@@ -765,19 +523,15 @@ const WorkOrderDetailForm = (props: any) => {
         setasssetType(res?.WORKORDERDETAILS[0]?.ASSETTYPE_ID);
         setasssetName(res?.WORKORDERDETAILS[0]?.ASSET_ID);
         setissueName(res?.WORKORDERDETAILS[0]?.REQ_ID);
-
         setValue(
           "WO_DATE",
           moment(res?.WORKORDERDETAILS[0]?.WO_DATE).format(dateFormat())
         );
-        // setValue("DOC_LIST", res?.WORKORDERDOCLIST);
-
         setOptions({
           assetGroup: reponseData?.ASSETGROUPLIST?.filter(
             (f: any) =>
               f.ASSETGROUP_TYPE === res?.WORKORDERDETAILS[0]?.ASSET_NONASSET
           ),
-
           assetType: reponseData?.ASSETTYPELIST,
           assestOptions: reponseData?.ASSETLIST,
           teamList: reponseData?.TEAMLIST,
@@ -786,14 +540,12 @@ const WorkOrderDetailForm = (props: any) => {
           statusList: reponseData?.STATUSLIST,
           reasonList: reponseData?.REASONLIST,
         });
-
         setEquipmentGroup(
           reponseData?.ASSETGROUPLIST?.filter(
             (f: any) =>
               f.ASSETGROUP_TYPE === res?.WORKORDERDETAILS[0]?.ASSET_NONASSET
           )
         );
-
         setValue("REQ_DESC", res?.WORKORDERDETAILS[0]?.REQ_DESC);
         setValue("WO_REMARKS", res?.WORKORDERDETAILS[0]?.WO_REMARKS);
         setValue("SEVERITY_DESC", res?.WORKORDERDETAILS[0]?.SEVERITY_DESC);
@@ -812,9 +564,7 @@ const WorkOrderDetailForm = (props: any) => {
           res?.WORKORDERDETAILS[0]?.WO_ID,
           res?.WORKORDERTASKLIST
         );
-
         setSubStatus(res?.WORKORDERDETAILS[0]?.SUB_STATUS);
-
         if (
           (res?.WORKORDERDETAILS[0]?.CURRENT_STATUS === 5 &&
             decryptData(localStorage.getItem("ROLETYPECODE")) === "SA") ||
@@ -828,10 +578,6 @@ const WorkOrderDetailForm = (props: any) => {
         ) {
           setApprovalStatus(true);
         }
-        // const docData: any =
-        //   "data:image/png;base64," + res?.DIGITALSIGNATURE[0]?.DOC_DATA;
-
-        // setImgSrc(docData);
 
         if (res?.WORKORDERDETAILS[0]?.CURRENT_STATUS >= 3) {
           const payload: any = {
@@ -863,10 +609,8 @@ const WorkOrderDetailForm = (props: any) => {
                 CHECK_PART_LIST.push(item);
               }
             }
-
             setMaterialPartOptions(PART_LIST);
             setMaterialRequest(MAT_REQUISITION_DETAILS);
-            //setCheckPartOptionsList(CHECK_PART_LIST);
             setLoading(false);
           } catch (error: any) {
             toast.error(error);
@@ -880,7 +624,6 @@ const WorkOrderDetailForm = (props: any) => {
     } catch (error: any) {
       toast.error(error);
       setLoading(false);
-      // toast.error(error)
     } finally {
       setLoading(false);
     }
@@ -899,7 +642,6 @@ const WorkOrderDetailForm = (props: any) => {
 
       if (res?.FLAG === 1) {
         props?.getAPI();
-        // getRequestList(res?.WORKORDERDETAILS[0]?.ASSETGROUP_ID, res?.WORKORDERDETAILS[0]?.ASSET_NONASSET,res?.WORKORDERDETAILS[0]?.REQ_ID )
         if (
           res?.WORKORDERDETAILS[0]?.CURRENT_STATUS === 1 ||
           res?.WORKORDERDETAILS[0]?.CURRENT_STATUS === 3
@@ -926,10 +668,8 @@ const WorkOrderDetailForm = (props: any) => {
           }
         }
 
-        // setDocOption(res?.WORKORDERDOCLIST);
         setTechnicianList(res?.ASSIGNTECHLIST);
         setTimelineList(res?.ACTIVITYTIMELINELIST);
-        // setAssetDocList(res?.ASSETDOCLIST);
         const updatedServiceRequestList: any = formatServiceRequestList(
           res?.WORKORDERDETAILS
         );
@@ -950,8 +690,6 @@ const WorkOrderDetailForm = (props: any) => {
           "WO_DATE",
           moment(res?.WORKORDERDETAILS[0]?.WO_DATE).format(dateFormat())
         );
-        // setValue("DOC_LIST", res?.WORKORDERDOCLIST);
-
         setOptions({
           assetGroup: reponseData?.ASSETGROUPLIST?.filter(
             (f: any) =>
@@ -971,11 +709,7 @@ const WorkOrderDetailForm = (props: any) => {
               f.ASSETGROUP_TYPE === res?.WORKORDERDETAILS[0]?.ASSET_NONASSET
           )
         );
-
         setType(reponseData?.ASSETTYPELIST);
-
-        // if()
-
         setValue("REQ_DESC", res?.WORKORDERDETAILS[0]?.REQ_DESC);
         setValue("WO_REMARKS", res?.WORKORDERDETAILS[0]?.WO_REMARKS);
         setValue("SEVERITY_DESC", res?.WORKORDERDETAILS[0]?.SEVERITY_DESC);
@@ -1009,11 +743,6 @@ const WorkOrderDetailForm = (props: any) => {
         ) {
           setApprovalStatus(true);
         }
-        // const docData: any =
-        //   "data:image/png;base64," + res?.DIGITALSIGNATURE[0]?.DOC_DATA;
-
-        // setImgSrc(docData);
-
         if (res?.WORKORDERDETAILS[0]?.CURRENT_STATUS >= 3) {
           const payload: any = {
             MATREQ_ID: res?.WORKORDERDETAILS[0]?.MATREQ_ID,
@@ -1047,7 +776,6 @@ const WorkOrderDetailForm = (props: any) => {
 
             setMaterialPartOptions(PART_LIST);
             setMaterialRequest(MAT_REQUISITION_DETAILS);
-            // setCheckPartOptionsList(CHECK_PART_LIST);
             setLoading(false);
           } catch (error: any) {
             toast.error(error);
@@ -1061,7 +789,6 @@ const WorkOrderDetailForm = (props: any) => {
     } catch (error: any) {
       toast.error(error);
       setLoading(false);
-      // toast.error(error)
     } finally {
       setLoading(false);
     }
@@ -1079,7 +806,6 @@ const WorkOrderDetailForm = (props: any) => {
 
     try {
       const res = await callPostAPI(ENDPOINTS.TASK_LIST, payload, "HD001");
-
       if (WORKORDERTASKLIST?.length > 0) {
         const workOrderTaskMap = WORKORDERTASKLIST.reduce(
           (map: any, task: any) => {
@@ -1172,17 +898,10 @@ const WorkOrderDetailForm = (props: any) => {
   const getDocmentList = async (WO_ID: any) => {
     setisloading(true);
     try {
-      const res = await callPostAPI(
-        ENDPOINTS.GET_DOCLIST,
-        {
-          WO_ID: WO_ID,
-        },
-        "HD001"
-      );
+      const res = await helperGetWorkOrderAwsDoclist(WO_ID,"HD001")  
       if (res?.FLAG === 1) {
         setAssetDocList(res?.ASSETDOCLIST);
         setDocOption(res?.WORKORDERDOCLIST);
-        // setValue("DOC_LIST", res?.WORKORDERDOCLIST)
         const docData: any = [];
         res?.DIGITAlSIGNLIST?.forEach((element: any) => {
           docData.push(element);
@@ -1209,7 +928,6 @@ const WorkOrderDetailForm = (props: any) => {
         // setMasterListOption(res);
       }
 
-      //setUserId(parseInt(id));
       if (search === "?edit=") {
         let WO_ID = localStorage.getItem("WO_ID");
         await getOptionDetails(WO_ID, res);
@@ -1236,7 +954,6 @@ const WorkOrderDetailForm = (props: any) => {
       selectedDetails.ASSETGROUP_ID = localGroupId;
       selectedDetails.ASSETTYPE_ID = localAssetTypeId;
       selectedDetails.REQ_ID = localRequestId;
-      //setGroupStatus(false)
       setEditStatus(false);
       setValue("TECH_ID", []);
       setTaskList(EditTaskList);
@@ -1248,7 +965,6 @@ const WorkOrderDetailForm = (props: any) => {
       setValue("REQ_ID", selectedDetails?.REQ_ID);
       setShowReassingList(false);
       setReassignVisible(false);
-      //setGroupStatus(true)
       setEditStatus(true);
       setTaskList(EditTaskList);
     }
@@ -1295,10 +1011,6 @@ const WorkOrderDetailForm = (props: any) => {
       try {
         delete payload?.TASKDETAILS;
         payload.MODE = "E";
-        // payload.ASSET_NONASSET = selectedDetails?.ASSET_NONASSET;
-        //  payload.ASSETGROUP_ID = payload?.ASSETGROUP_ID?.ASSETGROUP_ID;
-        //  payload.ASSETTYPE_ID = payload?.ASSETTYPE_ID?.ASSETTYPE_ID;
-        // payload.ASSET_ID = payload?.ASSET_ID?.ASSET_ID;
         if (locationStatus === true) {
           payload.ASSETGROUP_ID = selectedDetails?.ASSETGROUP_ID;
           payload.ASSETTYPE_ID = selectedDetails?.ASSETTYPE_ID;
@@ -1320,16 +1032,12 @@ const WorkOrderDetailForm = (props: any) => {
           payload?.REQ_ID?.REQ_ID !== undefined
             ? payload?.REQ_ID?.REQ_ID
             : selectedDetails?.REQ_ID;
-        // payload.SEVERITY_CODE = payload.SEVERITY_CODE.SEVERITY_ID !== undefined
-        //   ? payload.SEVERITY_CODE.SEVERITY_ID
-        //   : selectedDetails?.SEVERITY_CODE;
         payload.SEVERITY_CODE =
           payload.SEVERITY_CODE !== undefined &&
-          payload.SEVERITY_CODE.SEVERITY_ID !== undefined
+            payload.SEVERITY_CODE.SEVERITY_ID !== undefined
             ? payload.SEVERITY_CODE.SEVERITY_ID
             : selectedDetails?.SEVERITY_CODE;
         payload.ASSIGN_TEAM_ID = selectedDetails.ASSIGN_TEAM_ID;
-        // payload.TECH_ID = REASSIGN_ID;
         payload.REASSIGN_TYPE =
           currentStatus === 1 && selectedDetails.ATTEND_AT == null ? "B" : "";
 
@@ -1489,92 +1197,6 @@ const WorkOrderDetailForm = (props: any) => {
       }
     }
   };
-
-  const getStatus = (date: string | null, time: Date) => {
-    if (date == null) return "NA";
-    const dateObj = new Date(date);
-    if (dateObj < time) return "Overdue";
-    return "";
-  };
-
-  const getAcknowledgedStatus = () => {
-    if (
-      currentStatus === 1 ||
-      (currentStatus === 5 && selectedDetails?.RECTIFIED_WITHIN == null)
-    ) {
-      return getStatus(selectedDetails?.ACKNOWLEDGED_WITHIN, initialTime);
-    }
-    return "";
-  };
-
-  const getRectifiedStatus = () => {
-    if (
-      currentStatus === 3 ||
-      (currentStatus === 5 && selectedDetails?.RECTIFIED_WITHIN != null)
-    ) {
-      return getStatus(selectedDetails?.RECTIFIED_WITHIN, initialTime);
-    }
-    return "";
-  };
-
-  const getSLABoxStatus = () => {
-    const SLAboxStatus =
-      currentStatus === 1 ||
-      (currentStatus === 5 && selectedDetails?.RECTIFIED_WITHIN == null)
-        ? getAcknowledgedStatus()
-        : getRectifiedStatus();
-    return SLAboxStatus;
-  };
-
-  const customizedContent = (item: any) => {
-    return (
-      <div className="flex justify-between mb-3 gap-3">
-        <div className="mb-2 w-full">
-          <p className=" Text_Primary Input_Label mb-2">
-            {item.title}
-            <label className="Menu_Active Input_Label  ml-2 ">
-              {item?.DOC_NO ?? ""}
-            </label>
-          </p>
-          <p className="  Text_Secondary Helper_Text ">{item.subtitle}</p>
-          {item.ISREMARKS === 1 ? (
-            <p className="  Text_Secondary Helper_Text whitespace-wrap max-w-[800px] ">
-              <b>Remarks: </b> {item.TIMELINE_REMARKS}
-            </p>
-          ) : (
-            <></>
-          )}
-        </div>
-        <p className="Text_Secondary Helper_Text mt-4">
-          {/* {moment(item.date).format(
-            `${dateFormat()} ${","} HH:mm `
-          )} */}
-          {formateDate(item.date)}
-          {/* {item.date} */}
-        </p>
-      </div>
-    );
-  };
-
-  const customizedStatusTimeline = (item: any) => {
-    return (
-      <div className="">
-        <h6
-          className={`font-medium Sub_Service_Header_Text mb-1 ${
-            item.date
-              ? "Text_Primary "
-              : item.status
-              ? "Text_Primary "
-              : "Text_Secondary"
-          } `}
-        >
-          {item.title}
-        </h6>
-        <p className="Text_Secondary service_helper_text">{item.date}</p>
-      </div>
-    );
-  };
-
   const DetailsHeaderTemplate = (options: TabPanelHeaderTemplateOptions) => {
     return (
       <div
@@ -1587,13 +1209,13 @@ const WorkOrderDetailForm = (props: any) => {
         {
           // FACILITY["REDIRECT_APPROVAL"] === true
           selectedDetails?.ISAPPROVALCNC === false &&
-          selectedDetails?.ISAPPROVED === false &&
-          selectedDetails?.CURRENT_STATUS === 5 &&
-          (selectedDetails?.SUB_STATUS === "1" ||
-            selectedDetails?.SUB_STATUS === "2" ||
-            selectedDetails?.SUB_STATUS === "3" ||
-            selectedDetails?.SUB_STATUS === "4" ||
-            selectedDetails?.SUB_STATUS === "5") ? (
+            selectedDetails?.ISAPPROVED === false &&
+            selectedDetails?.CURRENT_STATUS === 5 &&
+            (selectedDetails?.SUB_STATUS === "1" ||
+              selectedDetails?.SUB_STATUS === "2" ||
+              selectedDetails?.SUB_STATUS === "3" ||
+              selectedDetails?.SUB_STATUS === "4" ||
+              selectedDetails?.SUB_STATUS === "5") ? (
             <Badge
               value="i"
               className="custom-target-icon"
@@ -1620,9 +1242,9 @@ const WorkOrderDetailForm = (props: any) => {
         {
           // FACILITY["MATREQ_APPROVAL"] === true
           selectedDetails?.ISMATAPPROVALCNC === false &&
-          selectedDetails?.ISMATAPPROVED === false &&
-          selectedDetails?.CURRENT_STATUS === 5 &&
-          selectedDetails?.SUB_STATUS === "6" ? (
+            selectedDetails?.ISMATAPPROVED === false &&
+            selectedDetails?.CURRENT_STATUS === 5 &&
+            selectedDetails?.SUB_STATUS === "6" ? (
             <Badge
               value="i"
               className="custom-target-icon1"
@@ -1681,15 +1303,14 @@ const WorkOrderDetailForm = (props: any) => {
     }
   };
 
-  //const taskDetailsWatch = watch("TASKDETAILS");
 
   const GetOpenList = () => {
     //  props?.isClick()
     if (location?.state === "service") {
       dispatch(clearFilters());
-      navigate(`${appName}/workorderlist`);
+      navigate(`/workorderlist`);
     } else {
-      navigate(`${appName}/workorderlist`, { state: "workorder" });
+      navigate(`/workorderlist`, { state: "workorder" });
     }
   };
 
@@ -1716,7 +1337,6 @@ const WorkOrderDetailForm = (props: any) => {
 
       if (res?.FLAG === 1) {
         setIssueList(res?.WOREQLIST);
-        // setSelectedIssue(reqId)
         setValue("REQ_ID", reqId);
         selectedDetails.REQ_ID = issueName;
       } else {
@@ -1797,8 +1417,6 @@ const WorkOrderDetailForm = (props: any) => {
   const getEquipmentType = (e: any) => {
     selectedDetails.ASSETTYPE_ID = e?.target?.value?.ASSETTYPE_ID;
     setValue("ASSETTYPE_ID", e?.target?.value?.ASSETTYPE_ID);
-    // setValue("ASSET_ID", "")
-    // selectedDetails.ASSET_ID = "";
     if (taskList.length > 0) {
       setTaskList([]);
     } else {
@@ -1816,30 +1434,11 @@ const WorkOrderDetailForm = (props: any) => {
     }
   };
 
-  function getCountdownNew() {
-    const date = selectedDetails?.RECTIFIED_AT_MS;
-    const NOW_IN_MS = selectedDetails?.REPORTED_AT_MS;
-    const countDown = date - NOW_IN_MS;
-    const days = Math.floor(countDown / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (countDown % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-    );
-    const minutes = Math.floor((countDown % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((countDown % (1000 * 60)) / 1000);
-
-    setCompDays(days);
-    setCompHours(hours);
-    setCompMinutes(minutes);
-    setCompSeconds(seconds);
-    //setDateTimeAfterThreeDaysNew(finalTime);
-  }
-
   const getSoftServiceGroup = () => {
     setType([]);
     setAssetList([]);
     setValue("ASSETTYPE_ID", "");
     setValue("ASSET_ID", "");
-    //setGroupStatus(true)
   };
 
   const GetVisibleSiderBar = (val: any) => {
@@ -1856,8 +1455,6 @@ const WorkOrderDetailForm = (props: any) => {
     resetField("ASSETTYPE_ID");
     resetField("REQ_ID");
     setValue("TECH_ID", []);
-    //const issueListData: any = issueList?.filter((f: any) => f?.REQ_ID === f?.REQ_ID)
-    //setIssueList(issueListData)
     selectedDetails.ASSET_ID = asssetName;
     selectedDetails.ASSETGROUP_ID = asssetGroup;
     selectedDetails.ASSETTYPE_ID = asssetType;
@@ -1889,10 +1486,6 @@ const WorkOrderDetailForm = (props: any) => {
       })();
     }
   }, [currentMenu]);
-
-  useEffect(() => {
-    getCountdownNew();
-  }, [selectedDetails?.RECTIFIED_AT_MS]);
 
   useEffect(() => {
     const location: any = locationtypeOptions?.filter(
@@ -1933,7 +1526,7 @@ const WorkOrderDetailForm = (props: any) => {
     }
   };
 
-  useEffect(() => {}, [selectedFacility]);
+  useEffect(() => { }, [selectedFacility]);
 
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -1943,8 +1536,6 @@ const WorkOrderDetailForm = (props: any) => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    // Clean up
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -1963,9 +1554,8 @@ const WorkOrderDetailForm = (props: any) => {
           {selectedDetails?.length !== 0 ? (
             <>
               <Card
-                className={`containerBox  ${
-                  isScrolled ? "fixedContainer1" : "topFixed"
-                }`}
+                className={`containerBox  ${isScrolled ? "fixedContainer1" : "topFixed"
+                  }`}
               >
                 <div className="flex justify-between">
                   <div>
@@ -2005,33 +1595,30 @@ const WorkOrderDetailForm = (props: any) => {
 
                     {/* Redirect */}
                     {selectedDetails?.ISREDIRECT &&
-                    currentStatus !== 6 &&
-                    status !== "Cancelled" &&
-                    currentStatus !== 7 &&
-                    editStatus === false &&
-                    locationStatus === false &&
-                    (currentStatus === 3 || currentStatus === 1) ? (
+                      currentStatus !== 6 &&
+                      status !== "Cancelled" &&
+                      currentStatus !== 7 &&
+                      editStatus === false &&
+                      locationStatus === false &&
+                      (currentStatus === 3 || currentStatus === 1) ? (
                       <WORedirectDialogBox
                         control={control}
-                        // header={"OnHold"}
                         setValue={setValue}
                         register={register}
-                        // name={"onHold"}
                         REMARK={""}
                         handlingStatus={handlingStatus}
                         watch={watch}
                         ASSIGN_TEAM_ID={"ASSIGN_TEAM_ID"}
                         getAPI={props?.getAPI}
-                        // STATUS_CODE={"STATUS_CODE"}
                         currentStatus={currentStatus}
                         errors={errors}
                         subStatus={selectedDetails.SUB_STATUS}
-                        // isSubmitting={isSubmitting}
                         options={options}
                         getOptionDetails={getOptionDetails}
                         eventNotification={eventNotification}
                         setIsSubmit={setIsSubmit}
                         IsSubmit={IsSubmit}
+                        selectedAssigneeTech={technicianList}
                       />
                     ) : (
                       <></>
@@ -2069,9 +1656,6 @@ const WorkOrderDetailForm = (props: any) => {
                           {currentStatus !== 5 ? (
                             <WorkOrderDialogBox
                               header={"Rectified"}
-                              // title={
-                              //   "Are you sure you want to rectify the workorder?"
-                              // }
                               errors={errors}
                               control={control}
                               setValue={setValue}
@@ -2106,20 +1690,14 @@ const WorkOrderDetailForm = (props: any) => {
                         </>
                       )}
 
-                    {/* Complete */}
-
                     {currentStatus == 4 &&
-                    selectedDetails?.ISCOMPLETERIGHTS === 1 ? (
+                      selectedDetails?.ISCOMPLETERIGHTS === 1 ? (
                       <WorkOrderDialogBox
                         header={"Complete"}
-                        // title={
-                        //   "Are you sure you want to Complete the workorder?"
-                        // }
                         control={control}
                         setValue={setValue}
                         register={register}
                         name={"Complete"}
-                        // REMARK={"REMARK"}
                         handlingStatus={handlingStatus}
                         watch={watch}
                         label={"Complete"}
@@ -2131,7 +1709,7 @@ const WorkOrderDetailForm = (props: any) => {
                       <></>
                     )}
                     {currentStatus == 4 &&
-                    selectedDetails?.ISCOMPLETERIGHTS === 1 ? (
+                      selectedDetails?.ISCOMPLETERIGHTS === 1 ? (
                       <>
                         {selectedDetails?.WO_TYPE === "CM" && (
                           <ReopenDialogBox
@@ -2139,9 +1717,6 @@ const WorkOrderDetailForm = (props: any) => {
                             control={control}
                             setValue={setValue}
                             register={register}
-                            // paragraph={
-                            //   t("Are you sure you want to Accept or Re-open the Service Request?")
-                            // }
                             watch={watch}
                             REMARK={"REMARK"}
                             errors={errors}
@@ -2166,16 +1741,7 @@ const WorkOrderDetailForm = (props: any) => {
                   </div>
                 </div>
               </Card>
-              {/* <div className="h-28"></div>  */}
-              <Card className="mt-2">
-                <Timeline
-                  value={StatusEvents}
-                  layout="horizontal"
-                  align="top"
-                  marker={customizedMarker}
-                  content={customizedStatusTimeline}
-                />
-              </Card>
+              <TimelineHeaderRE statusDetails={selectedDetails} currentStatus={currentStatus} />
               <div className=" grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
                 <div className="col-span-2 mt-3 woTabview">
                   <div className="woDetailTabview">
@@ -2187,13 +1753,13 @@ const WorkOrderDetailForm = (props: any) => {
                         <Card className="mt-2">
                           <div>
                             {selectedDetails?.ISAPPROVALCNC === false &&
-                            selectedDetails?.ISAPPROVED === false &&
-                            selectedDetails?.CURRENT_STATUS === 5 &&
-                            (selectedDetails?.SUB_STATUS === "1" ||
-                              selectedDetails?.SUB_STATUS === "2" ||
-                              selectedDetails?.SUB_STATUS === "3" ||
-                              selectedDetails?.SUB_STATUS === "4" ||
-                              selectedDetails?.SUB_STATUS === "5") ? (
+                              selectedDetails?.ISAPPROVED === false &&
+                              selectedDetails?.CURRENT_STATUS === 5 &&
+                              (selectedDetails?.SUB_STATUS === "1" ||
+                                selectedDetails?.SUB_STATUS === "2" ||
+                                selectedDetails?.SUB_STATUS === "3" ||
+                                selectedDetails?.SUB_STATUS === "4" ||
+                                selectedDetails?.SUB_STATUS === "5") ? (
                               <>
                                 <div className="reviewContainer">
                                   <div className="flex justify-between">
@@ -2219,7 +1785,7 @@ const WorkOrderDetailForm = (props: any) => {
                                           </p>
                                           {selectedDetails?.SUB_STATUS ===
                                             "4" ||
-                                          selectedDetails?.SUB_STATUS ===
+                                            selectedDetails?.SUB_STATUS ===
                                             "1" ? (
                                             <>
                                               <p className="Text_Primary Input_Text  ">
@@ -2234,16 +1800,13 @@ const WorkOrderDetailForm = (props: any) => {
                                     </div>
                                     <SidebarVisibal
                                       reassignVisible={reassignVisible}
-                                      headerTemplate={
-                                        selectedDetails?.STATUS_DESC
-                                      }
+                                      headerTemplate={selectedDetails?.STATUS_DESC}
                                       selectedDetails={selectedDetails}
                                       subStatus={selectedDetails?.SUB_STATUS}
                                       approvalStatus={approvalStatus}
                                       handlingStatus={handlingStatus}
                                       ASSIGNTECHLIST={technicianList}
                                       WORKORDER_DETAILS={selectedDetails}
-                                      //getOptionDetails={getOptionDetails}
                                       getOptions={getOptions}
                                       statusCode={
                                         selectedDetails.CURRENT_STATUS
@@ -2257,7 +1820,6 @@ const WorkOrderDetailForm = (props: any) => {
                                       setVisibleMaterialReqSideBar={
                                         setVisibleMaterialReqSideBar
                                       }
-                                      woor
                                     />
                                   </div>
                                 </div>
@@ -2339,19 +1901,19 @@ const WorkOrderDetailForm = (props: any) => {
 
                                         {(currentStatus === 1 ||
                                           currentStatus == 3) && (
-                                          <>
-                                            {" "}
-                                            {facilityStatus?.ISLOCATION_EDIT ===
-                                              true && (
-                                              <i
-                                                className="pi pi-pencil Menu_Active ml-2 cursor-pointer"
-                                                onClick={() =>
-                                                  OpenLocationDropDown()
-                                                }
-                                              ></i>
-                                            )}
-                                          </>
-                                        )}
+                                            <>
+                                              {" "}
+                                              {facilityStatus?.ISLOCATION_EDIT ===
+                                                true && (
+                                                  <i
+                                                    className="pi pi-pencil Menu_Active ml-2 cursor-pointer"
+                                                    onClick={() =>
+                                                      OpenLocationDropDown()
+                                                    }
+                                                  ></i>
+                                                )}
+                                            </>
+                                          )}
                                       </>
                                     )}
 
@@ -2394,7 +1956,7 @@ const WorkOrderDetailForm = (props: any) => {
                                     Description
                                   </label>
                                   {selectedDetails?.WO_REMARKS === null ||
-                                  selectedDetails?.WO_REMARKS === "" ? (
+                                    selectedDetails?.WO_REMARKS === "" ? (
                                     <>
                                       <p className="Text_Primary Service_Alert_Title  ">
                                         NA
@@ -2425,181 +1987,16 @@ const WorkOrderDetailForm = (props: any) => {
                                       </>
                                     </div>
                                   ) : docOption?.filter(
-                                      (e: any) => e.UPLOAD_TYPE === "W"
-                                    ).length > 0 ? (
-                                    <>
-                                      {/* <div className="flex flex-wrap gap-3">
-                                        {docOption?.map(
-                                          (doc: any, index: any) => {
-                                            if (doc.UPLOAD_TYPE === "W") {
-                                              var docData: any =
-                                                "data:image/png;base64," +
-                                                doc?.DOC_DATA;
-                                              return (
-                                                <>
-                                                  <div
-                                                    onClick={() => {
-                                                      setHandelImage(docData);
-                                                    }}
-                                                  >
-                                                    <img
-                                                      src={docData}
-                                                      alt=""
-                                                      className="w-[120px] h-[120px] rounded-xl"
-                                                    />
-                                                  </div>
-                                              
-                                                </>
-                                              );
-                                            }
-
-                                          }
-                                        )}
-                                        
-                                      </div> */}
+                                    (e: any) => e.UPLOAD_TYPE === "W"
+                                  ).length > 0 ? (<>
                                       <ImageGalleryComponent
                                         uploadType="W"
                                         docOption={docOption}
                                         Title={"Service Request"}
-                                      />
-                                      {/* <div className="flex flex-wrap gap-4">
-                                        {docOption?.map((doc: any, index: any) => { 
-                                          if (doc.UPLOAD_TYPE === "W") {
-                                            const getExtension = (str: any) => str.slice(str.lastIndexOf("."));
-                                            const fileExtension = getExtension(doc?.DOC_NAME);
-                                            let shortenedFileName = getShortenedFileName(doc?.DOC_NAME);
-                                            let FileSize = calFileSize(doc?.DOC_DATA)
-                                            var docData: string;
-                                            if (fileExtension === ".pdf") {
-                                              docData = "data:application/pdf;base64," + doc?.DOC_DATA;
-                                              return (
-                                                <div key={index}>
-                                                  <a
-                                                    href={docData}
-                                                    download={doc?.DOC_NAME}
-                                                    className="text-blue-500"
-                                                    title={doc?.DOC_NAME}
-                                                  >  <img src={pdfIcon} alt="" className="w-[120px] h-[120px] rounded-xl cursor-pointer" />
-
-                                                  </a>
-                                                  <div className="flex flex-col ">
-                                                    <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                    <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                  </div>
-                                                </div>
-                                              );
-                                            }
-                                            else if (fileExtension === ".doc" || fileExtension === ".docx") {
-                                              docData = 'data:application/msword;base64,' + doc?.DOC_DATA;
-                                              // Word icon
-                                              return (
-                                                <div key={index}>
-                                                  <a
-                                                    href={docData}
-                                                    download={doc?.DOC_NAME}
-                                                    className="text-blue-500"
-                                                    title={doc?.DOC_NAME}
-                                                  >
-                                                    <img src={wordDocIcon} alt="" className="w-[120px] h-[120px] rounded-xl cursor-pointer" />
-
-                                                  </a>
-                                                  <div className="flex flex-col ">
-                                                    <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                    <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                  </div>
-                                                </div>
-                                              );
-                                            } else if (fileExtension === ".xls" || fileExtension === ".xlsx") {
-                                              docData = "data:application/excel;base64," + doc?.DOC_DATA;
-                                              // Word icon
-                                              return (
-                                                <div key={index}>
-                                                  <a
-                                                    href={docData}
-                                                    download={doc?.DOC_NAME}
-                                                    className="text-blue-500 "
-                                                    title={doc?.DOC_NAME}
-                                                  >
-                                                    <img src={excelIcon} alt="" className="w-[120px] h-[120px] rounded-xl cursor-pointer" />
-
-                                                  </a>
-                                                  <div className="flex flex-col ">
-                                                    <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                    <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                  </div>
-                                                </div>
-                                              );
-                                            }
-
-                                            else {
-                                              // Otherwise, treat it as an image (e.g., PNG) and show a thumbnail
-                                              docData = "data:image/png;base64," + doc?.DOC_DATA;
-
-                                              return (
-                                                <div
-                                                  key={index}
-                                                  onClick={() => {
-                                                    setHandelImage(docData, doc?.DOC_NAME, "Service Request"); // Assuming this function sets the image for preview
-                                                  }}
-                                                >
-                                                  <img
-                                                    src={docData}
-                                                    alt=""
-                                                    className="w-[120px] h-[120px] rounded-xl cursor-pointer"
-                                                  />
-                                                  <div className="flex flex-col ">
-                                                    <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                    <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                  </div>
-                                                </div>
-                                              );
-                                            }
-                                          }
-                                        })}
-                                      </div>
-                                      <Dialog
-                                        visible={visibleImage}
-                                        style={{
-                                          width: "50vw",
-                                          height: "60vh",
-                                        }}
-                                        onHide={() => {
-                                          setVisibleImage(false);
-                                        }}
-                                      >
-                                        <>
-                                          <button className="text-blue-500 underline">download</button>
-                                          <img
-                                            src={showImage}
-                                            alt=""
-                                            className="w-full h-full"
-                                          />
-
-                                        </>
-                                      </Dialog> */}
-                                    </>
+                                      />  </>
                                   ) : (
                                     <>
-                                      <div className="flex items-center mt-2 justify-center w-2/3">
-                                        <label
-                                          htmlFor="dropzone-file"
-                                          className="flex flex-col items-center justify-center w-full h-24 border-2
-                                      border-gray-200 border rounded-lg  "
-                                        >
-                                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <img
-                                              src={noDataIcon}
-                                              alt=""
-                                              className="w-12"
-                                            />
-                                            <p className="mb-2 mt-2 text-sm ">
-                                              <span className="Text_Primary Service_Alert_Title">
-                                                {t("No items to show")}{" "}
-                                              </span>
-                                            </p>
-                                          </div>
-                                        </label>
-                                      </div>
+                                      <NoItemToShow />
                                     </>
                                   )}
 
@@ -2641,527 +2038,30 @@ const WorkOrderDetailForm = (props: any) => {
                             </div>
                           </div>
 
-                          {/* rectification code */}
                           {currentStatus === 4 ||
-                          currentStatus === 7 ||
-                          selectedDetails?.IS_REOPEN === true ? (
-                            <div className="mt-2">
-                              <hr className="w-full mb-2"></hr>
-                              <div className="flex flex-wrap justify-between">
-                                <h6 className="Service_Header_Text">
-                                  Rectified Details
-                                </h6>
-                              </div>
-
-                              <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
-                                <div className=" flex flex-col gap-4">
-                                  {selectedDetails?.RECTIFIED_AT !== null && (
-                                    <div>
-                                      <label className="Text_Secondary Helper_Text  ">
-                                        Rectified by
-                                      </label>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {selectedDetails?.RECTIFIED_BY_NAME}
-                                      </p>
-                                    </div>
-                                  )}
-                                  {selectedDetails?.RECTIFIED_AT !== null && (
-                                    <div>
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  ">
-                                          Rectified Date & Time
-                                        </label>
-                                        {/* <i className="pi pi-pencil Text_Main ml-2"></i> */}
-                                      </div>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {formateDate(
-                                          selectedDetails?.RECTIFIED_AT
-                                        )}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="col-span-2">
-                                  <div className=" flex flex-col gap-4">
-                                    {selectedDetails?.RECTIFIED_AT !== null && (
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  ">
-                                          Rectification Comment
-                                        </label>
-                                        {selectedDetails?.RECTIFIED_REMARKS ===
-                                          null ||
-                                        selectedDetails?.RECTIFIED_REMARKS ===
-                                          "" ? (
-                                          <>
-                                            <p className="Text_Primary Service_Alert_Title  ">
-                                              NA
-                                            </p>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <p className="Text_Primary Service_Alert_Title  ">
-                                              {
-                                                selectedDetails?.RECTIFIED_REMARKS
-                                              }
-                                            </p>
-                                          </>
-                                        )}
-                                      </div>
-                                    )}
-                                    <div>
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  ">
-                                          Before Files(
-                                          {
-                                            docOption?.filter(
-                                              (e: any) => e.UPLOAD_TYPE === "B"
-                                            ).length
-                                          }
-                                          )
-                                        </label>
-                                        {isloading === true ? (
-                                          <div className="imageContainer  flex justify-center items-center z-400">
-                                            <>
-                                              <LoaderFileUpload
-                                                IsScannig={false}
-                                              />
-                                            </>
-                                          </div>
-                                        ) : docOption?.filter(
-                                            (e: any) => e.UPLOAD_TYPE === "B"
-                                          ).length > 0 ? (
-                                          <>
-                                            <ImageGalleryComponent
-                                              uploadType="B"
-                                              docOption={docOption}
-                                              Title={"Before"}
-                                            />
-                                            {/* <div className="flex flex-wrap gap-4">
-                                              {docOption?.map((doc: any, index: any) => {
-                                                if (doc.UPLOAD_TYPE === "B") {
-                                                  const getExtension = (str: any) => str.slice(str.lastIndexOf("."));
-                                                  const fileExtension = getExtension(doc?.DOC_NAME);
-
-                                                  let shortenedFileName = getShortenedFileName(doc?.DOC_NAME);
-                                                  let FileSize = calFileSize(doc?.DOC_DATA)
-
-
-                                                  var docData: string;
-                                                  if (fileExtension === ".pdf") {
-                                                    docData = "data:application/pdf;base64," + doc?.DOC_DATA;
-                                                    return (
-                                                      <div key={index}>
-                                                        <a
-                                                          href={docData}
-                                                          download={doc?.DOC_NAME}
-                                                          className="text-blue-500"
-                                                          title={doc?.DOC_NAME}
-                                                        >  <img src={pdfIcon} alt="" className="w-[120px] h-[120px] rounded-xl cursor-pointer" />
-
-                                                        </a>
-                                                        <div className="flex flex-col ">
-                                                          <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                          <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  }
-                                                  else if (fileExtension === ".doc" || fileExtension === ".docx") {
-                                                    docData = 'data:application/msword;base64,' + doc?.DOC_DATA;
-                                                    // Word icon
-                                                    return (
-                                                      <div key={index}>
-                                                        <a
-                                                          href={docData}
-                                                          download={doc?.DOC_NAME}
-                                                          className="text-blue-500"
-                                                          title={doc?.DOC_NAME}
-                                                        >
-                                                          <img src={wordDocIcon} alt="Word icon" className="w-[120px] h-[120px] rounded-xl cursor-pointer" />
-
-                                                        </a>
-                                                        <div className="flex flex-col ">
-                                                          <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                          <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  } else if (fileExtension === ".xls" || fileExtension === ".xlsx") {
-                                                    docData = "data:application/excel;base64," + doc?.DOC_DATA;
-                                                    // Word icon
-                                                    return (
-                                                      <div key={index}>
-                                                        <a
-                                                          href={docData}
-                                                          download={doc?.DOC_NAME}
-                                                          className="text-blue-500"
-                                                          title={doc?.DOC_NAME}
-                                                        >
-                                                          <img src={excelIcon} alt="Word icon" className="w-[120px] h-[120px] rounded-xl cursor-pointer" />
-
-                                                        </a>
-                                                        <div className="flex flex-col ">
-                                                          <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                          <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  }
-
-                                                  else {
-                                                    // Otherwise, treat it as an image (e.g., PNG) and show a thumbnail
-                                                    docData = "data:image/png;base64," + doc?.DOC_DATA;
-
-                                                    return (
-                                                      <div
-                                                        key={index}
-                                                        onClick={() => {
-                                                          setHandelImage(docData, doc?.DOC_NAME, 'Before');; // Assuming this function sets the image for preview
-                                                        }}
-                                                      >
-                                                        <img
-                                                          src={docData}
-                                                          alt=""
-                                                          className="w-[120px] h-[120px] rounded-xl cursor-pointer"
-                                                        />
-                                                        <div className="flex flex-col ">
-                                                          <div className="Service_Image_Title">{shortenedFileName}</div >
-                                                          <div className="Text_Secondary Helper_Text">{FileSize}</div >
-                                                        </div>
-                                                      </div>
-                                                    );
-                                                  }
-                                                }
-                                              })}
-                                            </div>
-                                            <Dialog
-                                              visible={visibleImage}
-                                              style={{
-                                                width: "50vw",
-                                                height: "60vh",
-                                              }}
-                                              onHide={() => {
-                                                setVisibleImage(false);
-                                              }}
-                                            >
-                                              <a
-                                                href={showImage}
-                                                download={docName}
-                                                className="flex flex-col"
-                                                title={`Download ${docName}`}
-                                              >
-                                                <i className="pi pi-download" style={{ fontSize: '24px', marginBottom: '8px', display: "flex", justifyContent: "end" }}></i>
-                                              </a>
-                                              <img
-                                                src={showImage}
-                                                alt=""
-                                                className="w-full h-full"
-                                              />
-                                              <h5>{docName}</h5>
-                                              <h6>{DocTitle}</h6>
-                                            </Dialog> */}
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="flex items-center mt-2 justify-center w-2/3">
-                                              <label
-                                                htmlFor="dropzone-file"
-                                                className="flex flex-col items-center justify-center w-full h-24 border-2
-                                      border-gray-200 border rounded-lg  "
-                                              >
-                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                  <img
-                                                    src={noDataIcon}
-                                                    alt=""
-                                                    className="w-12"
-                                                  />
-                                                  <p className="mb-2 mt-2 text-sm ">
-                                                    <span className="Text_Primary Service_Alert_Title">
-                                                      {t("No items to show")}{" "}
-                                                    </span>
-                                                  </p>
-                                                </div>
-                                              </label>
-                                            </div>
-                                          </>
-                                        )}
-
-                                        <Dialog
-                                          visible={visibleImage}
-                                          style={{ width: "50vw" }}
-                                          onHide={() => {
-                                            setVisibleImage(false);
-                                          }}
-                                        >
-                                          <img
-                                            src={showImage}
-                                            alt=""
-                                            className="w-full bg-cover"
-                                          />
-                                        </Dialog>
-                                      </div>
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  mt-4">
-                                          After Files(
-                                          {
-                                            docOption?.filter(
-                                              (e: any) => e.UPLOAD_TYPE === "A"
-                                            ).length
-                                          }
-                                          )
-                                        </label>
-                                        {isloading === true ? (
-                                          <div className="imageContainer  flex justify-center items-center z-400">
-                                            <>
-                                              <LoaderFileUpload
-                                                IsScannig={false}
-                                              />
-                                            </>
-                                          </div>
-                                        ) : docOption?.filter(
-                                            (e: any) => e.UPLOAD_TYPE === "A"
-                                          ).length > 0 ? (
-                                          <>
-                                            <ImageGalleryComponent
-                                              uploadType="A"
-                                              docOption={docOption}
-                                              Title={"After"}
-                                            />
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="flex items-center mt-2 justify-center w-2/3">
-                                              <label
-                                                htmlFor="dropzone-file"
-                                                className="flex flex-col items-center justify-center w-full h-24 border-2
-                                      border-gray-200 border rounded-lg  "
-                                              >
-                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                  <img
-                                                    src={noDataIcon}
-                                                    alt=""
-                                                    className="w-12"
-                                                  />
-                                                  <p className="mb-2 mt-2 text-sm ">
-                                                    <span className="Text_Primary Service_Alert_Title">
-                                                      {t("No items to show")}{" "}
-                                                    </span>
-                                                  </p>
-                                                </div>
-                                              </label>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                            currentStatus === 7 ||
+                            selectedDetails?.IS_REOPEN === true ? (
+                            <RectifiedDetails
+                              rectifiedDetails={selectedDetails}
+                              imageDocList={docOption}
+                              isloading={isloading}
+                              isCardView={false}
+                            />
                           ) : (
                             <></>
                           )}
 
                           {(currentStatus === 7 &&
                             selectedDetails?.IS_REOPEN === true) ||
-                          (currentStatus === 7 &&
-                            selectedDetails?.IS_REOPEN === null) ? (
-                            <div className="mt-2">
-                              <hr className="w-full mb-2"></hr>
-                              <div className="flex flex-wrap justify-between">
-                                <h6 className="Service_Header_Text">
-                                  Completion Details
-                                </h6>
-                              </div>
-
-                              <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
-                                <div className=" flex flex-col gap-4">
-                                  {selectedDetails?.COMPLETED_AT !== null && (
-                                    <div>
-                                      <label className="Text_Secondary Helper_Text  ">
-                                        Verified by
-                                      </label>
-                                      {selectedDetails?.VERIFY_BY === null ||
-                                      selectedDetails?.VERIFY_BY === "" ? (
-                                        <>
-                                          <p className="Text_Primary Service_Alert_Title  ">
-                                            NA
-                                          </p>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <p className="Menu_Active Service_Alert_Title  ">
-                                            {selectedDetails?.VERIFY_BY}
-                                          </p>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                  {selectedDetails?.COMPLETED_BY_NAME !==
-                                    null && (
-                                    <div>
-                                      <label className="Text_Secondary Helper_Text  ">
-                                        Completed by
-                                      </label>
-                                      {selectedDetails?.COMPLETED_BY_NAME ===
-                                        null ||
-                                      selectedDetails?.COMPLETED_BY_NAME ===
-                                        "" ? (
-                                        <>
-                                          <p className="Text_Primary Service_Alert_Title  ">
-                                            NA
-                                          </p>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <p className="Menu_Active Service_Alert_Title  ">
-                                            {selectedDetails?.COMPLETED_BY_NAME}
-                                          </p>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                  {selectedDetails?.COMPLETED_AT !== null && (
-                                    <div>
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  ">
-                                          Verified Date & Time
-                                        </label>
-                                      </div>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {/* {moment(
-                                        selectedDetails?.COMPLETED_AT
-                                      ).format(`${dateFormat()} ${" "}`)} */}
-                                        {formateDate(
-                                          selectedDetails?.COMPLETED_AT
-                                        )}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="col-span-2">
-                                  <div className=" flex flex-col gap-4">
-                                    {selectedDetails?.COMPLETED_AT !== null && (
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  ">
-                                          Completed Remarks
-                                        </label>
-                                        {selectedDetails?.COMPLETED_REMARKS ===
-                                          null ||
-                                        selectedDetails?.COMPLETED_REMARKS ===
-                                          "" ? (
-                                          <>
-                                            <p className="Text_Primary Service_Alert_Title  ">
-                                              NA
-                                            </p>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <p className="Text_Primary Service_Alert_Title  ">
-                                              {
-                                                selectedDetails?.COMPLETED_REMARKS
-                                              }
-                                            </p>
-                                          </>
-                                        )}
-                                      </div>
-                                    )}
-                                    <div
-                                      className="justify-center flex w-full h-[100px] p-4 border-2
-                                                    border-gray-200 border rounded-lg "
-                                    >
-                                      {isloading === true ? (
-                                        <div className="imageContainer  flex justify-center items-center z-400">
-                                          <>
-                                            <LoaderFileUpload
-                                              IsScannig={false}
-                                            />
-                                          </>
-                                        </div>
-                                      ) : (
-                                        signatureDoc?.map((imgSource: any) => {
-                                          let source: any =
-                                            "data:image/png;base64," +
-                                            imgSource?.DOC_DATA;
-                                          return (
-                                            <img
-                                              src={source}
-                                              className="w-[102px] h-[65px] bg-contain "
-                                            />
-                                          );
-                                        })
-                                      )}
-                                    </div>
-                                    <div></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-                          {selectedDetails?.IS_ACCEPTED === true ? (
-                            <div className="mt-2">
-                              <hr className="w-full mb-2"></hr>
-                              <div className="flex flex-wrap justify-between">
-                                <h6 className="Service_Header_Text">
-                                  Acceptance Details
-                                </h6>
-                              </div>
-                              <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
-                                <div className=" flex gap-8">
-                                  {selectedDetails?.ACCEPTED_BY !== null && (
-                                    <div>
-                                      <label className="Text_Secondary Helper_Text  ">
-                                        Accepted by
-                                      </label>
-                                      {selectedDetails?.ACCEPTED_BY === null ||
-                                      selectedDetails?.ACCEPTED_BY === "" ? (
-                                        <>
-                                          <p className="Text_Primary Service_Alert_Title  ">
-                                            NA
-                                          </p>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <p className="Menu_Active Service_Alert_Title  ">
-                                            {selectedDetails?.ACCEPTED_BY}
-                                          </p>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                  {selectedDetails?.ACCEPTED_ON !== null && (
-                                    <div>
-                                      <div>
-                                        <label className="Text_Secondary Helper_Text  ">
-                                          Accepted Date & Time
-                                        </label>
-                                      </div>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {/* {moment(
-                                        selectedDetails?.COMPLETED_AT
-                                      ).format(`${dateFormat()} ${" "}`)} */}
-                                        {formateDate(
-                                          selectedDetails?.ACCEPTED_ON
-                                        )}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                                {/* <div className="col-span-2">
-                                  <div className=" flex flex-col gap-2">
- 
- 
- 
- 
- 
-                                  </div>
-                                </div> */}
-                              </div>
-                            </div>
-                          ) : (
-                            <></>
+                            (currentStatus === 7 &&
+                              selectedDetails?.IS_REOPEN === null) ? (
+                            <CompletedDetails
+                              completionDetails={selectedDetails}
+                              isloading={isloading}
+                              signatureDocImage={signatureDoc}
+                            /> ) : (<></> )}
+                          {selectedDetails?.IS_ACCEPTED === true && (
+                            <AcceptedDetails acceptedDetails={selectedDetails} isCardView={false} />
                           )}
                         </Card>
 
@@ -3175,38 +2075,7 @@ const WorkOrderDetailForm = (props: any) => {
                                 <h6 className="Service_Header_Text">
                                   Equipment Summary
                                 </h6>
-                                <div className="flex items-center mt-2 justify-center w-full">
-                                  <label
-                                    htmlFor="dropzone-file"
-                                    className="flex flex-col items-center justify-center w-full h-52 border-2
-               border-gray-200 border rounded-lg  "
-                                  >
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                      <img
-                                        src={noDataIcon}
-                                        alt=""
-                                        className="w-12"
-                                      />
-
-                                      <p className="mb-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        <span className="Text_Primary Service_Alert_Title">
-                                          {t("No items to show")}{" "}
-                                        </span>
-                                      </p>
-                                      <label className="Text_Secondary Helper_Text mb-4">
-                                        {t(
-                                          "Add equipment to access related tasks and resources."
-                                        )}
-                                      </label>
-
-                                      <Buttons
-                                        className="Secondary_Button"
-                                        icon="pi pi-plus"
-                                        label={"Add Equipment"}
-                                      />
-                                    </div>
-                                  </label>
-                                </div>
+                                <NoItemToShow />
                               </Card>
                             ))}
                         {selectedDetails?.ASSET_NONASSET !== "N" && (
@@ -3219,140 +2088,21 @@ const WorkOrderDetailForm = (props: any) => {
                                 <>
                                   {(currentStatus === 1 ||
                                     currentStatus == 3) && (
-                                    <Buttons
-                                      className="Secondary_Button"
-                                      icon="pi pi-pencil"
-                                      label={"Edit"}
-                                      onClick={() => {
-                                        OpenEditStatusDropDown();
-                                      }}
-                                      // onClick={OpenLocationDropDown}
-                                    />
-                                  )}
+                                      <Buttons
+                                        className="Secondary_Button"
+                                        icon="pi pi-pencil"
+                                        label={"Edit"}
+                                        onClick={() => {
+                                          OpenEditStatusDropDown();
+                                        }}
+                                      />
+                                    )}
                                 </>
                               )}
                             </div>
 
                             {editStatus === false && (
-                              <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Equipment Group
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.ASSETGROUP_NAME}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Ownership Status
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.OWN_LEASE === null ||
-                                    selectedDetails?.OWN_LEASE === "" ||
-                                    selectedDetails?.OWN_LEASE === undefined
-                                      ? "NA"
-                                      : selectedDetails?.OWN_LEASE === "O"
-                                      ? "Owned"
-                                      : selectedDetails?.OWN_LEASE === "L"
-                                      ? "Leased"
-                                      : "NA"}
-                                    {/* {ownLeasedStatus} */}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Last Maintenance Date
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.LAST_MAINTANCE_DATE ==
-                                      null ||
-                                    selectedDetails?.LAST_MAINTANCE_DATE === ""
-                                      ? "NA"
-                                      : // moment(
-                                        //   selectedDetails?.LAST_MAINTANCE_DATE
-                                        // ).format(dateFormat())}
-                                        onlyDateFormat(
-                                          selectedDetails?.LAST_MAINTANCE_DATE
-                                        )}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Equipment Type
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.ASSETTYPE_NAME === null
-                                      ? "NA"
-                                      : selectedDetails?.ASSETTYPE_NAME}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Warranty End Date
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.WARRANTY_END_DATE ==
-                                      null ||
-                                    selectedDetails?.WARRANTY_END_DATE === ""
-                                      ? "NA"
-                                      : onlyDateFormat(
-                                          selectedDetails?.WARRANTY_END_DATE
-                                        )}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Upcoming Schedule
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                      ? //  moment(
-                                        //   selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        // ).format(dateFormat())
-                                        onlyDateFormat(
-                                          selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        )
-                                      : "NA"}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Equipment Name
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.ASSET_NAME === "" ||
-                                    selectedDetails?.ASSET_NAME === null ||
-                                    selectedDetails?.ASSET_NAME === undefined
-                                      ? "NA"
-                                      : selectedDetails?.ASSET_NAME}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Vendor Name
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.VENDOR_NAME === "" ||
-                                    selectedDetails?.VENDOR_NAME === null ||
-                                    selectedDetails?.VENDOR_NAME === undefined
-                                      ? "NA"
-                                      : selectedDetails?.VENDOR_NAME}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Issue
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.REQ_DESC === "" ||
-                                    selectedDetails?.REQ_DESC === null ||
-                                    selectedDetails?.REQ_DESC === undefined
-                                      ? "NA"
-                                      : selectedDetails?.REQ_DESC}
-                                  </p>
-                                </div>
-                              </div>
+                              <EquipmentSummaryDetails equipmentDetails={selectedDetails} equipmentType={selectedDetails?.ASSET_NONASSET} isServiceReq={false} />
                             )}
                             {editStatus === true ? (
                               <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
@@ -3407,14 +2157,14 @@ const WorkOrderDetailForm = (props: any) => {
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.OWN_LEASE === null ||
-                                    selectedDetails?.OWN_LEASE === "" ||
-                                    selectedDetails?.OWN_LEASE === undefined
+                                      selectedDetails?.OWN_LEASE === "" ||
+                                      selectedDetails?.OWN_LEASE === undefined
                                       ? "NA"
                                       : selectedDetails?.OWN_LEASE === "O"
-                                      ? "Owned"
-                                      : selectedDetails?.OWN_LEASE === "L"
-                                      ? "Leased"
-                                      : "NA"}
+                                        ? "Owned"
+                                        : selectedDetails?.OWN_LEASE === "L"
+                                          ? "Leased"
+                                          : "NA"}
                                   </p>
                                 </div>
                                 <div>
@@ -3424,20 +2174,16 @@ const WorkOrderDetailForm = (props: any) => {
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.LAST_MAINTANCE_DATE ==
                                       null ||
-                                    selectedDetails?.LAST_MAINTANCE_DATE === ""
+                                      selectedDetails?.LAST_MAINTANCE_DATE === ""
                                       ? "NA"
-                                      : //  moment(
-                                        //   selectedDetails?.LAST_MAINTANCE_DATE
-                                        // ).format(dateFormat())
-                                        onlyDateFormat(
-                                          selectedDetails?.LAST_MAINTANCE_DATE
-                                        )}
+                                      : onlyDateFormat(
+                                        selectedDetails?.LAST_MAINTANCE_DATE
+                                      )}
                                   </p>
                                 </div>
                                 <div>
                                   <label className="Text_Secondary Helper_Text  ">
                                     Equipment Type{" "}
-                                    {/* <span className="text-red-600"> *</span> */}
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     <Field
@@ -3449,8 +2195,6 @@ const WorkOrderDetailForm = (props: any) => {
                                             <Select
                                               options={type}
                                               {...register("ASSETTYPE_ID", {
-                                                // required:
-                                                //   "Please fill the required fields",
                                                 onChange: (e: any) => {
                                                   getEquipmentType(e);
                                                 },
@@ -3463,7 +2207,6 @@ const WorkOrderDetailForm = (props: any) => {
                                               }
                                               filter={true}
                                               setValue={setValue}
-                                              //   invalid={errors.ASSETTYPE_ID}
                                               {...field}
                                             />
                                           );
@@ -3480,11 +2223,11 @@ const WorkOrderDetailForm = (props: any) => {
                                     <p className="Text_Primary Service_Alert_Title  ">
                                       {selectedDetails?.WARRANTY_END_DATE ==
                                         null ||
-                                      selectedDetails?.WARRANTY_END_DATE === ""
+                                        selectedDetails?.WARRANTY_END_DATE === ""
                                         ? "NA"
                                         : onlyDateFormat(
-                                            selectedDetails?.WARRANTY_END_DATE
-                                          )}
+                                          selectedDetails?.WARRANTY_END_DATE
+                                        )}
                                     </p>
                                   </p>
                                 </div>
@@ -3494,19 +2237,16 @@ const WorkOrderDetailForm = (props: any) => {
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                      ? // moment(
-                                        //   selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        // ).format(dateFormat())
-                                        onlyDateFormat(
-                                          selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        )
+                                      ?
+                                      onlyDateFormat(
+                                        selectedDetails?.UPCOMING_SCHEDULE_DATE
+                                      )
                                       : "NA"}
                                   </p>
                                 </div>
                                 <div>
                                   <label className="Text_Secondary Helper_Text  ">
                                     Equipment Name{" "}
-                                    {/* <span className="text-red-600"> *</span> */}
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     <Field
@@ -3528,14 +2268,12 @@ const WorkOrderDetailForm = (props: any) => {
                                                 },
                                               })}
                                               optionLabel="ASSET_NAME"
-                                              // require={false}
                                               findKey={"ASSET_ID"}
                                               selectedData={
                                                 selectedDetails?.ASSET_ID
                                               }
                                               filter={true}
                                               setValue={setValue}
-                                              // invalid={errors?.ASSET_ID}
                                               {...field}
                                             />
                                           );
@@ -3550,15 +2288,13 @@ const WorkOrderDetailForm = (props: any) => {
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.VENDOR_NAME === "" ||
-                                    selectedDetails?.VENDOR_NAME === null ||
-                                    selectedDetails?.VENDOR_NAME === undefined
+                                      selectedDetails?.VENDOR_NAME === null ||
+                                      selectedDetails?.VENDOR_NAME === undefined
                                       ? "NA"
                                       : selectedDetails?.VENDOR_NAME}
                                   </p>
                                 </div>
 
-                                {/* <div>{(reassignVisible === true &&
-                                  showReassingList === true).toString()}</div> */}
                                 {reassignVisible && showReassingList && (
                                   <div>
                                     <label className="Text_Secondary Helper_Text  ">
@@ -3663,91 +2399,8 @@ const WorkOrderDetailForm = (props: any) => {
                             </div>
 
                             {editStatus === false && (
-                              <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Service Group
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.ASSETGROUP_NAME}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Last Maintenance Date
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.LAST_MAINTANCE_DATE ==
-                                      null ||
-                                    selectedDetails?.LAST_MAINTANCE_DATE === ""
-                                      ? "NA"
-                                      : // moment(
-                                        //   selectedDetails?.LAST_MAINTANCE_DATE
-                                        // ).format(dateFormat())
-                                        onlyDateFormat(
-                                          selectedDetails?.LAST_MAINTANCE_DATE
-                                        )}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Upcoming Schedule
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                      ? onlyDateFormat(
-                                          selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        )
-                                      : "NA"}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Service Type
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.ASSETTYPE_NAME === null
-                                      ? "NA"
-                                      : selectedDetails?.ASSETTYPE_NAME}
-                                    {/* {selectedDetails?.ASSETTYPE_NAME} */}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Vendor Name
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.VENDOR_NAME === "" ||
-                                    selectedDetails?.VENDOR_NAME === null ||
-                                    selectedDetails?.VENDOR_NAME === undefined
-                                      ? "NA"
-                                      : selectedDetails?.VENDOR_NAME}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Issue
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.REQ_DESC === "" ||
-                                    selectedDetails?.REQ_DESC === null ||
-                                    selectedDetails?.REQ_DESC === undefined
-                                      ? "NA"
-                                      : selectedDetails?.REQ_DESC}
-                                  </p>
-                                </div>
-                                <div>
-                                  <label className="Text_Secondary Helper_Text  ">
-                                    Service Name
-                                  </label>
-                                  <p className="Text_Primary Service_Alert_Title  ">
-                                    {selectedDetails?.ASSET_NAME === null
-                                      ? "NA"
-                                      : selectedDetails?.ASSET_NAME}
-                                    {/* {selectedDetails?.ASSET_NAME} */}
-                                  </p>
-                                </div>
-                              </div>
+
+                              <EquipmentSummaryDetails equipmentDetails={selectedDetails} equipmentType={"N"} isServiceReq={false} />
                             )}
                             {editStatus === true && (
                               <div className="mt-2 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
@@ -3802,14 +2455,11 @@ const WorkOrderDetailForm = (props: any) => {
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.LAST_MAINTANCE_DATE ==
                                       null ||
-                                    selectedDetails?.LAST_MAINTANCE_DATE === ""
+                                      selectedDetails?.LAST_MAINTANCE_DATE === ""
                                       ? "NA"
-                                      : // moment(
-                                        //   selectedDetails?.LAST_MAINTANCE_DATE
-                                        // ).format(dateFormat())
-                                        onlyDateFormat(
-                                          selectedDetails?.LAST_MAINTANCE_DATE
-                                        )}
+                                      : onlyDateFormat(
+                                        selectedDetails?.LAST_MAINTANCE_DATE
+                                      )}
                                   </p>
                                 </div>
                                 <div>
@@ -3818,12 +2468,9 @@ const WorkOrderDetailForm = (props: any) => {
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                      ? // moment(
-                                        //   selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        // ).format(dateFormat())
-                                        onlyDateFormat(
-                                          selectedDetails?.UPCOMING_SCHEDULE_DATE
-                                        )
+                                      ?  onlyDateFormat(
+                                        selectedDetails?.UPCOMING_SCHEDULE_DATE
+                                      )
                                       : "NA"}
                                   </p>
                                 </div>
@@ -3871,8 +2518,8 @@ const WorkOrderDetailForm = (props: any) => {
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     {selectedDetails?.VENDOR_NAME === "" ||
-                                    selectedDetails?.VENDOR_NAME === null ||
-                                    selectedDetails?.VENDOR_NAME === undefined
+                                      selectedDetails?.VENDOR_NAME === null ||
+                                      selectedDetails?.VENDOR_NAME === undefined
                                       ? "NA"
                                       : selectedDetails?.VENDOR_NAME}
                                   </p>
@@ -3963,7 +2610,6 @@ const WorkOrderDetailForm = (props: any) => {
                                 <div>
                                   <label className="Text_Secondary Helper_Text  ">
                                     {" "}
-                                    {/* <span className="text-red-600"> *</span> */}
                                   </label>
                                   <p className="Text_Primary Service_Alert_Title  ">
                                     <Field
@@ -4001,151 +2647,11 @@ const WorkOrderDetailForm = (props: any) => {
                             )}
                           </Card>
                         )}
-                        <Card className="mt-4">
-                          <div className="flex flex-wrap justify-between mb-3">
-                            <h6 className="Service_Header_Text">
-                              {t("Reporter Details")}
-                            </h6>
-
-                            {selectedDetails?.SF_CASE_NO !== "" &&
-                              salcedorecedetails?.CaseId === undefined && (
-                                <div>
-                                  {" "}
-                                  <i
-                                    className="pi pi-eye
-"
-                                    style={{
-                                      fontSize: "24px",
-                                      display: "flex",
-                                      justifyContent: "end",
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={() => {
-                                      getSalceforceDetails();
-                                    }}
-                                  ></i>
-                                </div>
-                              )}
-                            {salcedorecedetails?.CaseId !== undefined && (
-                              <div>
-                                {" "}
-                                <i
-                                  className="pi pi-eye-slash
-"
-                                  style={{
-                                    fontSize: "24px",
-                                    display: "flex",
-                                    justifyContent: "end",
-                                    cursor: "pointer",
-                                  }}
-                                ></i>
-                              </div>
-                            )}
-                          </div>
-                          <div className=" grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
-                            <div>
-                              <label className="Text_Secondary Helper_Text">
-                                Reporter Name
-                              </label>
-                              {selectedDetails?.SF_CASE_NO !== "" ? (
-                                <>
-                                  <>
-                                    <p className="Text_Primary Service_Alert_Title  ">
-                                      {salcedorecedetails?.CaseId !== undefined
-                                        ? salcedorecedetails?.ContactName
-                                        : "XXXXX"}
-                                    </p>
-                                  </>
-                                </>
-                              ) : (
-                                <>
-                                  {selectedDetails?.CONTACT_NAME === null ||
-                                  selectedDetails?.CONTACT_NAME === "" ? (
-                                    <>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        NA
-                                      </p>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {selectedDetails?.CONTACT_NAME}
-                                      </p>
-                                    </>
-                                  )}
-                                </>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="Text_Secondary Helper_Text">
-                                Reporter Name
-                              </label>
-                              {selectedDetails?.SF_CASE_NO !== "" ? (
-                                <>
-                                  <>
-                                    <p className="Text_Primary Service_Alert_Title  ">
-                                      {salcedorecedetails?.CaseId !== undefined
-                                        ? salcedorecedetails?.ContactEmail
-                                        : "XXXXX"}
-                                    </p>
-                                  </>
-                                </>
-                              ) : (
-                                <>
-                                  {selectedDetails?.CONTACT_EMAIL === null ||
-                                  selectedDetails?.CONTACT_EMAIL === "" ? (
-                                    <>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        NA
-                                      </p>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {selectedDetails?.CONTACT_EMAIL}
-                                      </p>
-                                    </>
-                                  )}
-                                </>
-                              )}
-                            </div>
-
-                            <div>
-                              <label className="Text_Secondary Helper_Text">
-                                Reporter Name
-                              </label>
-                              {selectedDetails?.SF_CASE_NO !== "" ? (
-                                <>
-                                  <>
-                                    <p className="Text_Primary Service_Alert_Title  ">
-                                      {salcedorecedetails?.CaseId !== undefined
-                                        ? salcedorecedetails?.ContactMobile
-                                        : "XXXXX"}
-                                    </p>
-                                  </>
-                                </>
-                              ) : (
-                                <>
-                                  {selectedDetails?.CONTACT_PHONE === null ||
-                                  selectedDetails?.CONTACT_PHONE === "" ? (
-                                    <>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        NA
-                                      </p>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <p className="Text_Primary Service_Alert_Title  ">
-                                        {selectedDetails?.CONTACT_PHONE}
-                                      </p>
-                                    </>
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
+                        <ReporterDetails
+                          ReporterDetailsProps={selectedDetails}
+                          salcedorecedetails={salcedorecedetails}
+                          onClickFunction={getSalceforceDetails}
+                        />
                         {currentStatus !== 1 && (
                           <Card className="mt-2">
                             <div className="flex flex-wrap justify-between">
@@ -4239,10 +2745,10 @@ const WorkOrderDetailForm = (props: any) => {
                                       )}
                                       <div className=" w-full flex mt-2 gap-2">
                                         {currentStatus !== 1 &&
-                                        currentStatus !== 7 &&
-                                        currentStatus !== 6 &&
-                                        // currentStatus !== 5 &&
-                                        ViewAddTask ? (
+                                          currentStatus !== 7 &&
+                                          currentStatus !== 6 &&
+                                          // currentStatus !== 5 &&
+                                          ViewAddTask ? (
                                           <div className="w-full">
                                             <label className="Text_Secondary Helper_Text  ">
                                               Task Details{" "}
@@ -4260,9 +2766,7 @@ const WorkOrderDetailForm = (props: any) => {
                                                     <InputField
                                                       {...register(
                                                         "TASK_NAME",
-                                                        {
-                                                          // required: "Please fill the required fields",
-                                                          onChange(event) {
+                                                        { onChange(event) {
                                                             setTaskName(
                                                               event.target.value
                                                             );
@@ -4375,9 +2879,9 @@ const WorkOrderDetailForm = (props: any) => {
                                       currentStatus !== 6 &&
                                       currentStatus !== 1 &&
                                       currentStatus === 7) ||
-                                    status === "Rectified" ||
-                                    currentStatus === 5 ||
-                                    currentStatus === 6 ? (
+                                      status === "Rectified" ||
+                                      currentStatus === 5 ||
+                                      currentStatus === 6 ? (
                                       <></>
                                     ) : (
                                       <Buttons
@@ -4386,7 +2890,7 @@ const WorkOrderDetailForm = (props: any) => {
                                         label={"Add Material Requisition"}
                                         onClick={() => {
                                           navigate(
-                                            `${appName}/materialrequestlist?add=`,
+                                            `/materialrequestlist?add=`,
                                             {
                                               state: {
                                                 wo_ID: WO_ID,
@@ -4407,24 +2911,11 @@ const WorkOrderDetailForm = (props: any) => {
                           )}
                           {partMatOptions.length > 0 && (
                             <Card className="mt-2">
-                              {/* <div className="flex flex-wrap">
-                          <div className="flex flex-wrap">
-                            <img src={reviewIcon} alt="" className="w-10" />
-                            <div className="ml-3">
-                              <label className="Text_Primary mb-2 Avatar_Initials">
-                                Reassignment Request
-                              </label>
-                              <p className="Text_Primary Input_Text">
-                                Unqualified to work on this
-                              </p>
-                            </div>
-                          </div>
-                        </div> */}
                               <div>
                                 {selectedDetails?.ISMATAPPROVALCNC === false &&
-                                selectedDetails?.ISMATAPPROVED === false &&
-                                selectedDetails?.CURRENT_STATUS === 5 &&
-                                selectedDetails?.SUB_STATUS === "6" ? (
+                                  selectedDetails?.ISMATAPPROVED === false &&
+                                  selectedDetails?.CURRENT_STATUS === 5 &&
+                                  selectedDetails?.SUB_STATUS === "6" ? (
                                   <>
                                     <div className="reviewContainer">
                                       <div className="flex justify-between">
@@ -4440,26 +2931,19 @@ const WorkOrderDetailForm = (props: any) => {
                                                 Material Requisition
                                               </label>
 
-                                              {/* {(selectedDetails?.SUB_STATUS === "6") && (
-                                              <>
-                                                <p className="Text_Primary Helper_Text">
-                                                  {selectedDetails?.ONHOLD_REMARKS}
-                                                </p>
-                                              </>
-                                            )} */}
                                               {selectedDetails?.SUB_STATUS ===
                                                 "6" &&
-                                              decryptData(
-                                                localStorage.getItem(
-                                                  LOCALSTORAGE?.ROLETYPECODE
-                                                )
-                                              ) === "T" ? (
+                                                decryptData(
+                                                  localStorage.getItem(
+                                                    LOCALSTORAGE?.ROLETYPECODE
+                                                  )
+                                                ) === "T" ? (
                                                 <>
                                                   {materiallist[0]?.REMARKS !==
                                                     null ||
-                                                  materiallist[0]?.REMARKS !==
+                                                    materiallist[0]?.REMARKS !==
                                                     "" ||
-                                                  materiallist[0]?.REMARKS !==
+                                                    materiallist[0]?.REMARKS !==
                                                     undefined ? (
                                                     <>
                                                       <p>
@@ -4479,12 +2963,12 @@ const WorkOrderDetailForm = (props: any) => {
                                               {(materiallist[0]?.REMARKS ===
                                                 "" ||
                                                 materiallist[0]?.REMARKS ===
-                                                  null) &&
-                                              decryptData(
-                                                localStorage.getItem(
-                                                  LOCALSTORAGE?.ROLETYPECODE
-                                                )
-                                              ) === "T" ? (
+                                                null) &&
+                                                decryptData(
+                                                  localStorage.getItem(
+                                                    LOCALSTORAGE?.ROLETYPECODE
+                                                  )
+                                                ) === "T" ? (
                                                 "No remarks Added"
                                               ) : (
                                                 <></>
@@ -4543,17 +3027,17 @@ const WorkOrderDetailForm = (props: any) => {
                                   Material Details
                                 </h6>
                                 {currentStatus !== 4 &&
-                                currentStatus !== 6 &&
-                                currentStatus !== 1 &&
-                                currentStatus !== 7 &&
-                                currentStatus !== 5 ? (
+                                  currentStatus !== 6 &&
+                                  currentStatus !== 1 &&
+                                  currentStatus !== 7 &&
+                                  currentStatus !== 5 ? (
                                   <Buttons
                                     className="Secondary_Button"
                                     icon="pi pi-plus"
                                     label={"Add Material Requisition"}
                                     onClick={() => {
                                       navigate(
-                                        `${appName}/materialrequestlist?add=`,
+                                        `/materialrequestlist?add=`,
                                         {
                                           state: {
                                             wo_ID: WO_ID,
@@ -4602,18 +3086,17 @@ const WorkOrderDetailForm = (props: any) => {
                                       return (
                                         <>
                                           <p
-                                            className={`${
-                                              selectedDetails?.ISMATAPPROVALCNC ===
-                                                false &&
+                                            className={`${selectedDetails?.ISMATAPPROVALCNC ===
+                                              false &&
                                               selectedDetails?.ISMATAPPROVED ===
-                                                false &&
+                                              false &&
                                               selectedDetails?.CURRENT_STATUS ===
-                                                5 &&
+                                              5 &&
                                               selectedDetails?.SUB_STATUS ===
-                                                "6"
-                                                ? "cursor-pointer"
-                                                : ""
-                                            } `}
+                                              "6"
+                                              ? "cursor-pointer"
+                                              : ""
+                                              } `}
                                             onClick={() => {
                                               GetVisibleSiderBar(0);
                                             }}
@@ -4628,35 +3111,11 @@ const WorkOrderDetailForm = (props: any) => {
                                     field="ISSUED_QTY"
                                     header="Quantity"
                                   ></Column>
-                                  {/* 
-                                <Column
-                                  field="ISSUED_QTY"
-                                  header={t("Issued Qty")}
-                                  className="w-30"
-                                ></Column> */}
-
-                                  {/* <Column
-                                  field="UOM_NAME"
-                                  header={t("UOM")}
-                                  className="w-30"
-                                ></Column> */}
 
                                   <Column
                                     field="STATUS_DESC"
                                     header="Status"
-                                    // body={(rowData: any) => {
-
-                                    //   return (
-                                    //     <>
-                                    //       {rowData?.STATUS === 17 ? "Declined" : rowData?.STATUS === 14 ? "Approved" : "Pending"}
-                                    //     </>
-                                    //   );
-                                    // }}
                                   ></Column>
-                                  {/* <Column
-                                  field="STATUS_DESC"
-                                  header="Status"
-                                ></Column> */}
                                 </DataTable>
                               </div>
                             </Card>
@@ -4664,191 +3123,14 @@ const WorkOrderDetailForm = (props: any) => {
                         </TabPanel>
                       )}
                       <TabPanel headerTemplate={ActivityHeaderTemplate}>
-                        {timelineList.length == 0 && (
-                          <Card className="mt-2">
-                            <h6 className="Service_Header_Text">
-                              Activity Timeline
-                            </h6>
-                            <div className="flex items-center mt-2 justify-center w-full">
-                              <label
-                                htmlFor="dropzone-file"
-                                className="flex flex-col items-center justify-center w-full h-52 border-2
-               border-gray-200 border rounded-lg  "
-                              >
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                  <img
-                                    src={noDataIcon}
-                                    alt=""
-                                    className="w-12"
-                                  />
-                                  <p className="mb-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                    <span className="Text_Primary Service_Alert_Title  ">
-                                      {t("No items to show")}{" "}
-                                    </span>
-                                  </p>
-                                </div>
-                              </label>
-                            </div>
-                          </Card>
-                        )}
-                        <Card className="mt-2">
-                          <h6 className="mb-2 Service_Header_Text">
-                            Activity Timeline
-                          </h6>
-                          <Timeline
-                            value={timelineList}
-                            className="customized-timeline"
-                            content={customizedContent}
-                          />
-                        </Card>
+                        <ActivityTimelineRE activityTimeLineData={timelineList} />
                       </TabPanel>
                     </TabView>
                   </div>
                 </div>
                 <div className=" mt-3 ">
-                  {currentStatus !== 7 &&
-                  currentStatus !== 6 &&
-                  currentStatus !== 4 ? (
-                    <Card>
-                      <div className="flex justify-between">
-                        <div className=" ">
-                          <h6 className="Service_Header_Text">SLA Duration</h6>
-                          <p className="Text_Secondary Helper_Text ">
-                            {`${
-                              (currentStatus === 1 ||
-                                (currentStatus === 5 &&
-                                  selectedDetails?.RECTIFIED_WITHIN == null)) &&
-                              new Date(selectedDetails?.ACKNOWLEDGED_WITHIN) >=
-                                // new Date(selectedDetails?.CURRENT_DATE)
-                                // currentDate
-                                initialTime
-                                ? "Acknowledge within"
-                                : (currentStatus === 3 ||
-                                    (currentStatus === 5 &&
-                                      selectedDetails?.RECTIFIED_WITHIN !=
-                                        null)) &&
-                                  new Date(selectedDetails?.RECTIFIED_WITHIN) >=
-                                    //new Date(selectedDetails?.CURRENT_DATE)
-                                    initialTime
-                                ? "Rectify within"
-                                : ""
-                            }`}
-
-                            {/* {getStatus()} */}
-                          </p>
-                          {dateTimeAfterThreeDays !== null &&
-                          (currentStatus === 7 ||
-                            currentStatus === 6 ||
-                            currentStatus === 4) ? (
-                            <></>
-                          ) : (
-                            <CountdownTimer
-                              getOptionDetails={getOptionDetailsOverdue}
-                              targetDate={dateTimeAfterThreeDays}
-                              current_time={selectedDetails?.CURRENT_TIME_MS}
-                            />
-                          )}
-
-                          <div className="flex justify-between">
-                            <h6 className="Text_Main">{getSLABoxStatus()}</h6>
-                          </div>
-                        </div>
-                        <div>
-                          <img src={timeIcon} alt="" />
-                        </div>
-                      </div>
-                    </Card>
-                  ) : (
-                    <></>
-                  )}
-
-                  {currentStatus === 7 || currentStatus === 4 ? (
-                    <Card>
-                      <div className="flex justify-between">
-                        <div className=" ">
-                          <h6 className="Service_Header_Text">SLA Duration</h6>
-                          <p className="Text_Secondary Helper_Text ">
-                            Total Spent Time
-                          </p>
-
-                          <div className="show-counter">
-                            <div className="countdown-link">
-                              <DateTimeDisplay
-                                value={CompDays}
-                                type={"Days"}
-                                isDanger={CompDays <= 3}
-                              />
-                              <p>:</p>
-                              <DateTimeDisplay
-                                value={CompHours}
-                                type={"Hours"}
-                                isDanger={false}
-                              />
-                              <p>:</p>
-                              <DateTimeDisplay
-                                value={CompMinutes}
-                                type={"Mins"}
-                                isDanger={false}
-                              />
-                              <p>:</p>
-                              <DateTimeDisplay
-                                value={CompSeconds}
-                                type={"Seconds"}
-                                isDanger={false}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <img src={timeIcon} alt="" />
-                        </div>
-                      </div>
-                    </Card>
-                  ) : (
-                    <></>
-                  )}
-
-                  <Card className=" mt-2">
-                    <h6 className="Service_Header_Text ">
-                      {t("Assignees")} ({technicianList?.length})
-                    </h6>
-                    <div
-                      className="ScrollViewAssigneeTab"
-                      style={{
-                        overflow: "auto",
-                        maxHeight: "calc(100vh - 370px)",
-                        height: "100%",
-                      }}
-                    >
-                      {technicianList?.map((tech: any, index: any) => {
-                        const nameParts = tech?.USER_NAME?.split(" ");
-                        const initials =
-                          nameParts.length > 1
-                            ? `${nameParts[0]?.charAt(0)}${nameParts[1]?.charAt(
-                                0
-                              )}`
-                            : `${nameParts[0]?.charAt(0)}`;
-                        return (
-                          <div className="flex justify-start mt-2" key={index}>
-                            <div className="w-10 h-10 flex items-center justify-center bg-[#F7ECFA] rounded-full text-[#272B30] font-bold">
-                              {initials.toUpperCase()}
-                            </div>
-                            {/* <div>
-                              <img src={userIcon} alt="" className="w-10" />
-                            </div> */}
-                            <div className="ml-2">
-                              <label className="Text_Primary Input_Text ">
-                                {tech?.USER_NAME}
-                              </label>
-                              <p className="Text_Disabled Helper_Text">
-                                {tech?.TEAM_NAME}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </Card>
+                  <SLATimeDuration slaTimeDetails={selectedDetails} currentStatus={currentStatus} getOptionDetailsOverdue={getOptionDetailsOverdue} />
+                  <ShowAssigneeList assigneeList={technicianList} TeamName={("")} isInfraAssignee={false} />
                 </div>
               </div>
             </>

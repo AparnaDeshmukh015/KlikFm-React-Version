@@ -15,10 +15,10 @@ COPY . .
 
 # Set environment file (optional)
 # If you use different .env files per environment:
-COPY .env.dev .env
+COPY .env.staging .env
 
 # Build your React app
-RUN npm run build:dev
+RUN npm run build:staging
 
 
 # ============================

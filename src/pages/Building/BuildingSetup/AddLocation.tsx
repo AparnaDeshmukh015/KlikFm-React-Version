@@ -17,7 +17,7 @@ import HolidayList from "./HolidayList";
 import moment from "moment";
 import { saveTracker } from "../../../utils/constants";
 import { eventNotification, helperEventNotification } from "../../../utils/eventNotificationParameter";
-import { appName } from "../../../utils/pagePath";
+
 import { decryptData } from "../../../utils/encryption_decryption";
 
 const AddLocation = () => {
@@ -90,7 +90,7 @@ const AddLocation = () => {
   });
   const showHandler = (e: any) => {
     e.preventDefault();
-    navigate(`${appName}/facilitydetail`);
+    navigate(`/facilitydetail`);
   };
 
   const watchLocation: any = watch('LOCATION')
@@ -140,7 +140,7 @@ const AddLocation = () => {
         const eventPayload = { ...eventNotification, ...notifcation };
         await helperEventNotification(eventPayload);
         // setIsSubmit(false)
-        navigate(`${appName}/facilitydetail`);
+        navigate(`/facilitydetail`);
       } else {
         setIsSubmit(false)
         toast.error(res?.MSG);

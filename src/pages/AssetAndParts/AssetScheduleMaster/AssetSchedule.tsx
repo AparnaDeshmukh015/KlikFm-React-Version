@@ -1015,16 +1015,8 @@ const AssetSchedule = ({
                             <InputField
                               {...register(
                                 "SCHEDULER.RUN_THRESHOLD_MAIN_TRIGGER",
-                                // {
-                                //   required: "Please fill the required fields.",
-                                //   //  validate: (value: any) => +value !== 0 || "Please fill the required fields."
-
-                                // }
                               )}
                               require={true}
-                              // invalid={
-                              //   errors?.SCHEDULER?.RUN_THRESHOLD_MAIN_TRIGGER
-                              // }
                               {...field}
                             />
                           );

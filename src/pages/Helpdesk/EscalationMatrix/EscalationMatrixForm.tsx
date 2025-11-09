@@ -19,7 +19,7 @@ import FormHeader from "../../../components/FormHeader/FormHeader";
 import { eventNotification, helperEventNotification } from "../../../utils/eventNotificationParameter";
 import { saveTracker } from "../../../utils/constants";
 import { decryptData } from "../../../utils/encryption_decryption";
-import { appName } from "../../../utils/pagePath";
+
 import { Checkbox } from "primereact/checkbox";
 
 interface EVENTTYPE {
@@ -91,11 +91,6 @@ const EscalationMatrixForm = (props: any) => {
   } = useForm<FormValues, FormErrors>({
     defaultValues: {
       OBJ_ID: 0,
-      // location?.state !== null
-      //   ?location?.state?.data?.OBJ_ID 
-      //   : props?.selectedData
-      //     ? props?.selectedData?.OBJ_ID
-      //     : 0,
       EVENT_ID: search === "?edit=" ? dataId?.EVENT_ID : 0,
       PARA:
         location?.state && location?.state?.OBJ_ID
@@ -173,22 +168,6 @@ const EscalationMatrixForm = (props: any) => {
             EVENT_TYPE: "S",
             STATUS_CODE: search === '?edit=' ? 2 : 1,
             "PARA1": search === "?edit=" ? User_Name : User_Name,
-            // PARA2: "workorder_no",
-            // PARA3: "workorder_date",
-            // PARA4: "raised_by",
-            // PARA5: "location",
-            // PARA6: "asset",
-            // PARA7: "request_description",
-            // PARA8: "severity",
-            // PARA9: "raised_on",
-            // PARA10: "acknowledged_on",
-            // PARA11: "attednded_on",
-            // PARA12: "rectified_on",
-            // PARA13: "completed_on",
-            // PARA14: "cancelled_on",
-            // PARA15: "modified_on"
-
-
           };
 
           const eventPayload = { ...eventNotification, ...notifcation };
@@ -251,24 +230,8 @@ const EscalationMatrixForm = (props: any) => {
       setSelectedDetails(res?.ESCALATIONLIST[0]);
       setValue("SLA_NAME", res?.ESCALATIONLIST[0]?.SLA_NAME);
       setChecked(res?.ESCALATIONLIST[0]?.ALL_ASSETTYPE === true ? true : false)
-      //setValue("ALL_ASSETTYPE", res?.ESCALATIONLIST[0]?.ALL_ASSETTYPE);
       setAssetTypeList(res?.ASSETTYPELIST)
-      // const mappedResponse = res?.ESCALATIONMATRIXLIST?.map((item: any) => {
-      //   const matchedEscalation = options?.escalationList?.find(
-      //     (escalation: any) => escalation.ESC_LEVEL === item.ESC_LEVEL
-      //   );
-
-      //   return {
-      //     ...item,
-      //     EVENT: {
-      //       ESC_LEVEL: matchedEscalation?.ESC_LEVEL,
-      //       ESC_LEVEL_DESC: matchedEscalation?.ESC_LEVEL_DESC,
-      //     },
-      //   };
-      // });
-
       setValue("ESC_DETAILS", res?.ESCALATIONMATRIXLIST);
-
     }
   };
 
@@ -351,13 +314,6 @@ const EscalationMatrixForm = (props: any) => {
       toast?.error(t(check));
     }
   }, [isSubmitting]);
-
-
-  useEffect(() => {
-    
-  }, [])
-
-
 
   return (
     <>
@@ -492,39 +448,13 @@ const EscalationMatrixForm = (props: any) => {
               />
               <div className="flex align-items-center">
                 <>{checked}</>
-
-                {/* <Field
-                  controller={{
-                    name: "ALL_ASSETTYPE",
-                    control: control,
-                    
-                    render: ({ field }: any) => {
-                     
-                      return ( */}
-                {/* // <Checkboxs
-                        //   {...register("ALL_ASSETTYPE")}
-                        //   checked={selectedDetails?.ALL_ASSETTYPE}
-
-                        //   className="md:mt-7"
-                        //   label="All Equipment Type"
-                        //   setValue={setValue}
-                        //   {...field}
-                        // /> */}
                 <Checkbox
-                  // {...register("ALL_ASSETTYPE")}
-                  // value={category.TASK_ID}
                   onChange={(e: any) => setChecked(e?.target?.checked)}
                   className="md:mt-7"
-
                   checked={checked}
                 />
                 <label htmlFor="Active" className="ml-2 md:mt-7 Text_Secondary Input_Label">{t("All Equipment Type")}</label>
-                {/* );
-                    },
-                  }} */}
-
-
-                {/* /> */}
+               
               </div>
               {!checked && (
                 <Field
@@ -736,7 +666,7 @@ const EscalationMatrixForm = (props: any) => {
                           <>
                             <div className="flex flex-wrap">
                               <Link
-                                to={`${appName}/eventmasterlist?add=`}
+                                to={`/eventmasterlist?add=`}
                                 state={{
                                   EVENT_TYPE: "E",
                                   OBJ_ID: search === '?edit=' ? selectedDetails?.OBJ_ID : 0,

@@ -8,8 +8,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./HierarchyDialog.css";
 import { Checkbox } from "primereact/checkbox";
 import { useLocation, useOutletContext } from "react-router-dom";
-import { clearFilters, updateFilter } from "../../store/filterstore";
-import { useDispatch, useSelector } from "react-redux";
+
 interface TreeNode {
   id: string;
   label: string;
@@ -47,7 +46,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   const isIndeterminate = indeterminate.includes(node.id);
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = expandedNodes.includes(node.id);
-  const location = useLocation();
+
   useEffect(() => {
     if (checkboxRef.current) {
       checkboxRef.current.indeterminate = isIndeterminate;
@@ -124,11 +123,8 @@ const LocationHierarchyDialog = ({
   clearLocation,
   setLocationCheckData,
   locationCheckData,
-  filterLocationData,
-  setFilterLocationData,
 }: any) => {
   let { pathname } = useLocation();
-  const location: any = useLocation();
   const [selectedFacility, menuList]: any = useOutletContext();
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [checked, setChecked] = useState<CheckedNode[]>([]);
@@ -144,7 +140,7 @@ const LocationHierarchyDialog = ({
 
   const [originalNodes, setOriginalNodes] = useState<any | null>([]);
   const [locationList, setLocationList] = useState<any | null>([]);
-  const dispatch: any = useDispatch();
+
   const clearSelection = () => {
     if (pathname === "/workorderlist") {
       setLocationName([]);
@@ -152,18 +148,13 @@ const LocationHierarchyDialog = ({
       setSearch("");
       setLocationList([]);
       setChecked([]);
-      setFilterLocationData([]);
-
       clearLocationFilter([]);
-      let value: any = null;
-      dispatch(updateFilter({ key: "LOCATIONDATA", value }));
     } else if (pathname === "/servicerequestlist") {
       // setLocationName([]);
       setChecked([]);
       collapseAll();
     } else {
       setChecked([]);
-
       // setLocationName([]);
       collapseAll();
     }
@@ -180,6 +171,7 @@ const LocationHierarchyDialog = ({
   }
 
   useEffect(() => {
+    console.log(555);
     if (nodes) {
       const mapData = (
         inputNode: any,
@@ -281,7 +273,7 @@ const LocationHierarchyDialog = ({
         );
         newChecked = [...newChecked, ...filteredItemsToAdd];
       }
-      console.log(newChecked, "newCheckednewChecked");
+
       setChecked(newChecked);
     },
     [checked, setChecked, getAllChildIds]
@@ -299,9 +291,11 @@ const LocationHierarchyDialog = ({
     return Array.from(new Set([...expandedNodes, ...forceExpandedNodes]));
   };
 
+
   useEffect(() => {
     const newIndeterminate: string[] = [];
     let newChecked = [...checked];
+
     const checkNodeState = (node: TreeNode) => {
       if (!node.children || node.children.length === 0) return;
 
@@ -427,6 +421,7 @@ const LocationHierarchyDialog = ({
       return { LOCATION_ID: item?.node_id };
     });
 
+
     const locationwithHierarchicalNames = checked
       ?.map((item: any) => item?.name)
       .join(", ");
@@ -446,8 +441,6 @@ const LocationHierarchyDialog = ({
           setLocationName(locationwithHierarchicalNames);
           handleLocationFilter(locationData);
         } else {
-          setLocationName("");
-          handleLocationFilter([]);
           clearLocationFilter();
         }
       }
@@ -467,6 +460,7 @@ const LocationHierarchyDialog = ({
     if (visibleEquipmentlist) {
       collapseAll();
       if (locationResetStatus === true) {
+        console.log(111);
         collapseAll();
         setChecked([]);
       } else {
@@ -475,21 +469,17 @@ const LocationHierarchyDialog = ({
         } else if (pathname === "/dashboard") {
           setChecked(locationCheckData);
         } else {
-          let checkedData: any =
-            filterLocationData?.length > 0 ? filterLocationData : checked;
-          setChecked(checkedData);
+          setChecked([...checked]);
         }
       }
-    } else if (
-      location.state === "workorder" &&
-      pathname === "/workorderlist" &&
-      visibleEquipmentlist
-    ) {
-      setChecked(filterLocationData);
     } else {
       if (visibleEquipmentlist === false && pathname === "/workorderlist") {
+
         if (clearLocation === true) {
+          // collapseAll();
+          // setCheckedKeys([]);
           setLocationName(null);
+          // handleLocationFilter([]);
           setLocationList([]);
           setChecked([]);
         } else {
@@ -499,21 +489,17 @@ const LocationHierarchyDialog = ({
               return { LOCATION_ID: item?.node_id };
             });
 
-          // setFilterLocationData(checked);
           const locationwithHierarchicalNames = checked
             ?.map((item: any) => item?.name)
             .join(", ");
           if (locationData?.length > 0) {
             setLocationName(locationwithHierarchicalNames);
-            handleLocationFilter(checked);
-          } else {
-            setLocationName("");
-            handleLocationFilter([]);
+            handleLocationFilter(locationData);
           }
         }
       }
     }
-  }, [visibleEquipmentlist, locationResetStatus, location.state]);
+  }, [visibleEquipmentlist, locationResetStatus]);
 
   useEffect(() => {
     setChecked([]);
@@ -534,7 +520,7 @@ const LocationHierarchyDialog = ({
       <Dialog
         onHide={onHideDialog}
         visible={visibleEquipmentlist}
-        style={{ width: "60vw", height: "750px" }}
+        style={{ width: "700px", height: "750px" }}
         className="dialogBoxTreeStyle"
         dismissableMask
         content={() => (
@@ -585,7 +571,7 @@ const LocationHierarchyDialog = ({
                     />
                   ))
                 ) : (
-                  <p>No Data found.</p>
+                  <p>No nodes found matching your search.</p>
                 )}
               </div>
             </div>

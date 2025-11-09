@@ -46,7 +46,7 @@ const AssetGroupMasterForm = (props: any) => {
       ASSETGROUP_ID: props?.selectedData ? props?.selectedData?.ASSETGROUP_ID : search === '?edit=' ? dataId?.ASSETGROUP_ID : 0,
       ASSETGROUP_NAME: props?.selectedData ? props?.selectedData?.ASSETGROUP_NAME : search === '?edit=' ? dataId?.ASSETGROUP_NAME : "",
       ACTIVE:search === '?edit=' ? dataId?.ACTIVE  : true,
-      // ASSETGROUP_TYPE: pathname === "/servicegroupmaster" ? "N" : "A",
+    
       ASSETGROUP_TYPE: currentMenu?.FUNCTION_CODE === "AS0011" ? "N" : "A",
     },
     mode: "onSubmit",

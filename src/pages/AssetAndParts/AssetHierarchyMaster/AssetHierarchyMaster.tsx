@@ -314,20 +314,15 @@ const AssetHierarchyMaster = () => {
           const matchesSearch = node.label
             .toLowerCase()
             .includes(filterText.toLowerCase());
-
-          // Filter children recursively
           const filteredChildren = node.children
             ? filterNodes(node.children)
             : undefined;
-
-          // Include node if it matches or has matching children
+        
           if (
             matchesSearch ||
             (filteredChildren && filteredChildren.length > 0)
           ) {
-            // CHANGE: Add parent nodes to expanded set when searching
             if (node.children && node.children.length > 0) {
-              //   expandNode(node.children, node.key)
               expandAll();
             }
 

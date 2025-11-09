@@ -227,7 +227,7 @@ const WorkorderRedirectDialogBox = ({
                 : header === "Reassign"
                   ? { para1: `Reassign request has been `, para2: "submitted" }
                   : header === "Cancel Work Order"
-                    ? { para1: `Cancel request has been`, para2: "submitted" }
+                    ? { para1: `Cancel request has been`, para2: "added" }
                     : header === "Put On Hold"
                       ? {
                         para1: `Put on hold request has been`,

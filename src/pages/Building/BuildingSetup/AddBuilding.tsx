@@ -22,13 +22,29 @@ import {
   eventNotification,
   helperEventNotification,
 } from "../../../utils/eventNotificationParameter";
-import { appName } from "../../../utils/pagePath";
+
 import { decryptData } from "../../../utils/encryption_decryption";
 import Radio from "../../../components/Radio/Radio";
 import MultiSelects from "../../../components/MultiSelects/MultiSelects";
+import { clearField, getFacilityDetails } from "./utilis/helper";
 
 const AddBuilding = () => {
   let location: any = useLocation();
+    const { t } = useTranslation();
+  const checkboxFields = [
+  { name: "REDIRECT_APPROVAL", label: "Redirect Approval" ,cssClass:"flex h-full w-full items-end pb-[1%]" },
+  { name: "MATREQ_APPROVAL", label: "Material Approval", cssClass:"flex h-full w-full items-end pb-[1%]" },
+  { name: "OBEM_INTEG_REQUIRED", label: "OBEM Integration Required", cssClass:"" },
+  { name: "ISEQUIPMENT_EDIT", label: "Equipment Edit", cssClass:""},
+  { name: "ISLOCATION_EDIT", label: "Location Edit",cssClass:"" },
+  { name: "isImgRequired", label: "Upload Support File Mandatory", cssClass:"" },
+  { name: "ISPRECONDITION", label: "Cancel - Pre Conditional" ,cssClass:""},
+];
+const ppmOptions = [
+  { id: "WeekOff1", value: "B", label: t("Prepone A Day Before") },
+  { id: "WeekOff2", value: "A", label: t("Postpone A Day After") },
+  { id: "WeekOff3", value: "S", label: t("Keep On Same Day") },
+];
   const [IsSubmit, setIsSubmit] = useState<any | null>(false);
   const { search } = useLocation();
   const [selectedFacility, menuList]: any = useOutletContext();
@@ -36,7 +52,7 @@ const AddBuilding = () => {
   const currentMenu = menuList
     ?.flatMap((menu: any) => menu?.DETAIL)
     .filter((detail: any) => detail.URL === location?.pathname)[0];
-  const { t } = useTranslation();
+
   const [currencyList, setCurrencyList] = useState([]);
   const [timeZone, setTimeZone] = useState([]);
   const [dateFormatType, setDateFormatType] = useState([]);
@@ -121,7 +137,7 @@ const AddBuilding = () => {
   const User_Name = decryptData(localStorage.getItem("USER_NAME"));
   const showHandler = () => {
     // e.preventDefault();
-    navigate(`${appName}/facilitydetail`);
+    navigate(`/facilitydetail`);
   };
 
   const onSubmit = useCallback(
@@ -160,9 +176,6 @@ const AddBuilding = () => {
             ? payload?.FACILITY_TYPE?.key
             : "R";
 
-        // payload.REDIRECT_APPROVAL = payload.REDIRECT_APPROVAL;
-        // payload.MATREQ_APPROVAL = payload.MATREQ_APPROVAL;
-        // payload.OBEM_INTEG_REQUIRED = payload.OBEM_INTEG_REQUIRED;
         payload.PARA =
           location?.state !== null
             ? { para1: "Building set up", para2: t("Updated") }
@@ -218,7 +231,7 @@ const AddBuilding = () => {
           setIsSubmit(false);
           setError(true);
         }
-
+       console.log("payload", payload);
         if (isValid && isEmailValid) {
           const res = await callPostAPI(ENDPOINTS?.BUILDING_SAVE, payload);
           if (res?.FLAG === true) {
@@ -253,7 +266,7 @@ const AddBuilding = () => {
                   LOCALSTORAGE.FACILITY,
                   JSON.stringify(res2?.FACILITYLIST)
                 );
-                navigate(`${appName}/facilitydetail`);
+                navigate(`/facilitydetail`);
               }
             }
           }
@@ -311,7 +324,7 @@ const AddBuilding = () => {
         }
 
         if (search === "?edit=") {
-          await getFacilityDetails();
+          await getFacilityDetails(location, setConfigurationDetails, setSelectedDetails, setValue, setChecked, setHolidayList,setPPM_SCHEDULAR);
         }
       }
     } catch (error: any) {
@@ -319,82 +332,7 @@ const AddBuilding = () => {
     }
   };
 
-  const getFacilityDetails = async () => {
-    if (location?.state !== null) {
-      let editData: any = location?.state;
-
-      let payload: any = {
-        FACILITY_ID: editData?.facilityId,
-        LOCATION_ID: editData?.locationId,
-      };
-
-      const res = await callPostAPI(ENDPOINTS?.BUILDING_DETAILS, payload);
-      if (res.FLAG === 1) {
-        setConfigurationDetails(res?.DASHBOARDCONFIGLIST);
-        setSelectedDetails(res.FACILITYDETAILS[0]);
-        setValue(
-          "ISEQUIPMENT_EDIT",
-          res?.FACILITYDETAILS[0].ISEQUIPMENT_EDIT === true ? true : false
-        );
-        setValue(
-          "ISLOCATION_EDIT",
-          res?.FACILITYDETAILS[0]?.ISLOCATION_EDIT === true ? true : false
-        );
-        setValue(
-          "isImgRequired",
-          res?.FACILITYDETAILS[0]?.isImgRequired === true ? true : false
-        );
-        setChecked(res?.FACILITYDETAILS[0]?.ACTIVE === true ? true : false);
-        setValue("ACTIVE", res?.FACILITYDETAILS[0]?.ACTIVE);
-        setHolidayList(res?.HOLIDAYLIST);
-        setValue("FACILITY_NAME", res.FACILITYDETAILS[0]?.FACILITY_NAME);
-        setValue(
-          "FACILITY_LEGAL_NAME",
-          res.FACILITYDETAILS[0]?.LEGAL_ENTITY_NAME
-        );
-
-        setValue("FACILITY_ADDRESS", res?.FACILITYDETAILS[0]?.FACILITY_ADDRESS);
-
-        setValue("FACILITY_CITY", res.FACILITYDETAILS[0]?.FACILITY_CITY);
-        setValue("FACILITY_STATE", res.FACILITYDETAILS[0]?.FACILITY_STATE);
-        setValue("FACILITY_ZIP", res.FACILITYDETAILS[0]?.FACILITY_ZIP);
-        setValue(
-          "FACILITY_COUNTRY",
-          res.FACILITYDETAILS[0]?.FACILITY_COUNTRY_CODE
-        );
-
-        setValue("FACILITY_EMAIL_ID", res.FACILITYDETAILS[0]?.EMAIL_ID);
-        setValue(
-          "FACILITY_CONTACT_NUMBER",
-          res.FACILITYDETAILS[0]?.CONTACT_NUMBER
-        );
-        setValue("AREA_UNIT", res.FACILITYDETAILS[0]?.AREA_UNIT);
-        setValue(
-          "REDIRECT_APPROVAL",
-          res.FACILITYDETAILS[0]?.REDIRECT_APPROVAL === true ? true : false
-        );
-        setValue(
-          "MATREQ_APPROVAL",
-          res.FACILITYDETAILS[0]?.MATREQ_APPROVAL === true ? true : false
-        );
-        setValue(
-          "ISALLREQ",
-          res.FACILITYDETAILS[0]?.ISALLREQ === true ? true : false
-        );
-        setValue(
-          "OBEM_INTEG_REQUIRED",
-          res.FACILITYDETAILS[0]?.OBEM_INTEG_REQUIRED === true ? true : false
-        );
-        setValue(
-          "ISPRECONDITION",
-          res.FACILITYDETAILS[0]?.ISPRECONDITION === true ? true : false
-        );
-
-        setPPM_SCHEDULAR(res.FACILITYDETAILS[0]?.PPM_SCHEDULAR);
-      }
-    }
-  };
-
+  
   useEffect(() => {
     (async function () {
       await getCommonFacility();
@@ -409,24 +347,7 @@ const AddBuilding = () => {
       setHolidayList([]);
       setChecked(false);
       setHolidayList([]);
-      setValue("FACILITY_NAME", "");
-      setValue("FACILITY_LEGAL_NAME", "");
-
-      setValue("FACILITY_ADDRESS", "");
-
-      setValue("FACILITY_CITY", "");
-      setValue("FACILITY_STATE", "");
-      setValue("FACILITY_ZIP", "");
-      setValue("FACILITY_COUNTRY", "");
-
-      setValue("FACILITY_EMAIL_ID", "");
-      setValue("FACILITY_CONTACT_NUMBER", "");
-      setValue("AREA_UNIT", "");
-      setValue("REDIRECT_APPROVAL", false);
-      setValue("MATREQ_APPROVAL", false);
-      setValue("OBEM_INTEG_REQUIRED", false);
-
-      setPPM_SCHEDULAR([]);
+      clearField(setValue, setPPM_SCHEDULAR);
     }
     (async function () {
       await saveTracker(currentMenu);
@@ -598,7 +519,7 @@ const AddBuilding = () => {
                               setErrorEmail(false);
                             },
                           })}
-                          label={"Email Id"}
+                          label={"Email ID"}
                           setValue={setValue}
                           // invalid={errors.FACILITY_EMAIL_ID}
                           {...field}
@@ -908,7 +829,7 @@ const AddBuilding = () => {
                         {...register("KF_DASHBOARD_FACILITY_LIST", {
                           required: t("Please fill the required fields."),
                         })}
-                        label="Dashboard Configuartion"
+                        label="Dashboard Configuration"
                         optionLabel="DASHBOARD_BOX_NAME"
                         require={true}
                         setValue={setValue}
@@ -922,203 +843,63 @@ const AddBuilding = () => {
                   },
                 }}
               />
+            {checkboxFields.map(({ name, label, cssClass }:any) => (
               <Field
+              className={cssClass}
+                key={name}
                 controller={{
-                  name: "REDIRECT_APPROVAL",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("REDIRECT_APPROVAL", {})}
-                        className="md:mt-7"
-                        label="Redirect Approval"
-                        checked={
-                          selectedDetails?.REDIRECT_APPROVAL === true
-                            ? true
-                            : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
+                  name,
+                  control,
+                  render: ({ field }: any) => (
+                    <Checkboxs
+                      {...register(name, {})}
+                     
+                      label={label}
+                      checked={selectedDetails?.[name] === true}
+                      setValue={setValue}
+                      {...field}
+                    />
+                  ),
                 }}
               />
+            ))}
 
-              <Field
-                controller={{
-                  name: "MATREQ_APPROVAL",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("MATREQ_APPROVAL", {})}
-                        className="md:mt-7"
-                        label="Material Approval"
-                        checked={
-                          selectedDetails?.MATREQ_APPROVAL === true
-                            ? true
-                            : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
-                }}
-              />
 
+            {watchBuildingType?.key === "I" && (
               <Field
                 controller={{
-                  name: "OBEM_INTEG_REQUIRED",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("OBEM_INTEG_REQUIRED", {})}
-                        className=""
-                        label="OBEM Integration Required"
-                        checked={
-                          selectedDetails?.OBEM_INTEG_REQUIRED === true
-                            ? true
-                            : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
+                  name: "ISALLREQ",
+                  control,
+                  render: ({ field }: any) => (
+                    <Checkboxs
+                      {...register("ISALLREQ", {})}
+                      className=""
+                      label="All Service Request"
+                      checked={selectedDetails?.ISALLREQ === true}
+                      setValue={setValue}
+                      {...field}
+                    />
+                  ),
                 }}
               />
+            )}
 
-              <Field
-                controller={{
-                  name: "ISEQUIPMENT_EDIT",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("ISEQUIPMENT_EDIT", {})}
-                        className=""
-                        label="Equipment Edit "
-                        checked={
-                          selectedDetails?.ISEQUIPMENT_EDIT === true
-                            ? true
-                            : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
-                }}
-              />
-              <Field
-                controller={{
-                  name: "ISLOCATION_EDIT",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("ISLOCATION_EDIT", {})}
-                        className=""
-                        label="Location Edit"
-                        checked={
-                          selectedDetails?.ISLOCATION_EDIT === true
-                            ? true
-                            : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
-                }}
-              />
-              <Field
-                controller={{
-                  name: "isImgRequired",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("isImgRequired", {})}
-                        className=""
-                        label="Upload Support File Manadatory"
-                        checked={
-                          selectedDetails?.isImgRequired === true ? true : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
-                }}
-              />
-
-              {watchBuildingType?.key === "I" && (
-                <Field
-                  controller={{
-                    name: "ISALLREQ",
-                    control: control,
-                    render: ({ field }: any) => {
-                      return (
-                        <Checkboxs
-                          {...register("ISALLREQ", {})}
-                          className=""
-                          label="All Service Request"
-                          checked={
-                            selectedDetails?.ISALLREQ === true ? true : false
-                          }
-                          setValue={setValue}
-                          {...field}
-                        />
-                      );
-                    },
-                  }}
-                />
-              )}
-              <Field
-                controller={{
-                  name: "ISPRECONDITION",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("ISPRECONDITION", {})}
-                        className=""
-                        label="Cancel - Pre Conditional"
-                        checked={
-                          selectedDetails?.ISPRECONDITION === true
-                            ? true
-                            : false
-                        }
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
-                }}
-              />
-
-              <Field
-                controller={{
-                  name: "ACTIVE",
-                  control: control,
-                  render: ({ field }: any) => {
-                    return (
-                      <Checkboxs
-                        {...register("ACTIVE")}
-                        className=""
-                        label="Active"
-                        checked={checked || false}
-                        setValue={setValue}
-                        {...field}
-                      />
-                    );
-                  },
-                }}
-              />
+            <Field
+              controller={{
+                name: "ACTIVE",
+                control,
+                render: ({ field }: any) => (
+                  <Checkboxs
+                    {...register("ACTIVE")}
+                    className=""
+                    label="Active"
+                    checked={checked || false}
+                    setValue={setValue}
+                    {...field}
+                  />
+                ),
+              }}
+            />
             </div>
           </Card>
 
@@ -1163,71 +944,30 @@ const AddBuilding = () => {
                       }}
                       error={{}}
                     />
-
                     <hr className="mt-2"></hr>
                     <div className="mb-2">
                       <label className="Text_Primary Table_Header">
-                        {t("If PPM schedule date is on week off or holiday")}
+                        {t(
+                          "If Planned Preventive Maintenance(PPM) schedule date is on week off or holiday"
+                        )}
                       </label>
                     </div>
 
                     <div>
-                      <div className="flex align-items-center mb-2">
-                        <RadioButton
-                          inputId="WeekOff1"
-                          name="PPM_SCHEDULAR"
-                          value="B"
-                          checked={PPM_SCHEDULAR === "B"}
-                          onChange={(e: any) =>
-                            setPPM_SCHEDULAR(e?.target?.value)
-                          }
-                        />
-
-                        <label
-                          htmlFor="WeekOff1"
-                          className="ml-2 Text_Secondary Input_Label"
-                        >
-                          {t("Prepone A Day Before")}
-                        </label>
-                      </div>
-
-                      <div className="flex align-items-center mb-2">
-                        <RadioButton
-                          inputId="WeekOff2"
-                          name="PPM_SCHEDULAR"
-                          value="A"
-                          checked={PPM_SCHEDULAR === "A"}
-                          onChange={(e: any) =>
-                            setPPM_SCHEDULAR(e.target.value)
-                          }
-                        />
-
-                        <label
-                          htmlFor="WeekOff2"
-                          className="ml-2 Text_Secondary Input_Label"
-                        >
-                          {t("Postpone A Day After")}
-                        </label>
-                      </div>
-
-                      <div className="flex align-items-center">
-                        <RadioButton
-                          inputId="WeekOff3"
-                          name="PPM_SCHEDULAR"
-                          value="S"
-                          checked={PPM_SCHEDULAR === "S"}
-                          onChange={(e: any) =>
-                            setPPM_SCHEDULAR(e.target.value)
-                          }
-                        />
-
-                        <label
-                          htmlFor="WeekOff3"
-                          className="ml-2 Text_Secondary Input_Label"
-                        >
-                          {t("Keep On Same Day")}
-                        </label>
-                      </div>
+                      {ppmOptions.map(({ id, value, label }) => (
+                        <div key={id} className="flex align-items-center mb-2">
+                          <RadioButton
+                            inputId={id}
+                            name="PPM_SCHEDULAR"
+                            value={value}
+                            checked={PPM_SCHEDULAR === value}
+                            onChange={(e: any) => setPPM_SCHEDULAR(e.target.value)}
+                          />
+                          <label htmlFor={id} className="ml-2 Text_Secondary Input_Label">
+                            {label}
+                          </label>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

@@ -13,12 +13,12 @@ const AssetGroupMaster = (props: any) => {
   const currentMenu = menuList?.flatMap((menu: any) => menu?.DETAIL).filter((detail: any) => detail.URL === pathname)[0];
   const [showLoader, setShowLoader] = useState<boolean>(false);
 
- 
+
   const getAPI = async () => {
     try {
       setShowLoader(true);
       const payload: any = {
-        ASSETGROUP_TYPE: currentMenu?.FUNCTION_CODE ===  "AS0011" ? 'N' : 'A'
+        ASSETGROUP_TYPE: currentMenu?.FUNCTION_CODE === "AS0011" ? 'N' : 'A'
       }
       const res = await callPostAPI(ENDPOINTS.GET_ASSET_MASTER_LIST, payload, currentMenu?.FUNCTION_CODE);
       if (res?.FLAG === 1) {
@@ -26,6 +26,7 @@ const AssetGroupMaster = (props: any) => {
         localStorage.setItem('currentMenu', JSON.stringify(currentMenu))
         setShowLoader(false);
       } else {
+        props?.setData([]);
         setShowLoader(false);
       }
 
@@ -35,11 +36,11 @@ const AssetGroupMaster = (props: any) => {
   };
   useEffect(() => {
     if (currentMenu?.FUNCTION_CODE) {
-    
-        (async function () {
-            await getAPI()
-           })();
-    
+
+      (async function () {
+        await getAPI()
+      })();
+
     }
   }, [selectedFacility, currentMenu]);
   return !props?.search ? (
@@ -54,7 +55,7 @@ const AssetGroupMaster = (props: any) => {
           }}
           dataKey={currentMenu?.FUNCTION_DESC}
           columnTitle={["ASSETGROUP_NAME", "ACTIVE", "ACTION"]}
-          customHeader={[currentMenu?.FUNCTION_CODE ===  "AS0011"? "Service Group" : "Equipment Group", "Active", "Action"]}
+          customHeader={[currentMenu?.FUNCTION_CODE === "AS0011" ? "Service Group" : "Equipment Group", "Active", "Action"]}
           columnData={props?.data}
           clickableColumnHeader={["ASSETGROUP_NAME"]}
           filterFields={["ASSETGROUP_NAME"]}

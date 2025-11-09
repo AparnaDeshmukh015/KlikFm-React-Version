@@ -8,21 +8,19 @@ import TableListLayout from "../../../layouts/TableListLayout/TableListLayout";
 import AssetMasterForm from "./AssetMasterForm";
 import { clearScheduleTaskList } from "../../../store/scheduleTaskListStore";
 import { useDispatch } from "react-redux";
-import { appName } from "../../../utils/pagePath";
-import LoaderFileUpload from "../../../components/Loader/LoaderFileUpload";
 import LoaderS from "../../../components/Loader/Loader";
 const AssetMaster = (props: any) => {
-  const dispatch = useDispatch()
-  let { pathname, search, location }: any = useLocation();
+  const dispatch = useDispatch();
+  let { pathname, search }: any = useLocation();
   const [selectedFacility, menuList]: any = useOutletContext();
-  const [loading, setLoading] = useState<any | null>(false)
+  const [loading, setLoading] = useState<any | null>(false);
   const currentMenu = menuList
     ?.flatMap((menu: any) => menu?.DETAIL)
     .filter((detail: any) => detail.URL === pathname)[0];
   //API Function
   const getAPI = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const res = await callPostAPI(
         ENDPOINTS.GET_ASSET_MASTER_LIST,
         null,
@@ -32,44 +30,39 @@ const AssetMaster = (props: any) => {
       if (res?.FLAG === 1) {
         props?.setData(res?.ASSESTMASTERSLIST || []);
         localStorage.setItem("currentMenu", JSON.stringify(currentMenu));
-        localStorage.removeItem("scheduleId")
-        localStorage.removeItem("assetDetails")
-        setLoading(false)
+        localStorage.removeItem("scheduleId");
+        localStorage.removeItem("assetDetails");
+        setLoading(false);
       } else {
-        setLoading(false)
+        setLoading(false);
         props?.setData([]);
       }
     } catch (error: any) {
-      setLoading(false)
+      setLoading(false);
       toast?.error(error);
-
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
   useEffect(() => {
     if (currentMenu?.FUNCTION_CODE) {
       (async function () {
         sessionStorage.removeItem("formData");
-        await getAPI()
+        await getAPI();
       })();
     }
   }, [selectedFacility, currentMenu, search]);
 
   useEffect(() => {
-
     if (search === "" || search === undefined) {
       dispatch(clearScheduleTaskList());
-
     }
-
-
-
-
   }, [search]);
   return !props?.search ? (
     <>
-      {loading ? <LoaderS /> :
+      {loading ? (
+        <LoaderS />
+      ) : (
         <Table
           tableHeader={{
             headerName: currentMenu?.FUNCTION_DESC,
@@ -99,13 +92,12 @@ const AssetMaster = (props: any) => {
           isClick={props?.isForm}
           handelDelete={props?.handelDelete}
         />
-      }
+      )}
     </>
   ) : (
     <AssetMasterForm
       headerName={currentMenu?.FUNCTION_DESC}
       setData={props?.setData}
-
       selectedData={props?.selectedData}
       isClick={props?.isForm}
       functionCode={currentMenu?.FUNCTION_CODE}
@@ -123,5 +115,3 @@ const Index: React.FC = () => {
 };
 
 export default Index;
-
-

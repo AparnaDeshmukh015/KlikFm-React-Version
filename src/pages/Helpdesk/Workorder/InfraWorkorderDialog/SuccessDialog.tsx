@@ -1,41 +1,26 @@
-import { Dialog } from 'primereact/dialog';
-import React, { act, useState } from 'react'
-import Button from '../../../../components/Button/Button';
-import { toast } from 'react-toastify';
+import React, { useState } from "react";
+import Button from "../../../../components/Button/Button";
+import { toast } from "react-toastify";
 
 const SuccessDialog = ({
-  indexgetStatus,
   header,
-  control,
-  setValue,
-  register,
   paragraph,
-  watch,
-  errors,
   payload,
   updateWOStatusInfra,
   Actioncode,
-  CloseReassignPopUp,
   updateWoDetails,
   SuccessType,
   CloseAcknowledgePopUp,
-  ClosePTWApprovalPopUp,
   CloseResolutionPopUp,
-  CloseConfirmPTWPopUp,
-  CloseDeclinePTWApprovalPopUp,
   CloseRedirectOtherPopUp,
   CloseRedirectPopUp,
   CloseWOPopUp,
-  CssStyle,
   setError,
   resetFields,
+  setTestingOnHold,
 }: any) => {
-
   const [visible, setVisible] = useState<boolean>(false);
   const OpenSuccessPopUp = async () => {
-
-
-
     try {
       let valid = true;
       if (Actioncode == 102) {
@@ -70,17 +55,28 @@ const SuccessDialog = ({
         Actioncode == 137 ||
         Actioncode == 138
       ) {
-        if (Actioncode === 104 && (payload?.REASONID_INFRA !== undefined && payload?.REASONID_INFRA !== "")) {
+        if (
+          Actioncode === 104 &&
+          payload?.REASONID_INFRA !== undefined &&
+          payload?.REASONID_INFRA !== ""
+        ) {
           updateWOStatusInfra(payload, paragraph);
           CloseRedirectOtherPopUp();
           CloseRedirectPopUp();
-
-        } else if (Actioncode === 104 && (payload?.REASONID_INFRA === undefined || payload?.REASONID_INFRA === "")) {
+        } else if (
+          Actioncode === 104 &&
+          (payload?.REASONID_INFRA === undefined ||
+            payload?.REASONID_INFRA === "")
+        ) {
           // toast.error("Please fill the required fields.");
           setError(true);
           valid = false;
           return true;
-        } else if (Actioncode !== 104 && payload?.REMARKS !== undefined && payload?.REMARKS !== "") {
+        } else if (
+          Actioncode !== 104 &&
+          payload?.REMARKS !== undefined &&
+          payload?.REMARKS !== ""
+        ) {
           updateWOStatusInfra(payload, paragraph);
           CloseRedirectOtherPopUp();
           CloseRedirectPopUp();
@@ -96,14 +92,13 @@ const SuccessDialog = ({
       if (Actioncode == 122) {
         updateWOStatusInfra(payload, paragraph);
         CloseResolutionPopUp();
+        setTestingOnHold(false);
       }
       if (Actioncode == 124 && header === "Suspend") {
         updateWOStatusInfra(payload, paragraph);
-        // CloseConfirmPTWPopUp();
       }
       if (Actioncode == 123) {
         updateWOStatusInfra(payload, paragraph);
-        // CloseConfirmPTWPopUp();
       }
       if (Actioncode == 125) {
         updateWOStatusInfra(payload, paragraph);
@@ -116,7 +111,6 @@ const SuccessDialog = ({
         Actioncode == 141 ||
         Actioncode == 142
       ) {
-
         updateWOStatusInfra(payload, paragraph);
       }
       if (Actioncode == 118 || Actioncode == 119 || Actioncode == 120) {
@@ -132,15 +126,12 @@ const SuccessDialog = ({
         if (header === "Save & Submit later") {
           const updatedPayload = {
             ...payload,
-            ACTION_ID: 150
-          }
+            ACTION_ID: 150,
+          };
           updateWOStatusInfra(updatedPayload, paragraph);
-
-
         } else {
           updateWOStatusInfra(payload, paragraph);
         }
-
       }
       if (Actioncode == 124 && header === "Submit for Closure") {
         updateWOStatusInfra(payload, paragraph);
@@ -148,11 +139,10 @@ const SuccessDialog = ({
       if (Actioncode == 124 && header === "Save & Submit later") {
         const updatedPayload = {
           ...payload,
-          ACTION_ID: 149
-        }
+          ACTION_ID: 149,
+        };
         updateWOStatusInfra(updatedPayload, paragraph);
         CloseResolutionPopUp();
-
       }
       if (Actioncode == 134) {
         updateWOStatusInfra(payload, paragraph);
@@ -169,17 +159,17 @@ const SuccessDialog = ({
         CloseWOPopUp();
       }
       setTimeout(() => {
-        setVisible(false);
         if (
           Actioncode === 104 &&
           payload?.REASONID_INFRA !== undefined &&
           payload?.REASONID_INFRA !== ""
         ) {
           resetFields();
+          setVisible(false);
         }
       }, 10000);
     } catch (error: any) {
-      toast.error(error)
+      toast.error(error);
     }
   };
 
@@ -188,7 +178,11 @@ const SuccessDialog = ({
       <Button
         type="submit"
         label={header}
-        className={header === "Save & Submit later" ? "Secondary_Button mr-2" : "Primary_Button mr-2"}
+        className={
+          header === "Save & Submit later"
+            ? "Secondary_Button mr-2"
+            : "Primary_Button mr-2"
+        }
         onClick={() => OpenSuccessPopUp()}
       />
       {/* <Dialog
@@ -212,4 +206,4 @@ const SuccessDialog = ({
   );
 };
 
-export default SuccessDialog
+export default SuccessDialog;

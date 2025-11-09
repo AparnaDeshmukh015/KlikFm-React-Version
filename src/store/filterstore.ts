@@ -18,8 +18,6 @@ interface FiltersState {
     WO_DATE: Filter;
     WO_START:Filter;
     WO_END:Filter;
-    LOCATIONDATA: Filter;
-    STATUSLABEL: Filter;
 }
 const initialState: FiltersState = {
      
@@ -36,8 +34,6 @@ const initialState: FiltersState = {
       WO_DATE: { value: null, matchMode: 'in' },
       WO_START:{ value: null, matchMode: 'in' },
       WO_END:{ value: null, matchMode: 'in' },
-      LOCATIONDATA: { value: null, matchMode: 'in' },
-      STATUSLABEL: { value: null, matchMode: 'in' }
   };
 const filterGroupReducer = createSlice({
     name: 'filterGroup',

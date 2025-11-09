@@ -13,9 +13,7 @@ import Select from "../../../components/Dropdown/Dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
 import DateCalendar from "../../../components/Calendar/Calendar";
 import TimeCalendar from "../../Calendar/TimeCalendar";
-import { InputSwitch, InputSwitchChangeEvent } from "primereact/inputswitch";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
-
 import { RadioButton, RadioButtonChangeEvent } from "primereact/radiobutton";
 import {
   eventNotification,
@@ -26,7 +24,8 @@ import { decryptData } from "../../../utils/encryption_decryption";
 import { useDispatch } from "react-redux";
 import { clearScheduleGroup } from "../../../store/scheduleGroup";
 import "../../Calendar/Calendar.css";
-
+import {FormatHeader, inputElement} from "./HeplerInfraSchdule";
+import {onChangeBtnValue} from "./HeplerInfra"
 import {
   LABELS,
   INFRS_EQUIPMENT_OPTIONS,
@@ -35,36 +34,19 @@ import {
   LOCALSTORAGE,
   helperNullDate,
 } from "../../../utils/constants";
-import Button from "../../../components/Button/Button";
 import { callPostAPI } from "../../../services/apis";
 import { ENDPOINTS } from "../../../utils/APIEndpoints";
 import { toast } from "react-toastify";
 import moment from "moment";
-import { appName } from "../../../utils/pagePath";
-import { useSelector } from "react-redux";
 
-import { TreeExpandedKeysType } from "primereact/tree";
-import HierarchyDialog from "../../HierarchyDialog/HierarchyDialog";
-import { debugIntegration } from "@sentry/react";
+import { useSelector } from "react-redux";
 
 const InfraAssetSchedule = ({
   props,
 
   // watch,
   watchAll,
-  // resetField,
-  scheduleTaskList,
   scheduleId,
-
-  setEditStatus,
-  // isSubmitting,
-  AssetSchedule,
-  issueList,
-  setScheduleTaskList,
-  setAssetTypeState,
-  assetTypeState,
-  setSelectedSchedule,
-  typewatch,
 }: any) => {
   const dispatch = useDispatch();
   // This is where the state is accessed
@@ -114,26 +96,20 @@ const InfraAssetSchedule = ({
   const getId: any = localStorage.getItem("Id");
   const dataId = JSON.parse(getId);
   const location = useLocation();
-  const [nodes, setNodes] = useState<any | null>([]);
-  const [filteredData, setFilteredData] = useState<any | null>(nodes);
-
-  const [visibleEquipmentlist, showEquipmentlist] = useState(false);
-  const [selectedKey, setSelectedKey] = useState("");
   const [selectedEquipmentKey, setSelectedEquipmentKey] = useState("");
-
   const [assetTreeDetails, setAssetTreeDetails] = useState<any | null>([]);
-  const [addAssetTypeList, setaddAssetTypeList] = useState<any | null>([]);
+
   const [issueLength, setIssueLength] = useState<any | null>(0);
   const [loading, setLoading] = useState<any | null>(false);
   const scheduleId_nav = location?.state?.scheduleId;
 
   const selectedscheduleId =
     location?.state?.selectformscheduleId !== undefined ||
-      location?.state?.selectformscheduleId !== null
+    location?.state?.selectformscheduleId !== null
       ? location?.state?.selectformscheduleId
       : location?.state?.scheduleId !== undefined
-        ? scheduleId_nav
-        : dataId?.SCHEDULE_ID;
+      ? scheduleId_nav
+      : dataId?.SCHEDULE_ID;
   var Mode = location?.state?.Mode ?? "";
   const schIdLid = location?.state?.selectedLocationSchedule ?? {};
   const ASSET_FOLDER_DATA = location?.state?.ASSET_FOLDER_DATA;
@@ -142,7 +118,6 @@ const InfraAssetSchedule = ({
   );
 
   const {
-    getValues,
     setValue,
     register,
     control,
@@ -162,8 +137,8 @@ const InfraAssetSchedule = ({
       SCHEDULE_NAME: props?.selectedData
         ? props?.selectedData?.SCHEDULE_NAME
         : search === "?edit="
-          ? dataId?.SCHEDULE_NAME
-          : "",
+        ? dataId?.SCHEDULE_NAME
+        : "",
       SOFT_SERVICE: "",
       MAKE: props?.selectedData?.MAKE_ID || "",
       MODEL: props?.selectedData?.MODEL_ID || "",
@@ -171,19 +146,16 @@ const InfraAssetSchedule = ({
       SCHEDULE_ID: props?.selectedData
         ? props?.selectedData?.SCHEDULE_ID
         : search === "?edit="
-          ? dataId?.SCHEDULE_ID
-          : 0,
+        ? dataId?.SCHEDULE_ID
+        : 0,
       SCHEDULE_INFRA_END_DATE: "",
-      // SCHEDULE_DESC:"",
       SEVERITY: "",
       registerName: "",
-      // EQUIPMENT: "",
-      // EQUIPMENT_TYPE: "",
       DESCRIPTION: props?.selectedData
         ? props?.selectedData?.SCHEDULE_DESC
         : search === "?edit="
-          ? dataId?.SCHEDULE_DESC
-          : "",
+        ? dataId?.SCHEDULE_DESC
+        : "",
       REQ_DESC: "",
       REPEAT_UNTIL: "",
       SCHEDULE_INFRA_START_DATE: "",
@@ -274,53 +246,14 @@ const InfraAssetSchedule = ({
 
   const [selectedData, setSelectedData] = useState<any | null>([]);
 
-  const onChangeBtnValue = (btnvalue: any) => {
-    if (btnvalue === "Daily") {
-      resetField("SCHEDULER.WEEKLY_1_EVERY_WEEK");
-      resetField("SCHEDULER.WEEKLY_1_WEEKDAY");
-      resetField("SCHEDULER.YEARLY_MONTH");
-      resetField("SCHEDULER.EVERY_DAYS");
-      resetField("SCHEDULER.MONTHLY_1_MONTH_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEKDAY");
-      resetField("SCHEDULER.MONTHLY_1_MONTHDAY");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEKDAY");
-      resetField("SCHEDULER.YEARLY_MONTH");
-    } else if (btnvalue === "Weekly") {
-      resetField("SCHEDULER.EVERY_DAYS");
-      resetField("SCHEDULER.MONTHLY_1_MONTH_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEKDAY");
-      resetField("SCHEDULER.MONTHLY_1_MONTHDAY");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEKDAY");
-      resetField("SCHEDULER.YEARLY_MONTH");
-    } else if (btnvalue === "Monthly") {
-      resetField("SCHEDULER.WEEKLY_1_EVERY_WEEK");
-      resetField("SCHEDULER.WEEKLY_1_WEEKDAY");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.YEARLY_MONTH");
-      resetField("SCHEDULER.MONTHLY_1_MONTHDAY");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEKDAY");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-    } else if (btnvalue === "Yearly") {
-      resetField("SCHEDULER.WEEKLY_1_EVERY_WEEK");
-      resetField("SCHEDULER.WEEKLY_1_WEEKDAY");
-      resetField("SCHEDULER.MONTHLY_1_MONTH_NUM");
-      resetField("SCHEDULER.MONTHLY_2_WEEKDAY");
-      resetField("SCHEDULER.MONTHLY_2_WEEK_NUM");
-      resetField("SCHEDULER.MONTHLY_1_MONTHDAY");
-    }
-  };
+  
 
   useEffect(() => {
-    if (search !== '?edit=') {
+    if (search !== "?edit=") {
       let convertPrefredTime: any = convertTime("00:00:00");
       setValue("SCHEDULER.DAILY_EVERY_STARTAT", convertPrefredTime);
     }
-  }, [search !== '?edit=']);
+  }, [search !== "?edit="]);
   useEffect(() => {
     (async function () {
       if (watchAll?.TYPE !== null && scheduleId === 0) {
@@ -393,20 +326,20 @@ const InfraAssetSchedule = ({
         location?.state === null
           ? null
           : location?.state?.page === "infraPPM"
-            ? location?.state?.page
-            : null;
+          ? location?.state?.page
+          : null;
       const payload = {
         // SCHEDULE_ID: props?.selectedData ? props?.selectedData?.SCHEDULE_ID : search === '?edit=' ? dataId?.SCHEDULE_ID : 0,
         SCHEDULE_ID:
           scheduleid !== undefined && scheduleid !== 0
             ? scheduleid
             : locationData === "infraPPM"
-              ? scheduleData
-              : scheduleid !== 0 &&
-                scheduleid !== undefined &&
-                scheduleid !== null
-                ? scheduleid
-                : selectedscheduleId ?? dataId?.SCHEDULE_ID,
+            ? scheduleData
+            : scheduleid !== 0 &&
+              scheduleid !== undefined &&
+              scheduleid !== null
+            ? scheduleid
+            : selectedscheduleId ?? dataId?.SCHEDULE_ID,
       };
 
       const res = await callPostAPI(ENDPOINTS.GET_SCHEDULE_DETAILS, payload);
@@ -438,10 +371,10 @@ const InfraAssetSchedule = ({
           res?.SCHEDULEDETAILS[0].PERIOD === "W"
             ? "Weekly"
             : res?.SCHEDULEDETAILS[0].PERIOD == "M"
-              ? "Monthly"
-              : res?.SCHEDULEDETAILS[0].PERIOD == "Y"
-                ? "Yearly"
-                : "Daily"
+            ? "Monthly"
+            : res?.SCHEDULEDETAILS[0].PERIOD == "Y"
+            ? "Yearly"
+            : "Daily"
         );
 
         if (
@@ -537,8 +470,7 @@ const InfraAssetSchedule = ({
           if (Dailylist) {
             setValue("SCHEDULER.EVERY_DAYS", Dailylist);
           }
-          let preferedTime: any =
-            res?.SCHEDULEDETAILS[0]?.DAILY_ONCE_AT_TIME;
+          let preferedTime: any = res?.SCHEDULEDETAILS[0]?.DAILY_ONCE_AT_TIME;
           let convertPrefredTime: any = convertTime(preferedTime);
           setValue("SCHEDULER.DAILY_EVERY_STARTAT", convertPrefredTime);
         } else if (res?.SCHEDULEDETAILS[0].PERIOD === "W") {
@@ -632,9 +564,6 @@ const InfraAssetSchedule = ({
             (e: any) => e.REPEAT_ID === res?.SCHEDULEDETAILS[0].REPEAT_UNTIL
           );
 
-          // if (repeatUntil) {
-          //   setValue("REPEAT_UNTIL", repeatUntil);
-          // }
         }
 
         setRepeatUntil(`${res?.SCHEDULEDETAILS[0].REPEAT_UNTIL}`);
@@ -681,7 +610,7 @@ const InfraAssetSchedule = ({
           setValue("SCHEDULER.DAILY_EVERY_STARTAT", convertPrefredTime);
         }
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -718,7 +647,6 @@ const InfraAssetSchedule = ({
   useEffect(() => {
     (async function () {
       await saveTracker(currentMenu);
-      ////  await getEquimentHierarchy()
       await getOptions();
 
       setOptiondisbaledWeek(true);
@@ -752,7 +680,7 @@ const InfraAssetSchedule = ({
         facility_type === "I"
       ) {
       }
-    } catch (error) { }
+    } catch (error) {}
   };
 
   const onError: SubmitErrorHandler<any> = (errors, _) => {
@@ -763,20 +691,21 @@ const InfraAssetSchedule = ({
     const selectedSeverity =
       options?.PRIORITYLIST?.length >= 1
         ? options?.PRIORITYLIST?.find(
-          (option: any) => option.SEVERITY === "Medium"
-        )
+            (option: any) => option.SEVERITY === "Medium"
+          )
         : null;
 
     setValue("SEVERITY_ID", selectedSeverity);
   }, [options?.PRIORITYLIST]);
   const onSubmit = async (payload: any, e: any) => {
-
-
-    if (search === "?add=" && Btnvalue === "Weekly" && typeof (payload?.SCHEDULER?.WEEKLY_1_WEEKDAY) === "object") {
+    if (
+      search === "?add=" &&
+      Btnvalue === "Weekly" &&
+      typeof payload?.SCHEDULER?.WEEKLY_1_WEEKDAY === "object"
+    ) {
       toast.error("Please fill the required fields");
       setIsSubmit(false);
-      return
-
+      return;
     }
     if (search === "?edit=" && Btnvalue === "Weekly" && data?.DAY_CODE === 0) {
       toast.error("Please fill the required fields");
@@ -784,17 +713,7 @@ const InfraAssetSchedule = ({
 
       return;
     }
-    // return
-    // if (
-    //   Btnvalue === "Weekly" &&
-    //   arr[0] <= 0
-    // ) {
-    //   toast.error("Please fill the required fields");
-    //   setWeekStatus(true);
-    //   setIsSubmit(false);
-    //   return;
-    // }
-
+    
     if (
       week?.SCHEDULER_WEEKLY_1_EVERY_WEEK.MONTHLY_WEEK_NUM === 0 &&
       week?.SCHEDULER_PERIOD === "W"
@@ -822,14 +741,14 @@ const InfraAssetSchedule = ({
           pageInfra === "infraPPM"
             ? scheduleData
             : selectedscheduleId !== undefined
-              ? selectedscheduleId
-              : scheduleId_nav
-                ? scheduleId_nav
-                : "0",
+            ? selectedscheduleId
+            : scheduleId_nav
+            ? scheduleId_nav
+            : "0",
         FACILITY_ID:
           facilityData?.length > 0
             ? JSON.parse(localStorage.getItem(`${LOCALSTORAGE?.FACILITYID}`)!)
-              ?.FACILITY_ID
+                ?.FACILITY_ID
             : "",
         SCHEDULE_NAME: payload?.SCHEDULE_NAME,
         ASSET_NONASSET: "A",
@@ -839,25 +758,30 @@ const InfraAssetSchedule = ({
           Btnvalue == "Daily"
             ? "D"
             : Btnvalue == "Weekly"
-              ? "W"
-              : Btnvalue == "Monthly"
-                ? "M"
-                : Btnvalue == "Yearly"
-                  ? "Y"
-                  : "D",
+            ? "W"
+            : Btnvalue == "Monthly"
+            ? "M"
+            : Btnvalue == "Yearly"
+            ? "Y"
+            : "D",
         DAILY_ONCE_EVERY: "O",
 
         DAILY_ONCE_AT_TIME:
           Btnvalue == "Daily"
-            ? !payload?.SCHEDULER.DAILY_EVERY_STARTAT ? new Date()?.toTimeString().slice(0, 5) : moment(payload?.SCHEDULER.DAILY_EVERY_STARTAT).format("HH:mm")
+            ? !payload?.SCHEDULER.DAILY_EVERY_STARTAT
+              ? new Date()?.toTimeString().slice(0, 5)
+              : moment(payload?.SCHEDULER.DAILY_EVERY_STARTAT).format("HH:mm")
             : "12:00",
         DAILY_ONCE_EVERY_DAYS:
           Btnvalue == "Daily" ? payload?.SCHEDULER.EVERY_DAYS.DAY_NUM : "0",
         DAILY_EVERY_PERIOD: 0,
         DAILY_EVERY_PERIOD_UOM: "",
-        DAILY_EVERY_STARTAT: Btnvalue == "Daily"
-          ? !payload?.SCHEDULER.DAILY_EVERY_STARTAT ? new Date()?.toTimeString().slice(0, 5) : moment(payload?.SCHEDULER.DAILY_EVERY_STARTAT).format("HH:mm")
-          : "12:00",
+        DAILY_EVERY_STARTAT:
+          Btnvalue == "Daily"
+            ? !payload?.SCHEDULER.DAILY_EVERY_STARTAT
+              ? new Date()?.toTimeString().slice(0, 5)
+              : moment(payload?.SCHEDULER.DAILY_EVERY_STARTAT).format("HH:mm")
+            : "12:00",
         WEEKLY_1_WEEKDAY:
           Btnvalue == "Weekly"
             ? typeof payload?.SCHEDULER?.WEEKLY_1_WEEKDAY !== "object"
@@ -878,28 +802,28 @@ const InfraAssetSchedule = ({
         MONTH_OPTION: monthSelect === "O" ? 1 : 2,
         MONTHLY_1_MONTHDAY:
           (Btnvalue == "Monthly" && monthSelect === "O") ||
-            (Btnvalue == "Yearly" && monthSelect === "O")
+          (Btnvalue == "Yearly" && monthSelect === "O")
             ? payload?.SCHEDULER?.MONTHLY_1_MONTHDAY?.DAY_NUM
             : 0,
         MONTHLY_1_MONTH_NUM:
           (Btnvalue == "Monthly" &&
             (monthSelect === "T" || monthSelect === "O")) ||
-            (Btnvalue == "Yearly" && monthSelect === "O")
+          (Btnvalue == "Yearly" && monthSelect === "O")
             ? payload?.SCHEDULER?.MONTHLY_1_MONTH_NUM?.MONTH_NUM
             : 0,
         MONTHLY_2_WEEK_NUM:
           (Btnvalue == "Monthly" && monthSelect === "T") ||
-            (Btnvalue == "Yearly" && monthSelect === "T")
+          (Btnvalue == "Yearly" && monthSelect === "T")
             ? payload?.SCHEDULER?.MONTHLY_2_WEEK_NUM?.MONTHLY_WEEK_NUM
             : 0,
         MONTHLY_2_WEEKDAY:
           (Btnvalue == "Monthly" && monthSelect === "T") ||
-            (Btnvalue == "Yearly" && monthSelect === "T")
+          (Btnvalue == "Yearly" && monthSelect === "T")
             ? payload?.SCHEDULER?.MONTHLY_2_WEEKDAY?.DAY_CODE
             : 0,
         MONTHLY_2_MONTH_NUM:
           (Btnvalue == "Monthly" && monthSelect === "T") ||
-            (Btnvalue == "Yearly" && monthSelect === "T")
+          (Btnvalue == "Yearly" && monthSelect === "T")
             ? payload?.SCHEDULER?.MONTHLY_1_MONTH_NUM?.MONTH_NUM
             : 0,
         YEARLY_MONTH:
@@ -954,8 +878,7 @@ const InfraAssetSchedule = ({
         MODE: search === "?edit=" ? "E" : "A",
       },
     };
-    // console.log(schedulerPayload1, data, "schedulerPayload1")
-    // return
+   
     delete payload?.MAKE;
     delete payload?.MODEL;
     delete payload?.SOFT_SERVICE;
@@ -1010,7 +933,7 @@ const InfraAssetSchedule = ({
       if (pageInfra === "infraPPM") {
         navigate("/ppmSchedule");
       } else {
-        navigate(`${appName}/assetmasterlist?${Mode}=`, {
+        navigate(`/assetmasterlist?${Mode}=`, {
           state: schedulerPayload1,
         });
       }
@@ -1038,10 +961,6 @@ const InfraAssetSchedule = ({
     }
   }, [assetTreeDetails]);
 
-
-
-
-
   const hasError = (errorsObj: any, path: string) => {
     return path
       ?.split(".")
@@ -1054,149 +973,14 @@ const InfraAssetSchedule = ({
     }
   }, [isSubmitting]);
 
-
-  const inputElement = (
-    labelName: any,
-    registerName: any,
-    lastLabel: any = null,
-    validationType: any,
-    optionlist: any = [],
-    key: any,
-    disabled: boolean,
-    isReuired: boolean
-  ) => {
-    const selectedStr = registerName?.split(".")[1];
-    return (
-      <div className=" mb-2">
-        <div className="flex gap-2">
-          <div className="">
-            <Field
-              controller={{
-                name: registerName,
-                control: control,
-                render: ({ field }: any) => {
-                  return (
-                    <Select
-                      disabled={disabled}
-                      options={optionlist}
-                      {...register(registerName, {
-                        required: "Please fill the required fields",
-                        validate: (value) => {
-                          if (disabled) return true; // skip validation if disabled
-                          if (
-                            !value ||
-                            (typeof value === "object" &&
-                              Object.keys(value).length === 0)
-                          ) {
-                            return "Please fill the required fields";
-                          }
-                          return true;
-                        },
-                      })}
-                      label={labelName}
-                      optionLabel={"VIEW"}
-                      findKey={key}
-                      require={isReuired}
-                      selectedData={selectedDetails[selectedStr]}
-                      setValue={setValue}
-                      {...field}
-                      invalid={!!hasError(errors, registerName)}
-                    />
-                  );
-                },
-              }}
-            />
-          </div>
-          {lastLabel && (
-            <div className="flex items-end pb-2">
-              <label className="Text_Secondary Input_Label">{lastLabel}</label>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <>
       <section className="w-full">
         <form onSubmit={handleSubmit(onSubmit, onError)}>
           <Card className="fixedContainer">
-            <div className="flex justify-between">
-              <div>
-                {(search === "?edit=" || location?.state?.Mode === "edit") && (
-                  <h6 className=" Text_Primary Main_Main_Header_Text mb-1">
-                    Edit Scheduled Maintenance
-                  </h6>
-                )}
-                {(search === "?add=" || location?.state?.Mode === "add") && (
-                  <h6 className=" Text_Primary Main_Main_Header_Text mb-1">
-                    Add Scheduled Maintenance
-                  </h6>
-                )}
-                <p className="Helper_Text Menu_Active flex mb-1">
-                  <p className="Helper_Text Menu_Active ">
-                    {assetTreeDetails?.length > 0
-                      ? `${ASSET_FOLDER_DATA?.ASSET_FOLDER_DESCRIPTION ?? ""} ${assetTreeDetails[0]?.ASSET_NAME
-                      }`
-                      : location?.state !== null &&
-                        location?.state?.ASSET_FOLDER_DATA
-                          ?.ASSET_FOLDER_DESCRIPTION !== undefined
-                        ? `${location?.state?.ASSET_FOLDER_DATA?.ASSET_FOLDER_DESCRIPTION} > ${selectedAssetFormData?.ASSET_NAME}`
-                        : ""}
-                  </p>
-                  {/* )} */}
-                </p>
-              </div>
-              <div className="h-10 flex items-center">
-                {/* <Buttons className="Primary_Button w-20" label={"Schedule1"} onClick={routes} /> */}
-                <div className="p-2">
-                  {pathname === "/assettaskschedulelist" &&
-                    facility_type === "I" ? (
-                    <Buttons
-                      type="submit"
-                      className="Primary_Button w-20"
-                      label={"Save"}
-                    />
-                  ) : (
-                    <Buttons
-                      type="submit"
-                      className="Primary_Button w-20"
-                      label={"Submit"}
-                    />
-                  )}
-                </div>
-                <div>
-                  {/* <Buttons type="submit" className="Primary_Button w-20" label={"Schedule"} /> */}
-                  {pageInfra === "assetSchedule" ||
-                    pageInfra === "infraPPM" ||
-                    pathname === "/assettaskschedulelist" ? (
-                    <Buttons
-                      className="Secondary_Button w-20 me-2"
-                      label={
-                        pathname === "/assettaskschedulelist"
-                          ? "List"
-                          : "Cancel"
-                      }
-                      onClick={() => {
-                        let pageInfra = localStorage.getItem("schedulePage");
-                        if (pageInfra === "infraPPM") {
-                          navigate(`${appName}/ppmSchedule?`);
-                        } else if (Mode !== "") {
-                          navigate(`${appName}/assetmasterlist?${Mode}=`, {
-                            state: { groupStatus: true },
-                          });
-                        } else {
-                          navigate(`${appName}/assettaskschedulelist`);
-                        }
-                      }}
-                    />
-                  ) : (
-                    <></>
-                  )}
-                </div>
-              </div>
-            </div>
+            <FormatHeader Mode={Mode} assetTreeDetails ={assetTreeDetails} ASSET_FOLDER_DATA={ASSET_FOLDER_DATA} 
+            selectedAssetFormData={selectedAssetFormData}
+            />
           </Card>
           <div className="h-[7.5rem]"></div>
           <div className="grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-3 lg:grid-cols-3">
@@ -1334,8 +1118,9 @@ const InfraAssetSchedule = ({
                       }}
                     />
                     <label
-                      className={` ${issueLength === 100 ? "text-red-600" : "Text_Secondary"
-                        } Helper_Text`}
+                      className={` ${
+                        issueLength === 100 ? "text-red-600" : "Text_Secondary"
+                      } Helper_Text`}
                     >
                       {t(`${issueLength}/100 characters`)}
                     </label>
@@ -1380,10 +1165,11 @@ const InfraAssetSchedule = ({
                       />
                     </div>
                     <label
-                      className={` ${Descriptionlength === 400
-                        ? "text-red-600"
-                        : "Text_Secondary"
-                        } Helper_Text`}
+                      className={` ${
+                        Descriptionlength === 400
+                          ? "text-red-600"
+                          : "Text_Secondary"
+                      } Helper_Text`}
                     >
                       {t(`${Descriptionlength}/400 characters.`)}
                     </label>
@@ -1430,23 +1216,14 @@ const InfraAssetSchedule = ({
                           controller={{
                             name: "SCHEDULER.DAILY_EVERY_STARTAT",
                             control,
-                            rules: {
-                              // validate: (value: any) => {
-                              //   if (!value || value === "") {
-                              //     return "Please fill the required fields";
-                              //   }
-                              //   return true;
-                              // },
-                            },
+                            rules: {},
                             render: ({ field, fieldState: { error } }: any) => (
                               <TimeCalendar
                                 {...field}
-                                // initialDate={"12:00"}
+                              
                                 setValue={setValue}
                                 label={t("Preferred Time")}
                                 require={true}
-
-                              // invalid={!!error}
                               />
                             ),
                           }}
@@ -1466,7 +1243,8 @@ const InfraAssetSchedule = ({
                             INFRS_EQUIPMENT_OPTIONS?.InfraScheduledayNumList,
                             "DAY_NUM",
                             false,
-                            true
+                            true, Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                           )}
                         </div>
                       </div>
@@ -1482,7 +1260,7 @@ const InfraAssetSchedule = ({
                           value={Btnvalue}
                           onChange={(e: SelectButtonChangeEvent) => {
                             setBtnValue(e.value);
-                            onChangeBtnValue(e.value);
+                            onChangeBtnValue(e.value, resetField);
                             setValue("SCHEDULER.WEEKLY_1_WEEKDAY", {});
                             setData({ DAY_CODE: 0, DAY_DESC: "" });
                           }}
@@ -1509,7 +1287,9 @@ const InfraAssetSchedule = ({
                                 INFRS_EQUIPMENT_OPTIONS.dayNumList,
                                 "DAY_NUM",
                                 false,
-                                true
+                                true,
+                                Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                               )}
                             </div>
                           </div>
@@ -1530,7 +1310,8 @@ const InfraAssetSchedule = ({
                                 INFRS_EQUIPMENT_OPTIONS.weekNumList,
                                 "MONTHLY_WEEK_NUM",
                                 false,
-                                true
+                                true,Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                               )}
                             </div>
                             <div className="col-span-2">
@@ -1541,15 +1322,18 @@ const InfraAssetSchedule = ({
                                 <span className="text-red-600"> *</span>
                               </div>
                               <div
-                                className={`inline-flex gap-1 ${weekStatus === true ? "errorBorders" : "abc"}`}
+                                className={`inline-flex gap-1 ${
+                                  weekStatus === true ? "errorBorders" : "abc"
+                                }`}
                               >
                                 {LABELS.weekDataLabel?.map((week: any) => {
                                   return (
                                     <Buttons
-                                      className={`Secondary_Button mr-1 ${data?.DAY_CODE === week?.DAY_CODE
-                                        ? "!bg-[#8e724a] !text-white"
-                                        : ""
-                                        }`}
+                                      className={`Secondary_Button mr-1 ${
+                                        data?.DAY_CODE === week?.DAY_CODE
+                                          ? "!bg-[#8e724a] !text-white"
+                                          : ""
+                                      }`}
                                       label={week?.DAY_DESC}
                                       type="button"
                                       onClick={() => {
@@ -1583,7 +1367,9 @@ const InfraAssetSchedule = ({
                                 INFRS_EQUIPMENT_OPTIONS.monthNumList1,
                                 "MONTH_NUM",
                                 false,
-                                true
+                                true,
+                                Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                               )}
                             </div>
                             <div className="col-span-2">
@@ -1625,7 +1411,9 @@ const InfraAssetSchedule = ({
                                     INFRS_EQUIPMENT_OPTIONS.dayNumList,
                                     "DAY_NUM",
                                     optiondisbled,
-                                    false
+                                    false,
+                                    Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                                   )}
                                 </div>
                               </div>
@@ -1657,7 +1445,8 @@ const InfraAssetSchedule = ({
                                     INFRS_EQUIPMENT_OPTIONS.weekNumList,
                                     "MONTHLY_WEEK_NUM",
                                     optiondisbledWeek,
-                                    false
+                                    false,Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                                   )}
                                 </div>
                                 <div>
@@ -1669,17 +1458,11 @@ const InfraAssetSchedule = ({
                                     INFRS_EQUIPMENT_OPTIONS.weekDataLabel,
                                     "DAY_CODE",
                                     optiondisbledWeek,
-                                    false
+                                    false,
+                                    Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                                   )}
                                 </div>
-                                {/* <div>
-                              {inputElement(
-                                "",
-                                "SCHEDULER.MONTHLY_1_MONTHDAY",
-                                "day",
-                                "onlyDay"
-                              )}
-                            </div> */}
                               </div>
                             </div>
                           </div>
@@ -1700,7 +1483,9 @@ const InfraAssetSchedule = ({
                                 INFRS_EQUIPMENT_OPTIONS.monthNumList,
                                 "MONTH_NUM",
                                 false,
-                                true
+                                true,
+                                Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                               )}
                             </div>
                             <div className="col-span-2">
@@ -1742,7 +1527,9 @@ const InfraAssetSchedule = ({
                                     INFRS_EQUIPMENT_OPTIONS.dayNumList,
                                     "DAY_NUM",
                                     optiondisbled,
-                                    false
+                                    false,
+                                    Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                                   )}
                                 </div>
                               </div>
@@ -1774,7 +1561,9 @@ const InfraAssetSchedule = ({
                                     INFRS_EQUIPMENT_OPTIONS.weekNumList,
                                     "MONTHLY_WEEK_NUM",
                                     optiondisbledWeek,
-                                    false
+                                    false,
+                                    Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                                   )}
                                 </div>
                                 <div>
@@ -1786,7 +1575,9 @@ const InfraAssetSchedule = ({
                                     INFRS_EQUIPMENT_OPTIONS.weekDataLabel,
                                     "DAY_CODE",
                                     optiondisbledWeek,
-                                    false
+                                    false,
+                                    Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                                   )}
                                 </div>
                               </div>
@@ -1910,30 +1701,34 @@ const InfraAssetSchedule = ({
                       <div>
                         <p className="Text_Primary Alert_Title  mt-2">
                           {Btnvalue === "Monthly" &&
-                            monthlyEvery?.MONTH_NUM !== undefined
-                            ? `Occurs every ${monthlyEvery?.MONTH_NUM
-                            } months starting ${moment(startdate).format(
-                              "DD-MM-YYYY"
-                            )}`
+                          monthlyEvery?.MONTH_NUM !== undefined
+                            ? `Occurs every ${
+                                monthlyEvery?.MONTH_NUM
+                              } months starting ${moment(startdate).format(
+                                "DD-MM-YYYY"
+                              )}`
                             : Btnvalue === "Yearly" &&
                               yearlyEvery?.VIEW !== undefined
-                              ? `Occurs every ${yearlyEvery?.VIEW
+                            ? `Occurs every ${
+                                yearlyEvery?.VIEW
                               } month starting ${moment(startdate).format(
                                 "DD-MM-YYYY"
                               )}`
-                              : Btnvalue === "Weekly" &&
-                                weeklyEvery?.MONTHLY_WEEK_NUM !== undefined
-                                ? `Occurs every ${weeklyEvery?.MONTHLY_WEEK_NUM
-                                } week starting ${moment(startdate).format(
-                                  "DD-MM-YYYY"
-                                )}`
-                                : Btnvalue === "Daily" &&
-                                  dailyEvery?.DAY_NUM !== undefined
-                                  ? `Occurs every ${dailyEvery?.DAY_NUM
-                                  } day starting ${moment(startdate).format(
-                                    "DD-MM-YYYY"
-                                  )}`
-                                  : ""}
+                            : Btnvalue === "Weekly" &&
+                              weeklyEvery?.MONTHLY_WEEK_NUM !== undefined
+                            ? `Occurs every ${
+                                weeklyEvery?.MONTHLY_WEEK_NUM
+                              } week starting ${moment(startdate).format(
+                                "DD-MM-YYYY"
+                              )}`
+                            : Btnvalue === "Daily" &&
+                              dailyEvery?.DAY_NUM !== undefined
+                            ? `Occurs every ${
+                                dailyEvery?.DAY_NUM
+                              } day starting ${moment(startdate).format(
+                                "DD-MM-YYYY"
+                              )}`
+                            : ""}
                         </p>
                       </div>
                     </div>
@@ -1956,29 +1751,18 @@ const InfraAssetSchedule = ({
                       <div className="grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-2 lg:grid-cols-2">
                         <div className="">
                           <div
-                            className={` flex gap-2 p-3 containerWO  ${errors?.createWO && !createWO
-                              ? "radioborder"
-                              : ""
-                              }`}
+                            className={` flex gap-2 p-3 containerWO  ${
+                              errors?.createWO && !createWO ? "radioborder" : ""
+                            }`}
                           >
                             <div className="flex align-items-center">
-                              {/* <RadioButton
-                              inputId="createWO1"
-                              name="createWO"
-                              value="Schedule"
-                              onChange={(e: RadioButtonChangeEvent) => {
-                                setWorkOrder(e.value);
-                              }}
-                              checked={createWO === "Schedule" ? true : false}
-                            /> */}
-
                               <RadioButton
                                 inputId="createWO1"
                                 value="Schedule"
                                 {...register("createWO", {
                                   required:
                                     createWO === "Schedule" ||
-                                      createWO === "Immediately"
+                                    createWO === "Immediately"
                                       ? false
                                       : "Please fill the required fields",
                                 })}
@@ -2003,28 +1787,19 @@ const InfraAssetSchedule = ({
                         </div>
                         <div className="">
                           <div
-                            className={` flex gap-2 p-3 containerWO  ${errors?.createWO && !createWO
-                              ? "radioborder"
-                              : ""
-                              }`}
+                            className={` flex gap-2 p-3 containerWO  ${
+                              errors?.createWO && !createWO ? "radioborder" : ""
+                            }`}
                           >
                             <div className="flex align-items-center">
-                              {/* <RadioButton
-                              inputId="createWO2"
-                              name="createWO"
-                              value="Immediately"
-                              onChange={(e: RadioButtonChangeEvent) =>
-                                setWorkOrder(e.value)
-                              }
-                              checked={createWO === "Immediately"}
-                            /> */}
+                             
                               <RadioButton
                                 inputId="createWO2"
                                 value="Immediately"
                                 {...register("createWO", {
                                   required:
                                     createWO === "Schedule" ||
-                                      createWO === "Immediately"
+                                    createWO === "Immediately"
                                       ? false
                                       : "Please fill the required fields",
                                 })}
@@ -2058,7 +1833,9 @@ const InfraAssetSchedule = ({
                               INFRS_EQUIPMENT_OPTIONS.dayNumList,
                               "DAY_NUM",
                               false,
-                              true
+                              true,
+                              Field, setValue, control, register, errors,
+                            selectedDetails,hasError
                             )}
                           </div>
                         </>
@@ -2071,94 +1848,10 @@ const InfraAssetSchedule = ({
               </div>
             </div>
             <div>
-              {/* <Card className="mt-3">
-                <div className="flex flex-wrap justify-between mb-3">
-                  <h6 className="Main_Header_Text">Equipment Summary</h6>
-                </div> */}
-
-              {/* <div className=" flex flex-col gap-3">
-                  <div className=" flex flex-col gap-1">
-                    <label className="Text_Secondary Helper_Text">
-                      Equipment Name
-                    </label>
-
-                    <>
-                      <p className="Text_Primary Alert_Title  ">
-
-                        {assetTreeDetails?.length > 0
-                          ? `${ASSET_FOLDER_DATA?.ASSET_FOLDER_DESCRIPTION ?? ""
-                          } ${assetTreeDetails[0]?.ASSET_NAME}`
-                          : `${ASSET_FOLDER_DATA?.ASSET_FOLDER_DESCRIPTION ?? ""
-                          } > ${selectedAssetFormData?.ASSET_NAME ?? ""}`}
-                      </p>
-                    </>
-
-                  </div>
-                  <div className=" flex flex-col gap-1">
-                    <label className="Text_Secondary Helper_Text">
-                      Equipment Type
-                    </label>
-
-                    <>
-                      <p className="Text_Primary Alert_Title  ">
-
-                        {assetTreeDetails?.length > 0
-                          ? assetTreeDetails[0]?.ASSETTYPE_NAME
-                          : selectedAssetFormData?.TYPE?.ASSETTYPE_NAME ?? ""}
-                      </p>
-                    </>
-                    {/* )} */}
+              
             </div>
 
-            {/* <div className=" flex flex-col gap-1">
-                    <label className="Text_Secondary Helper_Text">
-                      Equipment Group
-                    </label>
-
-                    <>
-                      <p className="Text_Primary Alert_Title  ">
-
-                        {assetTreeDetails?.length > 0
-                          ? assetTreeDetails[0]?.ASSETGROUP_NAME
-                          : selectedAssetFormData?.GROUP?.ASSETGROUP_NAME ?? ""}
-                      </p>
-                    </>
-
-                  </div> */}
-
-            {/* <div className=" flex flex-col gap-1">
-                    <label className="Text_Secondary Helper_Text">
-                      Location
-                    </label>
-
-                    <>
-                      <p className="Text_Primary Alert_Title  ">
-                        {assetTreeDetails?.length > 0
-                          ? assetTreeDetails[0]?.LOCATION_DESCRIPTION
-                          : selectedAssetFormData?.LOCATION
-                            ?.LOCATION_DESCRIPTION ?? ""}
-                      </p>
-                    </>
-                  </div> */}
-
-            {/* <HierarchyDialog
-                    showEquipmentlist={showEquipmentlist}
-                    visibleEquipmentlist={visibleEquipmentlist}
-                    selectedKey={selectedKey}
-                    setSelectedKey={setSelectedKey}
-                    setValue={setValue}
-                    nodes={nodes}
-                    filteredData={filteredData}
-                    setFilteredData={setFilteredData}
-                    setNodes={setNodes}
-                    assetTreeDetails={assetTreeDetails}
-                    setAssetTreeDetails={setAssetTreeDetails}
-                    loading={loading}
-                  /> */}
-            {/* </div>  */}
-
-            {/* </Card>
-            </div> */}
+           
           </div>
         </form>
       </section>

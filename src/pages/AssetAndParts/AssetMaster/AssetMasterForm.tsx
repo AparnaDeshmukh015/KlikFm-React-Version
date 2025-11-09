@@ -51,6 +51,7 @@ const AssetMasterForm = (props: any) => {
   const dispatch = useDispatch();
   const scheduleTaskList = useSelector((state: any) => state.scheduleTaskList);
 
+
   const { t } = useTranslation();
   const location = useLocation();
 
@@ -261,12 +262,15 @@ const AssetMasterForm = (props: any) => {
       dispatch(upsertScheduleTask(scheduleDetails));
     }
   }, [scheduleDetails]);
-  console.log(Object.keys(options).length, "Object.keys(options).length");
-  const onError: SubmitErrorHandler<any> = (errors, _) => {};
+
+  const onError: SubmitErrorHandler<any> = (errors, _) => { };
 
   const onSubmit = useCallback(
     async (payload: any) => {
       try {
+
+
+        debugger;
         if (IsSubmit) return true;
         setIsSubmit(true);
 
@@ -305,8 +309,9 @@ const AssetMasterForm = (props: any) => {
               schedulerData?.MONTHLYONCETWICE?.key;
 
             // schedulerData.MODE = !!payload.SCHEDULE_ID ? "E" : "A";
+            // schedulerData.MODE = search === "?edit=" ? "E" : "A";
 
-            // schedulerData.MODE = schedulerData?.SCHEDULE_ID !== 0 ? "E" : "A";
+            schedulerData.MODE = (schedulerData?.SCHEDULE_ID !== 0 && schedulerData?.SCHEDULE_ID !== "") ? "E" : "A";
 
             const timeConvert = [
               "DAILY_ONCE_AT_TIME",
@@ -326,7 +331,6 @@ const AssetMasterForm = (props: any) => {
                 );
               }
             });
-
             schedulerData.MONTH_OPTION =
               schedulerData?.MONTH_OPTION?.MONTH_OPTION || "";
 
@@ -341,20 +345,19 @@ const AssetMasterForm = (props: any) => {
             delete payload?.SCHEDULER?.Record;
           }
 
-          // return
-          if (schedulerData?.SCHEDULE_NAME !== null) {
+          if (schedulerData?.SCHEDULE_NAME !== null && schedulerData?.SCHEDULE_NAME !== "") {
             const res1 = await callPostAPI(
               ENDPOINTS.SCHEDULE_SAVE,
               facility_type == "I"
                 ? {
-                    ...schedulerData,
-                    MODE:
-                      schedulerData?.SCHEDULE_ID &&
+                  ...schedulerData,
+                  MODE:
+                    schedulerData?.SCHEDULE_ID &&
                       schedulerData?.SCHEDULE_ID !== "0"
-                        ? "E"
-                        : "A",
-                    FUNCTION_CODE: currentMenu?.FUNCTION_CODE,
-                  }
+                      ? "E"
+                      : "A",
+                  FUNCTION_CODE: currentMenu?.FUNCTION_CODE,
+                }
                 : schedulerPayload,
               "AS067"
             );
@@ -367,13 +370,14 @@ const AssetMasterForm = (props: any) => {
         ).map((data: any) => ({
           [data?.FIELDNAME]: data?.VALUE,
         }));
+
         // payload.SCHEDULE_ID = payload?.SCHEDULE_ID !== 0 ? payload?.SCHEDULE_ID : 0;
         payload.SCHEDULE_ID =
-          selectedscheduleID === null ||
-          selectedscheduleID === "0" ||
-          selectedscheduleID === undefined
-            ? schedule_Id
-            : selectedscheduleID;
+          (selectedscheduleID !== "0" && selectedscheduleID !== 0 && selectedscheduleID !== undefined && selectedscheduleID !== "")
+            ? selectedscheduleID
+            : schedule_Id ?? 0;
+
+
         payload.EXTRA_COL_LIST = updateColList || [];
         payload.ACTIVE = payload?.ACTIVE === true ? 1 : 0;
         payload.LOCATION_ID = payload?.LOCATION?.LOCATION_ID;
@@ -517,7 +521,6 @@ const AssetMasterForm = (props: any) => {
 
     return <span>{props.placeholder}</span>;
   };
-
   const locationOptionTemplate = (option: any) => {
     return (
       <div className="align-items-center">
@@ -549,7 +552,7 @@ const AssetMasterForm = (props: any) => {
         setValue("SCHEDULE_ID", res?.SCHEDULELIST[0]?.SCHEDULE_ID || 0);
         setValue("SCHEDULER.SCHEDULE_ID", res?.SCHEDULELIST[0]?.SCHEDULE_ID);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const getAssetDetails = async (columnCaptions: any, ASSET_ID?: any) => {
@@ -562,8 +565,8 @@ const AssetMasterForm = (props: any) => {
         location?.state !== null
           ? ASSET_ID
           : props?.selectedData === null
-          ? assetId?.ASSET_ID
-          : props?.selectedData?.ASSET_ID,
+            ? assetId?.ASSET_ID
+            : props?.selectedData?.ASSET_ID,
     };
     try {
       const res = await callPostAPI(ENDPOINTS.ASSETMASTER_DETAILS, payload, "");
@@ -696,7 +699,7 @@ const AssetMasterForm = (props: any) => {
     } finally {
     }
   };
-  console.log(options, "option");
+
   useEffect(() => {
     if (search === "?edit=") {
       const getScheduleId: any = localStorage.getItem("SCHEDULE_ID");
@@ -744,7 +747,7 @@ const AssetMasterForm = (props: any) => {
 
     if (res?.FLAG === 1) {
       setPPMAssignee(res?.TECHLIST);
-      setValue("ASSET_NAME", dataId?.ASSET_NAME);
+      // setValue("ASSET_NAME", dataId?.ASSET_NAME);
     } else {
       setPPMAssignee([]);
     }
@@ -778,7 +781,7 @@ const AssetMasterForm = (props: any) => {
           hirarchy: res?.EQUIPMENTHIERARCHYLIST.map((f: any) => ({
             ASSET_FOLDER_DESCRIPTION:
               f.ASSET_FOLDER_DESCRIPTION !== null &&
-              f.ASSET_FOLDER_DESCRIPTION.trim() !== ""
+                f.ASSET_FOLDER_DESCRIPTION.trim() !== ""
                 ? f.ASSET_FOLDER_DESCRIPTION
                 : "no label",
             ASSET_FOLDER_ID: f.ASSET_FOLDER_ID,
@@ -916,7 +919,7 @@ const AssetMasterForm = (props: any) => {
     }
   }, [watchAll?.ASSET_NAME, watchAll?.TYPE]);
 
-  const infraScheduleData = (infraData: any) => {};
+  const infraScheduleData = (infraData: any) => { };
   useEffect(() => {
     if (options?.location && watchAll?.LOCATION?.LOCATION_ID) {
       setLocationError(false);
@@ -1096,11 +1099,10 @@ const AssetMasterForm = (props: any) => {
                       }}
                     />
                     <label
-                      className={` ${
-                        Descriptionlength === 400
-                          ? "text-red-600"
-                          : "Text_Secondary"
-                      } Helper_Text`}
+                      className={` ${Descriptionlength === 400
+                        ? "text-red-600"
+                        : "Text_Secondary"
+                        } Helper_Text`}
                     >
                       {t(`Up to ${Descriptionlength}/400 characters.`)}
                     </label>
@@ -1336,11 +1338,10 @@ const AssetMasterForm = (props: any) => {
                       }}
                     />
                     <label
-                      className={` ${
-                        Descriptionlength === 400
-                          ? "text-red-600"
-                          : "Text_Secondary"
-                      } Helper_Text`}
+                      className={` ${Descriptionlength === 400
+                        ? "text-red-600"
+                        : "Text_Secondary"
+                        } Helper_Text`}
                     >
                       {t(`Up to ${Descriptionlength}/400 characters.`)}
                     </label>
@@ -1396,55 +1397,57 @@ const AssetMasterForm = (props: any) => {
               </div>
             </div>
           </Card>
-          <AssetSchedule
-            ASSET_FOLDER_DATA={ASSET_FOLDER_DATA}
-            errors={errors}
-            setValue={setValue}
-            watchAll={watchAll}
-            register={register}
-            control={control}
-            watch={watch}
-            resetField={resetField}
-            scheduleTaskList={scheduleTaskList}
-            scheduleId={
-              search === "?edit=" && assetTypeState === true
-                ? 0
-                : search === "?edit="
-                ? schedId
-                : 0
-            }
-            getValues={getValues}
-            setEditStatus={setEditStatus}
-            isSubmitting={isSubmitting}
-            AssetSchedule={
-              TypeWatch == undefined ||
-              TypeWatch == null ||
-              GroupWatch == undefined ||
-              GroupWatch == null ||
-              LocationWatch == undefined ||
-              LocationWatch == null ||
-              AssetNameWatch == undefined ||
-              AssetNameWatch == null
-                ? false
-                : true
-            }
-            issueList={issueList}
-            setScheduleTaskList={upsertScheduleTask}
-            setAssetTypeState={setAssetTypeState}
-            assetTypeState={assetTypeState}
-            setSelectedSchedule={setselectedscheduleID}
-            infraScheduleData={infraScheduleData}
-            typewatch={TypeWatch}
-            setScheduleGroupStatus={setScheduleGroupStatus}
-            getSelectedScheduleId={getSelectedScheduleId}
-            selectedLocationSchedule={selectedLocationSchedule}
-            allFieldsFilled={allFieldsFilled}
-            Mode={search === "?edit=" ? "edit" : "add"}
-            setLocationError={setLocationError}
-            setTypeError={setTypeError}
-            setGroupError={setGroupError}
-            setAssetNameError={setAssetNameError}
-          />
+          {facility_type === "R" && (
+            <AssetSchedule
+              ASSET_FOLDER_DATA={ASSET_FOLDER_DATA}
+              errors={errors}
+              setValue={setValue}
+              watchAll={watchAll}
+              register={register}
+              control={control}
+              watch={watch}
+              resetField={resetField}
+              scheduleTaskList={scheduleTaskList}
+              scheduleId={
+                search === "?edit=" && assetTypeState === true
+                  ? 0
+                  : search === "?edit="
+                    ? schedId
+                    : 0
+              }
+              getValues={getValues}
+              setEditStatus={setEditStatus}
+              isSubmitting={isSubmitting}
+              AssetSchedule={
+                TypeWatch == undefined ||
+                  TypeWatch == null ||
+                  GroupWatch == undefined ||
+                  GroupWatch == null ||
+                  LocationWatch == undefined ||
+                  LocationWatch == null ||
+                  AssetNameWatch == undefined ||
+                  AssetNameWatch == null
+                  ? false
+                  : true
+              }
+              issueList={issueList}
+              setScheduleTaskList={upsertScheduleTask}
+              setAssetTypeState={setAssetTypeState}
+              assetTypeState={assetTypeState}
+              setSelectedSchedule={setselectedscheduleID}
+              infraScheduleData={infraScheduleData}
+              typewatch={TypeWatch}
+              setScheduleGroupStatus={setScheduleGroupStatus}
+              getSelectedScheduleId={getSelectedScheduleId}
+              selectedLocationSchedule={selectedLocationSchedule}
+              allFieldsFilled={allFieldsFilled}
+              Mode={search === "?edit=" ? "edit" : "add"}
+              setLocationError={setLocationError}
+              setTypeError={setTypeError}
+              setGroupError={setGroupError}
+              setAssetNameError={setAssetNameError}
+            />
+          )}
 
           <Card className="mt-2">
             <DocumentUpload
@@ -1483,7 +1486,7 @@ const AssetMasterForm = (props: any) => {
                     },
                   }}
                 />
-                <div className="flex ml-4 align-items-center">
+                <div className="flex ml-4 items-end">
                   <Field
                     controller={{
                       name: "UNDERAMC",

@@ -10,14 +10,21 @@ import {
 import HeaderView from "./HeaderView";
 import { createTw } from "react-pdf-tailwind";
 import { useEffect, useState } from "react";
-import { formateDate } from "../../../../utils/constants";
+import { formateDate, LOCALSTORAGE } from "../../../../utils/constants";
+import moment from "moment";
 const WorkOrderReport = ({ pageSize }: any) => {
+  const facilityData = JSON.parse(((localStorage.getItem(LOCALSTORAGE.FACILITY)))!);
+  const facilityDetails: any = facilityData?.length !== 0 ? JSON.parse(
+    localStorage.getItem(LOCALSTORAGE.FACILITYID)!
+  ) : "";
+  const FacilityDateFormat: any = facilityDetails?.DATE_FORMAT ?? 'DD-MM-YYYY';
   const [reportWorkOrder, setReportWorkOrder] = useState<any | null>([]);
   const [workOrderNo, setWorkOrderNo] = useState<any | null>("");
   const [assigneeData, setAssigneeData] = useState<any | null>([]);
   const [workOrderDescription, setWorkOrderDescription] = useState<
     any | null
   >();
+  const [workorderResolution, setWorkOrderResolution] = useState<any | null>("");
   const tw = createTw({
     theme: {
       extend: {
@@ -119,6 +126,7 @@ const WorkOrderReport = ({ pageSize }: any) => {
   useEffect(() => {
     const workOrderData: any = localStorage.getItem("workDetailsReport");
     const workReportData: any = JSON.parse(workOrderData);
+    console.log("workReportData", workReportData);
     const technicianData: any =
       localStorage.getItem("TECHNICIAN_LIST") !== null
         ? localStorage.getItem("TECHNICIAN_LIST")
@@ -153,8 +161,9 @@ const WorkOrderReport = ({ pageSize }: any) => {
     setReportWorkOrder([workReports]);
     setWorkOrderNo(workReportData[0]?.WO_NO);
     setWorkOrderDescription(workReportData[0]?.ISSUE_DESCRIPTION);
+    setWorkOrderResolution(workReportData[0]?.COMPLETED_DESCRIPTION)
   }, []);
-
+  console.log("reportWorkOrder", reportWorkOrder);
   return (
     <>
       <Document>
@@ -191,7 +200,7 @@ const WorkOrderReport = ({ pageSize }: any) => {
               ]}
             >
               <Text style={[tw(""), styles.boxTextHeading]}>
-                Printed Date:- {formateDate(new Date().toISOString())}
+                Printed Date:- {moment().format(FacilityDateFormat)}, {moment().format('HH:mm')}
               </Text>
             </View>
           </View>
@@ -281,7 +290,7 @@ const WorkOrderReport = ({ pageSize }: any) => {
               {/* Right Column */}
               <View style={tw(`w-5/6 border-b border-gray-800`)}>
                 <Text style={styles.Input_Text}>
-                  {/* ------------------------------------------------------------------------------------ */}
+                  {workorderResolution}
                 </Text>
               </View>
             </View>
@@ -376,12 +385,22 @@ const WorkOrderReport = ({ pageSize }: any) => {
           <View style={tw("flex flex-row gap-3 mb-2.5")}>
             <View style={[tw(`w-1/3 h-20 text-left`), styles.boxContainer]}>
               <Text style={[tw(` text-left`), styles.Input_Text]}>
-                Technician Assign By
+                Technician Assign
+              </Text>
+              <Text style={[tw(` text-left`), styles.Input_Text]}>
+
               </Text>
             </View>
             <View style={[tw(`w-1/3 h-20 text-left`), styles.boxContainer]}>
               <Text style={[tw(` text-left`), styles.Input_Text]}>
                 Technician Assign
+              </Text>
+              <Text style={[tw(` text-left`), styles.Input_Text]}>
+                {assigneeData.map((assignee: any) => (
+
+                  <>{assignee.name}{assignee.roleName}</>
+
+                ))}
               </Text>
             </View>
             <View style={[tw(`w-1/3 h-20 text-left`), styles.boxContainer]}>

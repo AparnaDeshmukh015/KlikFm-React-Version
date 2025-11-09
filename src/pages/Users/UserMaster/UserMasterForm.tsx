@@ -54,8 +54,6 @@ const UserMasterForm = (props: any) => {
   const [errorss, setErrorss] = useState<any | null>(false)
 
   const [hasOccupant, setHasOccupant] = useState<boolean>(false);
-
-  // const [showLoader, setShowLoader] = useState<boolean>(true);
   const [selectedRoleListandBuilding, setSelectedRoleListandBuilding] = useState<any>([]);
 
   const userTypeLabel: any = [
@@ -73,8 +71,6 @@ const UserMasterForm = (props: any) => {
     control,
     setValue,
     watch,
-    resetField,
-    trigger,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -96,7 +92,6 @@ const UserMasterForm = (props: any) => {
       VALIDITY_DATE: "",
       ACTIVE: search === '?edit=' ? dataId?.ACTIVE : true,
       LOCATION_LIST: [],
-      // LOCATION_LIST1: []
     },
     mode: "all",
   });
@@ -169,15 +164,10 @@ const UserMasterForm = (props: any) => {
       try {
         const filtered = payload?.FACILITY_LIST.filter((e: any) => e?.FACILITY_ID === selectedFacility?.FACILITY_ID);
         if (filtered?.length !== 0 || User_Name !== payload?.USER_NAME) {
-
-
-          // return
           const res = await callPostAPI(ENDPOINTS?.USERMASTER_SAVE, payload, "A23");
           if (res?.FLAG) {
             toast?.success(res?.MSG);
             const res1 = await callPostAPI(ENDPOINTS?.BUILDING_GET, {});
-
-
             if (res1?.FLAG === 1) {
               localStorage.setItem(
                 LOCALSTORAGE.FACILITY,
@@ -207,7 +197,6 @@ const UserMasterForm = (props: any) => {
           toast?.error(`${selectedFacility?.FACILITY_NAME ?? ''} facility is in use and cannot be unselected`);
         }
 
-
       } catch (error: any) {
         toast?.error('Something went wrong!');
       }
@@ -217,7 +206,6 @@ const UserMasterForm = (props: any) => {
   }, [props?.selectedData, selectedFacility, search, props?.headerName, User_Name, USER_ROLE, USER_TYPEwatch, eventNotification, props?.functionCode, props?.getAPI, props?.isClick, finalselectedfaciltyRole]);
 
   const onError: SubmitErrorHandler<any> = (errors, _) => {
-
     if (errors?.EMAIL_ID) {
       toast.error(errors.EMAIL_ID?.message?.toString())
     }
@@ -226,7 +214,6 @@ const UserMasterForm = (props: any) => {
     }
   };
   const getUserDetails = async () => {
-
     const getId: any = localStorage.getItem("Id");
     const assetId: any = JSON.parse(getId);
     const payload: any = {
@@ -312,10 +299,7 @@ const UserMasterForm = (props: any) => {
       null,
       "HD004"
     );
-
-
     if (res1?.FLAG === 1) {
-
       setlocationtypeOptions(res1?.LOCATIONHIERARCHYLIST);
     }
   }
@@ -345,10 +329,7 @@ const UserMasterForm = (props: any) => {
 
   ;
   const handleAdd = async (e: any) => {
-
     e.preventDefault();
-
-
     if ((!watchSelectedBuilding || watchSelectedBuilding === "" || watchSelectedBuilding === null)
       || (!watchSelectedRole || watchSelectedRole === "" || watchSelectedRole === null)) {
       setErrorss(true);
@@ -366,16 +347,12 @@ const UserMasterForm = (props: any) => {
       const entry = {
         building: selectedbuilding,
         role: selectedrole,
-
       };
-
-
 
       // Avoid duplicates if needed
       const exists = selectedList?.some(
         (item: any) =>
           (item.building?.FACILITY_ID === selectedbuilding?.FACILITY_ID)
-
       );
 
       if (!exists) {
@@ -383,37 +360,28 @@ const UserMasterForm = (props: any) => {
       } else {
         toast.error("This building or role  already exists.");
       }
-
-
       // Clear values from form as well if needed
       setValue("FACILITY_LIST", "");
       setValue("USER_ROLE", '');
     }
   };
 
-
   const handleRemove = (indexToRemove: number, e: any) => {
     e.preventDefault();
-
     const updatedList = selectedList.filter((_: any, index: any) => index !== indexToRemove);
     setSelectedList(updatedList);
-
     setfinalselectedfaciltyRole(updatedList?.map((item: any) => ({
       FACILITY_ID: item?.building?.FACILITY_ID,
       ROLE_ID: item?.role?.ROLE_ID,
       ROLETYPE_CODE: item?.role?.ROLETYPE_CODE,
-
-
     })))
     setValue("FACILITY_LIST1", updatedList?.map((item: any) => item?.building?.FACILITY_NAME).join(", ") || []);
-
 
   };
 
 
   const handleSave = async (e: any) => {
     e.preventDefault();
-
     if (!selectedList || selectedList.length === 0) {
       setErrorss(true);
       return;
@@ -442,9 +410,6 @@ const UserMasterForm = (props: any) => {
     setValue("FACILITY_LIST", "")
     setValue("USER_ROLE", "")
     setErrorss(false)
-
-
-
   }
 
 

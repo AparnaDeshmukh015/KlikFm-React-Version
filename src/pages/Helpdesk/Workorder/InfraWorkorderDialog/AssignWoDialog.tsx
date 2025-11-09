@@ -148,10 +148,10 @@ const AssignWoDialog = ({
       prevTechWatch.map((tech: any, i: any) =>
         i === index
           ? {
-              ...tech,
-              ASSING_ROLE: value?.code,
-              sub_roles: value,
-            }
+            ...tech,
+            ASSING_ROLE: value?.code,
+            sub_roles: value,
+          }
           : tech
       )
     );
@@ -183,7 +183,6 @@ const AssignWoDialog = ({
   };
 
   const ShowSuccessPopup = async () => {
-    debugger;
     if (!techToRemove || techToRemove?.length === 0) return;
 
     const updatedList = assigneeTechList?.filter(

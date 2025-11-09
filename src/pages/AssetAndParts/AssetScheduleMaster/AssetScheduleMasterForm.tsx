@@ -543,10 +543,8 @@ const AssetScheduleMasterForm = (props: any) => {
                           label="Make"
                           optionLabel="MAKE_NAME"
                           findKey={"MAKE_ID"}
-                          // require={true}
                           selectedData={selectedDetails?.MAKE_ID}
                           setValue={setValue}
-                          // invalid={errors.MAKE}
                           {...field}
                         />
                       );

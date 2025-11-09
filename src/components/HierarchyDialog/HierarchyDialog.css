@@ -8,18 +8,18 @@
 .hierarchy-label {
     font-size: 1.1rem !important;
     color: #4b5563 !important;
-
+     
 }
 
 .tree-node {
-    margin-left: 20px;
+    margin-left: 30px;
 }
 
 .tree-node-header {
     margin-top: 10px;
     display: flex;
     justify-content: flex-start;
-    gap: 3px;
+    gap: 5px;
     cursor: pointer;
     padding-left: 20px;
 }
@@ -40,7 +40,7 @@
 }
 
 .hierarchy-label {
-    margin-left: 1px;
+    margin-left: 5px;
 }
 
 .hehe {
@@ -49,24 +49,13 @@
 }
 
 .hierarchy-button {
-    width: 13rem !important;
-    height: 2.2rem !important;
+    width: 10rem !important;
 }
-
-/* .serviceHeirarchy1 {
-    display: flex;
-    flex-direction: column;
-    height: 500px;
-    
-} */
 
 .serviceHeirarchy1 {
     display: flex;
     flex-direction: column;
-    border-radius: 12px;
-    background: #f7f7f7;
-    padding-top: 10px;
-    height: 615px;
+    height: 500px;
 }
 
 .treeNodeList {

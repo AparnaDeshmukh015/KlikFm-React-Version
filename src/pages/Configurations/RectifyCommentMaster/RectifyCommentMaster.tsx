@@ -44,8 +44,8 @@ const RectifyCommentMaster = (props: any) => {
                 isClick={props?.isForm}
                 handelDelete={props?.handelDelete}
                 getAPI={getAPI}
-                deleteURL={ENDPOINTS.DELETE_MAKEMASTER}
-                DELETE_ID="MAKE_ID"
+                deleteURL={ENDPOINTS.deleteRectifyComment}
+                DELETE_ID="RECT_ID"
             /> :
             <RectifyCommentMasterForm
                 headerName={currentMenu?.FUNCTION_DESC}

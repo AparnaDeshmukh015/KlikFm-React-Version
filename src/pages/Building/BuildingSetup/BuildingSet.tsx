@@ -20,7 +20,7 @@ import {
 import { Dialog } from "primereact/dialog";
 import { FileUpload } from "primereact/fileupload";
 import { saveTracker } from "../../../utils/constants";
-import { appName } from "../../../utils/pagePath";
+
 
 function RecursiveNode({
   nodes,
@@ -285,7 +285,7 @@ const BuildingSet = (props: any) => {
           mode: "A",
         };
 
-        navigate(`${appName}/location?add=`, { state: payload });
+        navigate(`/location?add=`, { state: payload });
       },
     },
     {
@@ -301,7 +301,7 @@ const BuildingSet = (props: any) => {
           materialApproval: facilityDetails?.materialApproval,
           mode: "E",
         };
-        navigate(`${appName}/addfacilitysetup?edit=`, { state: payload });
+        navigate(`/addfacilitysetup?edit=`, { state: payload });
       },
     },
   ];
@@ -491,9 +491,9 @@ const BuildingSet = (props: any) => {
       currentMenu: currentMenu,
     };
     if (mode === "A") {
-      navigate(`${appName}/location?add=`, { state: payload });
+      navigate(`/location?add=`, { state: payload });
     } else {
-      navigate(`${appName}/location?edit=`, { state: payload });
+      navigate(`/location?edit=`, { state: payload });
     }
   };
 

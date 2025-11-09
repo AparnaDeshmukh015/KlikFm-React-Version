@@ -26,6 +26,8 @@ const AddResolutionDialog = ({
   selectedDetails,
   DOC_LIST_DATA,
   Actioncode,
+  setTestingOnHold,
+
 }: any) => {
   const [visible1, setVisible1] = useState<boolean>(false);
   const { t } = useTranslation();
@@ -46,12 +48,12 @@ const AddResolutionDialog = ({
       REMARKS: "",
       ACTUAL_START_DATE:
         selectedDetails?.ACTUAL_START_DATE === "Invalid date" ||
-        selectedDetails?.ACTUAL_START_DATE === undefined
+          selectedDetails?.ACTUAL_START_DATE === undefined
           ? ""
           : moment(selectedDetails?.ACTUAL_START_DATE).format("YYYY-MM-DD"),
       ACTUAL_END_DATE:
         selectedDetails?.ACTUAL_END_DATE === "Invalid date" ||
-        selectedDetails?.ACTUAL_END_DATE === undefined
+          selectedDetails?.ACTUAL_END_DATE === undefined
           ? ""
           : moment(selectedDetails?.ACTUAL_END_DATE).format("YYYY-MM-DD"),
       DOC_LIST: DOC_LIST_DATA,
@@ -59,7 +61,7 @@ const AddResolutionDialog = ({
 
     mode: "all",
   });
-
+   console.log(docCancel, 'docCancel')
   useEffect(() => {
     const start_date: any = helperNullDate(selectedDetails?.ACTUAL_START_DATE);
     setValue("ACTUAL_START_DATE", start_date);
@@ -111,6 +113,7 @@ const AddResolutionDialog = ({
     reset();
     setVisible1(false);
     setDescriptionlength(0);
+
   };
   const DOC_LIST =
     watch("DOC_LIST") == undefined ? DOC_LIST_DATA : watch("DOC_LIST");
@@ -120,24 +123,25 @@ const AddResolutionDialog = ({
       header === "Edit Comments"
         ? 132
         : header === "Submit for Closure"
-        ? 130
-        : header === "Add Resolution" || header === "Edit Resolution"
-        ? 143
-        : 122,
+          ? 130
+          : header === "Add Resolution" || header === "Edit Resolution"
+            ? 143
+            : 122,
     COMPLETED_DESCRIPTION: REMARKS,
     ACTUAL_START_DATE:
       ACTUAL_START_DATE === "Invalid Date" ||
-      ACTUAL_START_DATE === "" ||
-      ACTUAL_START_DATE === null
+        ACTUAL_START_DATE === "" ||
+        ACTUAL_START_DATE === null
         ? ""
         : moment(ACTUAL_START_DATE).format("YYYY-MM-DD"),
     ACTUAL_END_DATE:
       ACTUAL_END_DATE === "Invalid Date" ||
-      ACTUAL_END_DATE === "" ||
-      ACTUAL_END_DATE === null
+        ACTUAL_END_DATE === "" ||
+        ACTUAL_END_DATE === null
         ? ""
         : moment(ACTUAL_END_DATE).format("YYYY-MM-DD"),
     DOC_LIST: DOC_LIST,
+    DOC_CANCEL_LIST: docCancel?.length > 0 ? docCancel : [],
   };
 
   const handleInputChange = (event: any) => {
@@ -180,8 +184,8 @@ const AddResolutionDialog = ({
           header === "Edit Comments"
             ? "Edit Resolution"
             : header === "Edit Resolution"
-            ? "Edit"
-            : header
+              ? "Edit"
+              : header
         }
         className={
           header !== "Edit Resolution"
@@ -196,10 +200,10 @@ const AddResolutionDialog = ({
           header === "Edit"
             ? "Edit Resolution"
             : header === "Complete"
-            ? "Add Resolution"
-            : header === "Edit Comments"
-            ? "Edit Resolution"
-            : header
+              ? "Add Resolution"
+              : header === "Edit Comments"
+                ? "Edit Resolution"
+                : header
         }
         visible={visible1}
         style={{ width: "900px" }}
@@ -250,11 +254,10 @@ const AddResolutionDialog = ({
                   }}
                 />
                 <label
-                  className={` ${
-                    Descriptionlength === 400
-                      ? "text-red-600"
-                      : "Text_Secondary"
-                  } Helper_Text`}
+                  className={` ${Descriptionlength === 400
+                    ? "text-red-600"
+                    : "Text_Secondary"
+                    } Helper_Text`}
                 >
                   {t(`${Descriptionlength}/400 characters`)}
                 </label>
@@ -283,7 +286,7 @@ const AddResolutionDialog = ({
                               if (
                                 endDate &&
                                 new Date(value)?.getDate() >
-                                  new Date(endDate).getDate()
+                                new Date(endDate).getDate()
                               ) {
                                 return "Start date must be before the end date.";
                               }
@@ -408,47 +411,24 @@ const AddResolutionDialog = ({
 
               {(header === "Add Resolution" ||
                 header === "Edit Resolution") && (
-                <>
-                  {payload?.ACTUAL_START_DATE === "" &&
-                  payload?.ACTUAL_END_DATE !== "" &&
-                  IsSubmit === false ? (
-                    <>
-                      <Buttons
-                        type="submit"
-                        disabled={IsSubmit}
-                        className="Primary_Button  w-20 me-2"
-                        label={"Submit"}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      {payload?.ACTUAL_START_DATE !== "" &&
-                      payload?.ACTUAL_END_DATE === "" &&
+                  <>
+                    {payload?.ACTUAL_START_DATE === "" &&
+                      payload?.ACTUAL_END_DATE !== "" &&
                       IsSubmit === false ? (
-                        <>
-                          <SuccessDialog
-                            header={"Submit"}
-                            control={control}
-                            setValue={setValue}
-                            register={register}
-                            paragraph={
-                              "Your request has been successfully submitted."
-                            }
-                            watch={watch}
-                            errors={errors}
-                            payload={payload}
-                            Actioncode={122}
-                            CloseResolutionPopUp={CloseResolutionPopUp}
-                            updateWOStatusInfra={updateWOStatusInfra}
-                          />{" "}
-                        </>
-                      ) : (
-                        <>
-                          {(!payload?.ACTUAL_START_DATE ||
-                            !payload?.ACTUAL_END_DATE ||
-                            new Date(payload?.ACTUAL_START_DATE) <=
-                              new Date(payload?.ACTUAL_END_DATE)) &&
+                      <>
+                        <Buttons
+                          type="submit"
+                          disabled={IsSubmit}
+                          className="Primary_Button  w-20 me-2"
+                          label={"Submit"}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        {payload?.ACTUAL_START_DATE !== "" &&
+                          payload?.ACTUAL_END_DATE === "" &&
                           IsSubmit === false ? (
+                          <>
                             <SuccessDialog
                               header={"Submit"}
                               control={control}
@@ -463,51 +443,75 @@ const AddResolutionDialog = ({
                               Actioncode={122}
                               CloseResolutionPopUp={CloseResolutionPopUp}
                               updateWOStatusInfra={updateWOStatusInfra}
-                            />
-                          ) : (
-                            <>
-                              {(payload?.ACTUAL_START_DATE === null ||
-                                payload?.ACTUAL_END_DATE === null ||
-                                new Date(payload?.ACTUAL_START_DATE) <=
-                                  new Date(payload?.ACTUAL_END_DATE)) &&
+                            />{" "}
+                          </>
+                        ) : (
+                          <>
+                            {(!payload?.ACTUAL_START_DATE ||
+                              !payload?.ACTUAL_END_DATE ||
+                              new Date(payload?.ACTUAL_START_DATE) <=
+                              new Date(payload?.ACTUAL_END_DATE)) &&
                               IsSubmit === false ? (
-                                <SuccessDialog
-                                  header={"Submit"}
-                                  control={control}
-                                  setValue={setValue}
-                                  register={register}
-                                  paragraph={
-                                    "Your request has been successfully submitted."
-                                  }
-                                  watch={watch}
-                                  errors={errors}
-                                  payload={payload}
-                                  Actioncode={122}
-                                  CloseResolutionPopUp={CloseResolutionPopUp}
-                                  updateWOStatusInfra={updateWOStatusInfra}
-                                />
-                              ) : (
-                                <Buttons
-                                  type="submit"
-                                  disabled={IsSubmit}
-                                  className="Primary_Button  w-20 me-2"
-                                  label={"Submit"}
-                                />
-                              )}
-                            </>
-                          )}
-                        </>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
+                              <SuccessDialog
+                                header={"Submit"}
+                                control={control}
+                                setValue={setValue}
+                                register={register}
+                                paragraph={
+                                  "Your request has been successfully submitted."
+                                }
+                                watch={watch}
+                                errors={errors}
+                                payload={payload}
+                                Actioncode={122}
+                                CloseResolutionPopUp={CloseResolutionPopUp}
+                                updateWOStatusInfra={updateWOStatusInfra}
+                              />
+                            ) : (
+                              <>
+                                {(payload?.ACTUAL_START_DATE === null ||
+                                  payload?.ACTUAL_END_DATE === null ||
+                                  new Date(payload?.ACTUAL_START_DATE) <=
+                                  new Date(payload?.ACTUAL_END_DATE)) &&
+                                  IsSubmit === false ? (
+                                  <SuccessDialog
+                                    header={"Submit"}
+                                    control={control}
+                                    setValue={setValue}
+                                    register={register}
+                                    paragraph={
+                                      "Your request has been successfully submitted."
+                                    }
+                                    watch={watch}
+                                    errors={errors}
+                                    payload={payload}
+                                    Actioncode={122}
+                                    CloseResolutionPopUp={CloseResolutionPopUp}
+                                    updateWOStatusInfra={updateWOStatusInfra}
+                                    setTestingOnHold={setTestingOnHold}
+                                  />
+                                ) : (
+                                  <Buttons
+                                    type="submit"
+                                    disabled={IsSubmit}
+                                    className="Primary_Button  w-20 me-2"
+                                    label={"Submit"}
+                                  />
+                                )}
+                              </>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
+                  </>
+                )}
 
               {header === "Complete" ? (
                 <>
                   {payload?.ACTUAL_START_DATE === "" &&
-                  payload?.ACTUAL_END_DATE !== "" &&
-                  IsSubmit === false ? (
+                    payload?.ACTUAL_END_DATE !== "" &&
+                    IsSubmit === false ? (
                     <>
                       <Buttons
                         type="submit"
@@ -519,8 +523,8 @@ const AddResolutionDialog = ({
                   ) : (
                     <>
                       {payload?.ACTUAL_START_DATE !== "" &&
-                      payload?.ACTUAL_END_DATE === "" &&
-                      IsSubmit === false ? (
+                        payload?.ACTUAL_END_DATE === "" &&
+                        IsSubmit === false ? (
                         <>
                           <SuccessDialog
                             header={"Submit"}
@@ -543,8 +547,8 @@ const AddResolutionDialog = ({
                           {(!payload?.ACTUAL_START_DATE ||
                             !payload?.ACTUAL_END_DATE ||
                             new Date(payload?.ACTUAL_START_DATE) <=
-                              new Date(payload?.ACTUAL_END_DATE)) &&
-                          IsSubmit === false ? (
+                            new Date(payload?.ACTUAL_END_DATE)) &&
+                            IsSubmit === false ? (
                             <SuccessDialog
                               header={"Submit"}
                               control={control}
@@ -559,14 +563,15 @@ const AddResolutionDialog = ({
                               Actioncode={122}
                               CloseResolutionPopUp={CloseResolutionPopUp}
                               updateWOStatusInfra={updateWOStatusInfra}
+                              setTestingOnHold={setTestingOnHold}
                             />
                           ) : (
                             <>
                               {(payload?.ACTUAL_START_DATE === null ||
                                 payload?.ACTUAL_END_DATE === null ||
                                 new Date(payload?.ACTUAL_START_DATE) <=
-                                  new Date(payload?.ACTUAL_END_DATE)) &&
-                              IsSubmit === false ? (
+                                new Date(payload?.ACTUAL_END_DATE)) &&
+                                IsSubmit === false ? (
                                 <SuccessDialog
                                   header={"Submit"}
                                   control={control}
@@ -602,11 +607,11 @@ const AddResolutionDialog = ({
                 header === "Edit" ? (
                 <>
                   {payload?.ACTUAL_START_DATE !== "" &&
-                  payload?.ACTUAL_END_DATE !== "" &&
-                  payload?.COMPLETED_DESCRIPTION !== "" &&
-                  new Date(payload?.ACTUAL_START_DATE) <=
+                    payload?.ACTUAL_END_DATE !== "" &&
+                    payload?.COMPLETED_DESCRIPTION !== "" &&
+                    new Date(payload?.ACTUAL_START_DATE) <=
                     new Date(payload?.ACTUAL_END_DATE) &&
-                  IsSubmit === false ? (
+                    IsSubmit === false ? (
                     <>
                       {/* {!showApprovalDialog ? (
                             <Buttons

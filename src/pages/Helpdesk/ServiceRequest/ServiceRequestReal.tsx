@@ -25,7 +25,7 @@ import { Calendar } from "primereact/calendar";
 import "../../../components/Table/Table.css";
 import moment from "moment";
 import { dateFormat, dateFormat1, formateDate, LOCALSTORAGE, priorityIconList } from "../../../utils/constants";
-import { appName, PATH } from "../../../utils/pagePath";
+import { PATH } from "../../../utils/pagePath";
 import { Card } from "primereact/card";
 import { decryptData } from "../../../utils/encryption_decryption";
 import { useDispatch, useSelector } from "react-redux";
@@ -1400,7 +1400,7 @@ const ServiceRequestReal = (props: any) => {
               className="Primary_Button me-2"
               label={t("Add Service Request")}
               onClick={() => {
-                navigate(`${appName}/servicerequestlist?add=`);
+                navigate(`/servicerequestlist?add=`);
               }}
             />)}
 
@@ -1451,7 +1451,7 @@ const ServiceRequestReal = (props: any) => {
                         className="cursor-pointer mb-2"
                         onClick={() => {
                           // props?.isForm({ rowItem });
-                          navigate(`${appName}/servicerequestlist?edit=`);
+                          navigate(`/servicerequestlist?edit=`);
                           localStorage.setItem("Id", JSON.stringify(rowItem));
                           localStorage.setItem(
                             "WO_ID",

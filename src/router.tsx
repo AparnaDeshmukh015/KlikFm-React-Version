@@ -220,7 +220,9 @@ const LazyInfraAssetSchedule = lazy(
 
 const LazyAssetHierarchyMaster = lazy(
   () =>
-    import("./pages/AssetAndParts/AssetHierarchyMaster/AssetHierarchyMaster")
+    import(
+      "./pages/AssetAndParts/AssetHierarchyMaster/AssetHierarchyMaster"
+    )
 );
 const LazyAssetHierarchyMasterForm = lazy(
   () =>
@@ -239,13 +241,16 @@ const LazyActionMaster = lazy(
   () => import("./pages/Users/UserActionMaster/UserActionMaster")
 );
 
-const LazyPdfReport = lazy(() => import("./pages/Report/PdfReport/PdfReport"));
+const LazyPdfReport = lazy(() =>
+  import(
+    "./pages/Report/PdfReport/PdfReport"));
 
-const LazyReport = lazy(() => import("./pages/Report/ReportList/Report"));
+const LazyReport = lazy(() =>
+  import("./pages/Report/ReportList/Report"));
 
-const LazyReportTemplate = lazy(
-  () => import("./pages/Report/ReportTempate/ReportTemplate")
-);
+const LazyReportTemplate = lazy(() =>
+  import("./pages/Report/ReportTempate/ReportTemplate"));
+
 
 //Add Custom Paths Here
 export const router = createBrowserRouter(
@@ -827,7 +832,7 @@ export const router = createBrowserRouter(
       ],
     },
 
-    //  ],)
-  ],
-  { basename: process.env.REACT_APP_CUSTOM_VARIABLE }
-);
+      ],)
+//   ],
+//   { basename: process.env.REACT_APP_CUSTOM_VARIABLE }
+// );

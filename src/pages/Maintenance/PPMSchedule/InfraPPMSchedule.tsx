@@ -295,7 +295,7 @@ const InfraNewPPMSchedule = (props: any) => {
     },
   });
   const watchAllFields: any = watch();
-  const onSubmit = async () => { };
+  const onSubmit = async () => {};
   const getAssetDetailsList = async (assetid: any) => {
     try {
       localStorage.setItem("assetId", assetid);
@@ -701,11 +701,6 @@ const InfraNewPPMSchedule = (props: any) => {
   };
 
   useEffect(() => {
-    // if (statusToday) {
-    //   setGlobalFilterValue(null);
-    //   getOptionCall();
-    // } else {
-    // onGlobalFilterChange();
     getFilterData(
       priorityId,
       equipmentName,
@@ -1150,18 +1145,6 @@ const InfraNewPPMSchedule = (props: any) => {
       }
     }
   };
-  // const onGlobalFilterChange = async (e) => {
-  //   const value = e.target.value;
-  //   setGlobalFilterValue(value);
-
-  //   getFilterData(
-  //     priorityId,
-  //     equipmentName,
-  //     e.target.value,
-  //     originalScheduleData,
-  //     woTypeFilterName
-  //   );
-  // };
 
   return (
     <>
@@ -1226,9 +1209,9 @@ const InfraNewPPMSchedule = (props: any) => {
                       Filter By
                     </label>
                     {filterValue?.length > 0 ||
-                      globalFilterValue !== null ||
-                      checkedItems?.length > 0 ||
-                      equipmentTypeCheckAll ? (
+                    globalFilterValue !== null ||
+                    checkedItems?.length > 0 ||
+                    equipmentTypeCheckAll ? (
                       <Button
                         type="button"
                         label="Reset Filter"
@@ -1522,7 +1505,7 @@ const InfraNewPPMSchedule = (props: any) => {
                           }
                           onEventDrop={onEventDrop}
                           onView={(view) => setCurrentView(view)}
-                        // onEventResize={onEventResize}
+                          // onEventResize={onEventResize}
                         />
                       </div>
 
@@ -1648,8 +1631,8 @@ const InfraPPMScheduleDetails = ({
                       <>
                         {ppmDetails[0]?.SCHEDULE_DATE !== null
                           ? `${moment(ppmDetails[0]?.SCHEDULE_DATE).format(
-                            "DD/MM/YYYY"
-                          )} ${ppmDetails[0]?.SCHEDULE_TIME}`
+                              "DD/MM/YYYY"
+                            )} ${ppmDetails[0]?.SCHEDULE_TIME}`
                           : "NA"}
                       </>
                     }
@@ -1757,7 +1740,7 @@ const InfraPPMScheduleDetails = ({
               onClick={() => {
                 localStorage.removeItem("Id");
                 localStorage.setItem("scheduleId", ppmDetails[0]?.SCHEDULE_ID);
-                //    navigate(`${appName}/infraschedule`, { state: { typewatch: typewatch, Mode: Mode } });
+                //    navigate(`/infraschedule`, { state: { typewatch: typewatch, Mode: Mode } });
                 localStorage.setItem("schedulePage", "infraPPM");
                 navigate("/assettaskschedulelist?edit=", {
                   state: {

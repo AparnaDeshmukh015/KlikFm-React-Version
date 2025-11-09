@@ -9,33 +9,40 @@ import SeverityMasterForm from "./SeverityMasterForm";
 
 const UserMaster = (props: any) => {
     let { pathname } = useLocation();
-    const priorityIcon:any =[{"ICON_ID":1, "ICON_NAME":"pi pi-angle-down"},
-        {"ICON_ID":2, "ICON_NAME":"pi pi-angle-double-up"}, {"ICON_ID":3, "ICON_NAME":"pi pi-equals"}, {"ICON_ID":4, "ICON_NAME":"pi pi-angle-up"}]
+    const priorityIcon: any = [{ "ICON_ID": 1, "ICON_NAME": "pi pi-angle-down" },
+    { "ICON_ID": 2, "ICON_NAME": "pi pi-angle-double-up" }, { "ICON_ID": 3, "ICON_NAME": "pi pi-equals" }, { "ICON_ID": 4, "ICON_NAME": "pi pi-angle-up" }]
     const [selectedFacility, menuList]: any = useOutletContext();
     const currentMenu = menuList?.flatMap((menu: any) => menu?.DETAIL).filter((detail: any) => detail.URL === pathname)[0]
+    const FACILITY: any = localStorage.getItem("FACILITYID");
+    const FACILITYID: any = JSON.parse(FACILITY);
+
+    if (FACILITYID) {
+        var facility_type: any = FACILITYID?.FACILITY_TYPE;
+
+    }
     const getAPI = async () => {
         try {
             const res = await callPostAPI(ENDPOINTS.getConfigurationsMastersList, {}, currentMenu?.FUNCTION_CODE)
-            const updateSeverity:any = res?.CONFIGURATIONSMASTERSLIST.map((item:any) => {
-                const icon = priorityIcon.filter((icon:any) => icon.ICON_ID === item?.ICON_ID)[0]
+            const updateSeverity: any = res?.CONFIGURATIONSMASTERSLIST.map((item: any) => {
+                const icon = priorityIcon.filter((icon: any) => icon.ICON_ID === item?.ICON_ID)[0]
                 return {
                     ...item,
                     ICON_NAME: icon?.ICON_NAME,
                 }
             })
-         
+
             props?.setData(updateSeverity)
             localStorage.setItem('currentMenu', JSON.stringify(currentMenu))
         } catch (error: any) {
             toast.error(error)
         }
     }
-  
+
     useEffect(() => {
         if (currentMenu) {
             (async function () {
                 await getAPI()
-               })();
+            })();
         }
     }, [selectedFacility, currentMenu])
     return (
@@ -46,8 +53,12 @@ const UserMaster = (props: any) => {
                     search: true
                 }}
                 dataKey={currentMenu?.FUNCTION_DESC}
-                columnTitle={["SEVERITY", "COLORS", "ICON_NAME", "ACTIVE"]}
-                customHeader={["Priority", "Color","Icon Name", "Active"]}
+                columnTitle={["SEVERITY", "COLORS",
+                    ...(facility_type === "I" ? ["ICON_NAME"] : []),
+                    "ACTIVE"]}
+                customHeader={["Priority", "Color",
+                    ...(facility_type === "I" ? ["ICON_NAME"] : []),
+                    "Active"]}
                 columnData={props?.data}
                 clickableColumnHeader={["SEVERITY"]}
                 filterFields={['SEVERITY']}

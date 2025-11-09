@@ -17,7 +17,6 @@
 @import "./components/Calendar/Calendar.css";
 @import "./components/Input/Input.css";
 @import "./components/Dropdown/Dropdown.css";
-
 body {
   margin: 0;
   font-family: 'Lato', sans-serif;
@@ -133,7 +132,6 @@ h6,
   font-weight: 400;
   line-height: 21px;
   letter-spacing: 0.15px;
-
 }
 
 .Input_Text {
@@ -312,5 +310,5 @@ h6,
 }
 
 .errorBorders {
-  border: 1px solid #dc2020;
+    border: 1px solid #dc2020;
 }

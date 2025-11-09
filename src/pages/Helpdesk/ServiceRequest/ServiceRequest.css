@@ -1,12 +1,12 @@
 .fixedContainer {
-    position: fixed;
-    width: calc(100% - 18.3rem);
-    left: 17.2rem;
+    position: sticky;
+    width: 100%;
+    /* left: 17.2rem; */
     right: 0;
     z-index: 1075;
     border-top: 1px solid #e5e7eb;
     border-radius: 0;
-    top: 76px !important;
+    top: 85px !important;
 }
 
 .left-container .fixedContainer {
@@ -207,6 +207,7 @@
     height: 100%;
     max-height: calc(100vh - 250px);
     overflow-y: auto;
+    border-radius: 12px;
 }
 
 .serviceEquipment .p-inputtext {

@@ -15,7 +15,7 @@ import {
 import { FileUpload } from "primereact/fileupload";
 import * as xlsx from "xlsx";
 import FileSaver from "file-saver";
-import { appName } from "../../utils/pagePath";
+
 import { PATH } from '../../utils/pagePath';
 
 
@@ -221,8 +221,8 @@ const TableHeader = (props: any) => {
                 location?.pathname === PATH?.CREDENTIALCONFIGMASTER ||
                 location?.pathname === PATH?.USER_ACTION_DETAILS ||
                 facility_type === "R" && location?.pathname === PATH?.SEVERITYMASTER ||
-                location?.pathname === `${appName}/materialrequestapprovelist` ||
-                location?.pathname === `${appName}/workorderlist`
+                location?.pathname === `/materialrequestapprovelist` ||
+                location?.pathname === `/workorderlist`
                 ? (
                   ""
                 ) : (
@@ -237,8 +237,8 @@ const TableHeader = (props: any) => {
                         />
                       )}
                       <>
-                        {location?.pathname === `${appName}/currentstatusconfig` ||
-                          location?.pathname === `${appName}/severitylist` ||
+                        {location?.pathname === `/currentstatusconfig` ||
+                          location?.pathname === `/severitylist` ||
                           location?.pathname === PATH?.WEEKOFMASTER ||
                           location?.pathname === PATH?.TASKMASTER ||
                           location?.pathname === PATH?.USERROLEMASTER ||
@@ -250,7 +250,7 @@ const TableHeader = (props: any) => {
                           location?.pathname === PATH?.WORKORDERMASTER ||
                           location?.pathname === PATH?.ACTION_MASTER ||
                           location?.pathname === PATH?.TEAMMASTER ||
-                          location?.pathname === `${appName}/assettaskschedulelist` ? (
+                          location?.pathname === `/assettaskschedulelist` ? (
                           ""
                         ) : (
                           <>
