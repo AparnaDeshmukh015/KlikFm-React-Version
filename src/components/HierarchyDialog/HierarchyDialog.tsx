@@ -202,7 +202,7 @@ const HierarchyDialog = ({
       setselectedapplynoodes(selectedAssetsnodes);
     }
   }, [selectedAssetsnodes]);
-  console.log(selectedKey, "selectedKey");
+
   const findKey = (data: any, targetKey: any) => {
     if (data.key === targetKey) {
       return data;
