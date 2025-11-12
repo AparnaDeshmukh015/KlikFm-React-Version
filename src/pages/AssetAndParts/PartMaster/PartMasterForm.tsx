@@ -20,6 +20,8 @@ import FormHeader from "../../../components/FormHeader/FormHeader";
 import { useLocation, useOutletContext } from "react-router-dom";
 import { saveTracker } from "../../../utils/constants";
 import { decryptData } from "../../../utils/encryption_decryption";
+import { isAws } from "../../../utils/constants";
+import { helperAwsFileupload } from "../../Helpdesk/ServiceRequest/utils/helperAwsFileupload";
 
 const PartMasterForm = (props: any) => {
   let { search } = useLocation();
@@ -119,6 +121,8 @@ const PartMasterForm = (props: any) => {
 
       const res = await callPostAPI(ENDPOINTS.savePartMaster, payload)
       if (res?.FLAG === true) {
+        if(isAws === true){ 
+        await helperAwsFileupload( payload?.DOC_LIST);}
         toast?.success(res?.MSG)
         const notifcation: any = {
           "FUNCTION_CODE": currentMenu?.FUNCTION_CODE,

@@ -47,6 +47,8 @@ import {
 import "../../../components/Calendar/Calendar.css";
 
 import LoaderS from "../../../components/Loader/Loader";
+import {isAws} from "../../../utils/constants";
+import { helperAwsFileupload } from "../../Helpdesk/ServiceRequest/utils/helperAwsFileupload";
 const AssetMasterForm = (props: any) => {
   const dispatch = useDispatch();
   const scheduleTaskList = useSelector((state: any) => state.scheduleTaskList);
@@ -270,7 +272,7 @@ const AssetMasterForm = (props: any) => {
       try {
 
 
-        debugger;
+        
         if (IsSubmit) return true;
         setIsSubmit(true);
 
@@ -439,6 +441,8 @@ const AssetMasterForm = (props: any) => {
           "AS007"
         );
         if (res?.FLAG === true) {
+          if(isAws === true){
+         await helperAwsFileupload(payload?.DOC_LIST);}
           toast?.success(res?.MSG);
           const notifcation: any = {
             FUNCTION_CODE: currentMenu?.FUNCTION_CODE,

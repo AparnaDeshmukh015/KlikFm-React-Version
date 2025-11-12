@@ -8,14 +8,10 @@ import { callPostAPI } from "../../services/apis";
 import { toast } from "react-toastify";
 import { ENDPOINTS } from "../../utils/APIEndpoints";
 import "./HierarchyDialog.css";
-import LoaderFileUpload from "../Loader/LoaderFileUpload";
 import { useLocation, useOutletContext } from "react-router-dom";
-import LocationHierarchyDialog from "./LocationHierarchyDialog";
 import { LOCALSTORAGE } from "../../utils/constants";
 import LoaderShow from "../Loader/LoaderShow";
 import { Checkbox } from "primereact/checkbox";
-import { node } from "@sentry/core";
-
 const folder = (
   <>
     <i className="pi pi-angle-down tree-icon tree-arrow-icon" />
@@ -26,6 +22,12 @@ const folder = (
 const openFolder = (
   <>
     <i className="pi pi-angle-right tree-icon tree-arrow-icon" />
+    <i className="pi pi-folder-open folder-image tree-icon" />
+  </>
+);
+const openFolderarrowDown = (
+  <>
+    <i className="pi pi-angle-down tree-icon tree-arrow-icon" />
     <i className="pi pi-folder-open folder-image tree-icon" />
   </>
 );
@@ -46,40 +48,39 @@ const TreeNode = ({
   seselectedassetid,
   selectedAssetsnodes,
   setselectedapplynoodes,
+
 }: any) => {
   const isExpanded = expandedKeys[node.key];
   const hasChildren = node.children && node.children.length > 0;
-
-  useEffect(() => {
-    if (selectedAssetsnodes?.length) {
-      setSelectedKey(selectedAssetsnodes?.map((item: any) => item?.asset_id));
-    }
-  }, [selectedAssetsnodes]);
 
   const isChecked = useMemo(() => {
     return Array.isArray(selectedKey)
       ? selectedKey.includes(node?.asset_id)
       : false;
   }, [selectedKey, node?.asset_id]);
+
   const handleCheckboxChange = useCallback(
-    (e: any) => {
-      if (e.checked) {
-        setSelectedKey((prev: any) => [...prev, node.asset_id]);
+    (e: any, node: any) => {
+      e?.preventDefault();
+      const isChecked = e?.checked;
+      if (isChecked) {
+        setSelectedKey((prev: any) => [...prev, node?.asset_id]);
+
       } else {
         setSelectedKey((prev: any) =>
-          prev.filter((id: any) => id !== node.asset_id)
+          prev?.filter((id: any) => id !== node?.asset_id)
         );
+
       }
     },
-    [node.asset_id]
+    []
   );
 
   return (
     <div className="tree-node">
       <div
-        className={`tree-node-header ${
-          selectedKey === node.key ? "node-tree-node-header-default" : ""
-        }`}
+        className={`tree-node-header ${selectedKey === node.key ? "node-tree-node-header-default" : ""
+          }`}
         onClick={() => {
           if (node.isAsset === 1) {
             onNodeClick(node);
@@ -90,7 +91,7 @@ const TreeNode = ({
       >
         {hasChildren ? (
           isExpanded ? (
-            <>{openFolder}</>
+            <>{openFolderarrowDown}</>
           ) : (
             <>{openFolder}</>
           )
@@ -102,7 +103,7 @@ const TreeNode = ({
             <Checkbox
               inputId={node?.asset_id}
               checked={isChecked}
-              onChange={handleCheckboxChange}
+              onChange={(e) => handleCheckboxChange(e, node)} // 👈 pass node
               className="tree-checkbox"
             />
           )}{" "}
@@ -126,6 +127,7 @@ const TreeNode = ({
               seselectedassetid={seselectedassetid}
               selectedAssetsnodes={selectedAssetsnodes}
               setSelectedAssetsnodes={setSelectedAssetsnodes}
+
               isCheckbox={isCheckbox}
             />
           ))}
@@ -158,6 +160,7 @@ const HierarchyDialog = ({
   selectedAssetsnodes,
   setFinalEquipment,
   finalEquipment,
+
 }: any) => {
   const [selectedEquipmentKey, setSelectedEquipmentKey] = useState("");
   const [nodecollapse, setnodecollapse] = useState<boolean>(false);
@@ -171,15 +174,22 @@ const HierarchyDialog = ({
   // const [assetTreeDetails, setAssetTreeDetails] = useState<any | null>([]);
   const [locationFilteredData, setLocationFilteredData] = useState<any[]>([]);
   const [locationResetStatus, setLocationResetStatus] = useState<any>(false);
+  const [locNodes, setLocNodes] = useState<any[]>([]);
+  const [filterLocData, setFilterLocData] = useState<any[]>([]);
   const [selectedapplynoodes, setselectedapplynoodes] =
     useState<any[]>(selectedAssetsnodes);
   const [expandedKeys, setExpandedKeys] = useState<any | null>({
     "0": true,
     "0-0": true,
   });
-  console.log(selectedAssetsnodes, "selectedAssetsnodes");
+
   const [LOCATIONID, setLOCATIONID] = useState<any | null>([]);
   const [selectedlocationCount, setselectedlocationCount] = useState<any>();
+  const toggleSwitch = [
+    { id: 1, label: "By Equipment", isEqp: true },
+    { id: 2, label: "By Location", isLcn: true }
+  ];
+  const [active, setActive] = useState(toggleSwitch[0].id);
   const filterNodes = (nodes: any, query: any) => {
     return nodes
       .map((node: any) => {
@@ -278,41 +288,39 @@ const HierarchyDialog = ({
     }
     return null;
   };
-
+ 
   const expandAll = () => {
+
     setExpandLoader(true);
-    setTimeout(() => {
-      const keys: Record<string, boolean> = {};
-      const stack = [...filteredData]; // Start with top-level nodes
 
-      while (stack.length > 0) {
-        const node = stack.pop();
-        if (!node) continue;
+    const keys: Record<string, boolean> = {};
+    const stack = [...(filteredData?.length > 0 ? filteredData : nodes)];
 
-        keys[node.key] = true; // Mark as expanded
+    while (stack.length > 0) {
+      const node = stack.pop();
+      if (!node) continue;
 
-        if (node.children) {
-          stack.push(...node.children); // Process children iteratively
-        }
+      keys[node.key] = true; // expand this node
+
+      if (node.children) {
+        stack.push(...node.children);
       }
+    }
 
-      setExpandedKeys(keys);
-      setnodecollapse(true);
-      setExpandLoader(false);
-    }, 0);
+    setExpandedKeys(keys);
+    setnodecollapse(true);
+    setExpandLoader(false);
   };
-
   const collapseAll = () => {
     setExpandedKeys({});
     setnodecollapse(false);
   };
-  console.log(selectedapplynoodes, "selectedapplynoodes");
+
   const applySelectedNodes = () => {
     const selectedNodes =
       selectedapplynoodes?.filter((node: any) =>
         selectedKey?.includes(node?.asset_id)
       ) ?? [];
-
     setSelectedAssetsnodes(
       (prev: any[]) =>
         // Keep only items that are still selected
@@ -323,6 +331,7 @@ const HierarchyDialog = ({
         // Keep only items that are still selected
         selectedNodes
     );
+    setFilterText("");
     showEquipmentlist(false);
   };
 
@@ -333,7 +342,10 @@ const HierarchyDialog = ({
       };
       const res = await callPostAPI(ENDPOINTS.GET_INFRA_ASSET_DETAILS, payload);
       if (res?.FLAG === 1) {
+        setFilterText("");
+        setActive(toggleSwitch[0].id);
         setAssetTreeDetails(res?.ASSETDETAILSLIST);
+
       } else {
         toast?.error(res?.MSG);
       }
@@ -375,8 +387,10 @@ const HierarchyDialog = ({
       }
 
       setSelectedEquipmentKey(node.label);
+      if (!isCheckbox) {
+        await getAssetDetailsList(node.asset_id);
+      }
 
-      await getAssetDetailsList(node.asset_id);
     } else {
       toast.error("Please select an equipment item, not a folder.");
     }
@@ -387,11 +401,14 @@ const HierarchyDialog = ({
     }
   };
 
+
   const filterTree = useCallback(
     (nodeList: any[], PATHs?: any) => {
+
       return nodeList
         ?.map((node: any) => {
           const currentPath = PATHs ? `${PATHs} > ${node.label}` : node.label;
+
           const children: any = node?.children
             ? filterTree(node.children, currentPath)
             : [];
@@ -408,18 +425,23 @@ const HierarchyDialog = ({
 
           const isMatch = normalizedPath.includes(normalizedFilter);
 
+          // debugger
           if (children?.length > 0) {
+
+            setnodecollapse(true)
             return {
               ...node,
               children,
               expanded: true,
             };
+
           } else {
             if (isMatch) {
+
               return {
                 ...node,
                 children: [],
-                expanded: false,
+                expanded: true,
               };
             }
           }
@@ -431,25 +453,28 @@ const HierarchyDialog = ({
   ); // Only recreate when filterText changes
 
   useEffect(() => {
-    if (!nodes) return;
+    // if (!nodes) return;
 
     if (filterText?.trim()) {
+
       const filtered = filterTree(nodes, "");
       setFilteredData(filtered);
-
       expandAll();
     } else {
       setFilteredData(nodes);
       setExpandedKeys({});
       setnodecollapse(false);
+
     }
   }, [filterText, nodes, setFilteredData, filterTree]);
 
   const { pathname } = useLocation();
-
+  //new api calling added by anand 25/08/2025
   const getEquimentHierarchy = useCallback(
     async (locationData?: any) => {
+      setExpandLoader(true);
       try {
+        // --- First API ---
         const payload = {
           LOCATION_LIST: locationData ?? [],
           ASSET_EQUIPMENT_ID: 0,
@@ -459,16 +484,12 @@ const HierarchyDialog = ({
             pathname === "/ppmSchedule"
               ? "MS002"
               : pathname === "/servicerequestlist"
-              ? "HD004"
-              : "AS0012",
+                ? "HD004"
+                : "AS0012",
         };
-        setLoading(true);
 
-        const res = await callPostAPI(
-          ENDPOINTS.Location_Hierarchy_List,
-          payload
-        );
-        setLoading(false);
+        const res = await callPostAPI(ENDPOINTS.Location_Hierarchy_List, payload);
+
         if (res?.FLAG === 1) {
           setNodes(res?.EQUIPMENTHIERARCHYLIST);
           setFilteredData(res?.EQUIPMENTHIERARCHYLIST);
@@ -476,15 +497,41 @@ const HierarchyDialog = ({
           toast?.error(res?.MSG);
           setFilteredData([]);
         }
+
+        // --- Second API (independent try-catch) ---
+
       } catch (error: any) {
         toast?.error(error.message);
-        setLoading(false);
+        setFilteredData([]);
       } finally {
-        setLoading(false);
+        setExpandLoader(false)
       }
     },
     [setNodes, setFilteredData, hierachyFirstDate, hierachyLastDate]
   );
+
+  const ByLocationEquipment = async () => {
+    // setActive()
+    setExpandLoader(true)
+    try {
+      const res1 = await callPostAPI(
+        ENDPOINTS.LOCATION_EQUIPMENT_HIERARCHY_LIST,
+        {}
+      );
+      if (res1?.FLAG === 1) {
+        setNodes(res1?.LOCATIONHIERARCHYLIST);
+        setFilteredData(res1?.LOCATIONHIERARCHYLIST);
+      } else {
+        setFilteredData([]);
+        setExpandLoader(false)
+        toast?.error(res1?.MSG);
+      }
+    } catch (err: any) {
+      toast?.error(err.message);
+    } finally {
+      setExpandLoader(false)
+    }
+  }
 
   const getLocation = async () => {
     let Currentfacility = JSON.parse(
@@ -519,6 +566,8 @@ const HierarchyDialog = ({
     setLOCATIONID(locationList);
     getEquimentHierarchy(locationData);
   };
+
+
   useEffect(() => {
     setLocationDialog(false);
     if (visibleEquipmentlist === true) {
@@ -527,10 +576,8 @@ const HierarchyDialog = ({
         getEquimentHierarchy();
       }
       if (isCheckbox === true) {
-        // finalEquipment
       }
 
-      // getLocation();
     }
   }, [
     visibleEquipmentlist,
@@ -547,7 +594,8 @@ const HierarchyDialog = ({
       ) : (
         <Dialog
           visible={visibleEquipmentlist}
-          style={{ width: "650px", height: "720px" }}
+          style={{ width: "60vw", height: "720px" }}
+          // style={{ width: "50vw", height: "80vh" }}
           className="dialogBoxTreeStyle bg-white"
           dismissableMask
           closable={false}
@@ -567,44 +615,53 @@ const HierarchyDialog = ({
             className="serviceEquipment bg-white p-4"
             style={{ maxHeight: "750px" }}
           >
-            <div className="px-2 pb-4 flex w-full gap-3 justify-between">
+            <div
+              className={pathname !== "/servicerequestlist" ? `px-2 pb-4 flex w-full gap-3 justify-end` : 'px-2 pb-4 flex w-full gap-3 justify-between'}
+            >
               {pathname === "/servicerequestlist" && (
                 <div>
-                  <InputText
-                    placeholder="Search Location"
-                    value={
-                      !selectedlocationCount ||
-                      selectedlocationCount?.length === 0
-                        ? ""
-                        : selectedlocationCount?.length >= 2
-                        ? `${selectedlocationCount?.length} items selected`
-                        : locationName
-                    }
-                    onClick={(e: any) => setLocationDialog(true)}
-                    readOnly
-                    className="width-1/5"
-                  />
-                  <LocationHierarchyDialog
-                    showEquipmentlist={setLocationDialog}
-                    visibleEquipmentlist={locationDialog}
-                    selectedKey={selectedKey}
-                    setSelectedKey={setSelectedKey}
-                    nodes={locationNode}
-                    locationFilteredData={locationFilteredData}
-                    setLocationFilteredData={setLocationFilteredData}
-                    setNodes={setLocationNode}
-                    setValue={setValue}
-                    // getDashboardDetails={getDashboardDetails}
-                    setLocationName={setLocationName}
-                    handleLocationFilter={handleLocationFilter}
-                    locationResetStatus={locationResetStatus}
-                    setLocationResetStatus={setLocationResetStatus}
-                    LOCATIONID={LOCATIONID}
-                    locationUrl={"/servicerequestlist?add="}
-                    setLOCATIONID={setLOCATIONID}
-                  />
+                  <div className="flex w-fit rounded-[32px] bg-[#EFF1F5]  border border-gray-300 overflow-hidden">
+                    {toggleSwitch.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setActive(item.id)
+                          if (item.id === 1) {
+                            getEquimentHierarchy();
+                          } else {
+                            ByLocationEquipment();
+                          }
+                        }}
+                        className={`px-4 py-2 text-sm font-medium transition-all  rounded-[32px]
+            ${active === item.id
+                            ? "bg-[#8e724a] text-white"
+                            : "bg-[#EFF1F5] text-gray-700 rounded-[32px]"
+                          }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+
+                  </div>
+                  
                 </div>
+
               )}
+              {
+                <div>
+                  <Button
+                    onClick={() => {
+                      showEquipmentlist(false);
+                      setSelectedKey([])
+                      // setselectedapplynoodes([])
+                      setFilterText("")
+                      setActive(toggleSwitch[0].id)
+                    }}
+                  >
+                    <i className="pi pi-times x-button"></i>
+                  </Button>
+                </div>
+              }
             </div>
             <div className="px-2 pb-4 flex w-full gap-3 justify-between">
               <div className="w-4/5">
@@ -616,7 +673,7 @@ const HierarchyDialog = ({
                     onChange={(e) =>
                       setFilterText(e?.target?.value?.trimStart())
                     }
-                    placeholder="Search"
+                    placeholder="Search Equipment"
                   />
                 </IconField>
               </div>
@@ -628,17 +685,7 @@ const HierarchyDialog = ({
                   label={nodecollapse ? "Collapse All" : "Expand All"}
                   onClick={nodecollapse ? collapseAll : expandAll}
                 />
-                {
-                  <Button
-                    onClick={() => {
-                      showEquipmentlist(false);
-                      // setSelectedKey([])
-                      // setselectedapplynoodes([])
-                    }}
-                  >
-                    <i className="pi pi-times x-button"></i>
-                  </Button>
-                }
+
               </div>
             </div>
 
@@ -651,9 +698,9 @@ const HierarchyDialog = ({
                 className="serviceHeirarchy relative"
                 style={{ maxHeight: "500px", overflowY: "auto" }}
               >
-                {filteredData?.length > 0 ? (
+                {(filteredData?.length > 0) ? (
                   <>
-                    {filteredData?.map((node: any) => (
+                    {(filteredData)?.map((node: any) => (
                       <TreeNode
                         key={node.key}
                         node={node}
@@ -666,6 +713,7 @@ const HierarchyDialog = ({
                         isCheckbox={isCheckbox}
                         setSelectedAssetsnodes={setSelectedAssetsnodes}
                         selectedAssetsnodes={selectedAssetsnodes}
+
                       />
                     ))}
                   </>
@@ -674,31 +722,14 @@ const HierarchyDialog = ({
                 )}
               </div>
             )}
-            {/* {isCheckbox && selectedKey?.length > 0 && (
-              <div className="flex justify-end pr-[77px]  pt-[59px] ">
-                <div className="">
-                  <a
-                    className="status-subheading cursor-pointer"
-                    // onClick={() => clearSelection()}
-                  >
-                    Clear Selection
-                  </a>
-                </div>
-                <Button
-                  type="button"
-                  className="Primary_Button"
-                  label="Apply"
-                  onClick={applySelectedNodes}
-                />
-              </div>
-            )} */}
+           
             {isCheckbox && (
               <div className="absolute bottom-0 left-0 right-0 bg-white py-4 px-4 border-t border-gray-200 rounded-b-lg flex justify-between items-center">
                 <div className="pl-4">
                   {" "}
                   {/* Left-aligned Clear Selection */}
                   <a
-                    className="status-subheading cursor-pointer text-blue-600 hover:text-blue-800"
+                    className="status-subheading cursor-pointer text-[#8e724a] "
                     onClick={() => {
                       setSelectedKey([]);
                     }}

@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import { useFieldArray } from "react-hook-form";
 import { decryptData } from "../../../utils/encryption_decryption";
-import { scanfileAPI } from "../../../utils/constants";
+import { scanfileAPI, isAws } from "../../../utils/constants";
 
 // import LoaderS from "../../Loader/Loader";
 import pdfIcon from "../../../assest/images/pdfIcon.jpg";
@@ -51,6 +51,7 @@ const WoDocumentUpload = ({
   uploadSupportMandatory,
   docCancel,
   setdocCancel,
+  CancelData,
   // onRemoveExistingDocument,
   ...props
 }: any) => {
@@ -60,7 +61,7 @@ const WoDocumentUpload = ({
   });
   const [doclist, setDoclist] = useState(watch("DOC_LIST"));
   const [fileStatus, setFileStatus] = useState<any | null>(false);
-
+ const[preview,setPreview]=useState<any|null>(null);
   var doclistWatch = watch("DOC_LIST");
   const inputRef = useRef<any | null>(null);
   const DOC_LIST = watch("DOC_LIST");
@@ -70,7 +71,7 @@ const WoDocumentUpload = ({
   const DOC_LIST_VALUE = getValues("DOC_LIST");
   const FACILITY: any = localStorage.getItem("FACILITYID");
   const FACILITYID: any = JSON.parse(FACILITY);
-
+   const Cancelled_Doclist=watch("CANCEL_DOC_LIST");
   if (FACILITYID) {
     var facility_type: any = FACILITYID?.FACILITY_TYPE;
   }
@@ -104,6 +105,7 @@ const WoDocumentUpload = ({
   }, [IsCancel]);
 
   const handleFileInputChange = async (e: any) => {
+    
     e.preventDefault();
     if (isDropping === true) {
       return;
@@ -116,7 +118,7 @@ const WoDocumentUpload = ({
       setIsSubmit(false);
       return;
     }
-
+ 
     try {
       const newFiles: any = [];
       const fileScanPromises: any = selectedFiles.map(async (file) => {
@@ -125,20 +127,20 @@ const WoDocumentUpload = ({
           const base64: any = await getBase64(file);
           setLoading(true);
           const fileScanStatus: any = await scanfileAPI(base64, file.name);
-
-          file.base64 = base64;
+            if( isAws === false){
+           file.base64 = base64;
+            }
           return { file, fileScanStatus, base64 };
         } else {
           setLoading(false);
-          //  thro
-          // w new Error("You can upload only JPG & PNG files.");
-          // toast.error(t("You can upload only JPG & PNG files."));
+          
         }
       });
 
       const results = await Promise.allSettled(fileScanPromises);
-
+        
       for (const result of results) {
+       
         if (result.status === "fulfilled") {
           const { file, fileScanStatus, base64 } = result.value;
           const check = file.name.split(".");
@@ -162,7 +164,8 @@ const WoDocumentUpload = ({
                   newFiles.push({
                     DOC_SRNO: DOC_LIST_VALUE.length + newFiles.length + 1,
                     DOC_NAME: file.name,
-                    DOC_DATA: base64.split("base64,")[1],
+                    DOC_DATA: isAws === true ?result?.value?.file:  base64.split("base64,")[1],
+                    doc_file:URL.createObjectURL(result?.value?.file),
                     DOC_EXTENTION: check[check.length - 1],
                     DOC_SYS_NAME: uuidv4(),
                     ISDELETE: false,
@@ -170,6 +173,7 @@ const WoDocumentUpload = ({
                     UPLOADEDBY: decryptData(localStorage.getItem("USER_NAME")),
                     UPLOAD_TYPE: uploadtype,
                     DOC_SIZE: (file.size / 1024).toFixed(2),
+                     UPLOAD_NEW:true  
                   });
                 } else {
                   toast.error(t("The max file size is 5 Mb"));
@@ -203,7 +207,7 @@ const WoDocumentUpload = ({
           setIsSubmit(false);
         }
       }
-
+   
       append(newFiles);
       setIsSubmit(false);
       e.target.value = null;
@@ -215,6 +219,7 @@ const WoDocumentUpload = ({
     }
   };
 
+
   const calFileSize = (base64: string) =>
     `${((4 * Math.ceil(base64?.length / 3) * 0.5624896334383812) / 1000)
       .toFixed(1)
@@ -222,26 +227,21 @@ const WoDocumentUpload = ({
 
   const handlerChange = (e: any, id: any, i: any) => {
     e.preventDefault();
-    // const fileToRemove = doclist[i];
     const deleteFile: any = doclist?.filter(
       (f: any, index: any) => index === i
     );
     const fileData = doclist?.filter((f: any, index: any) => index !== i);
-    // console.log(fileToRemove, fileData, "DELETE")
     const updatedDocuments = fileData?.map((doc: any, index: any) => ({
       ...doc,
       DOC_SRNO: index + 1, // Assigning sequential serial numbers starting from 1
     }));
-    const deletedData: any = deleteFile?.map((file: any) => {
+    const deletedData: [] = deleteFile?.map((file: any) => {
       return { DOC_SYS_NAME: file?.DOC_SYS_NAME };
     });
-    setdocCancel((prev: any) => [...(prev || []), ...deletedData]);
-    // setdocCancel(deleteFile);
-    setValue("DOC_LIST", updatedDocuments);
-
-    // if (!fileToRemove?.ISNEW && fileToRemove?.DOC_SYS_NAME && onRemoveExistingDocument) {
-    //   onRemoveExistingDocument(fileToRemove);
-    // }
+ 
+    setdocCancel((prev: any) => [...prev , ...deletedData]);
+  //  CancelData.push(deletedData);
+    setValue("DOC_LIST", updatedDocuments);  
   };
 
   const duplicateFileChecker = (fileList: any) => {
@@ -277,8 +277,6 @@ const WoDocumentUpload = ({
     const droppedFiles = e.dataTransfer.files;
     const fakeEvent = { target: { files: droppedFiles } };
     const selectedFiles: any[] = Array.from(fakeEvent?.target?.files);
-    // const validExtensions = ["jpg", "png", "jpeg", "JPG", "JPEG"];
-    // const validExtensions = ["jpg", "png", "jpeg", "JPG", "JPEG", "pdf", "doc", "docx", "xls", "xlsx"];
     if (selectedFiles.length + CurrDocData?.length > 5) {
       toast.error("Only 5 files are allowed");
       setIsSubmit(false);
@@ -304,8 +302,9 @@ const WoDocumentUpload = ({
             const base64: any = await getBase64(file);
             setLoading(true);
             const fileScanStatus: any = await scanfileAPI(base64, file.name);
-
-            file.base64 = base64;
+            if( isAws === false){
+             file.base64 = base64;
+            }
             return { file, fileScanStatus, base64 };
           } else {
             setLoading(false);
@@ -321,13 +320,15 @@ const WoDocumentUpload = ({
 
             if (fileScanStatus) {
               setLoading(false);
+         
               // if (sameFileName.length === 0) {
               if (CurrDocData?.length < 5) {
                 if (file?.size < 5242880) {
                   newFiles.push({
                     DOC_SRNO: DOC_LIST_VALUE.length + newFiles.length + 1,
                     DOC_NAME: file.name,
-                    DOC_DATA: base64.split("base64,")[1],
+                    DOC_DATA: isAws === true ?result?.value?.file : base64.split("base64,")[1],
+                       doc_file:isAws === true? URL.createObjectURL(result?.value?.file):"",
                     DOC_EXTENTION: check[check.length - 1],
                     DOC_SYS_NAME: uuidv4(),
                     ISDELETE: false,
@@ -335,6 +336,7 @@ const WoDocumentUpload = ({
                     UPLOADEDBY: decryptData(localStorage.getItem("USER_NAME")),
                     UPLOAD_TYPE: uploadtype,
                     DOC_SIZE: (file.size / 1024).toFixed(2),
+                    UPLOAD_NEW:true
                   });
                   setIsDropping(false);
                 } else {
@@ -352,14 +354,7 @@ const WoDocumentUpload = ({
                 setIsDropping(false);
                 return;
               }
-              // }
-              //   else {
-              // //    toast.error(t("This file already exists"));
-              //     //e.target.value = null;
-              //     setLoading(false)
-              //     setIsSubmit(false)
-              //     return;
-              //   }
+             
             } else {
               setLoading(false);
               setIsSubmit(false);
@@ -440,13 +435,12 @@ const WoDocumentUpload = ({
         >
           <label
             // htmlFor="dropzone-file"
-            className={`flex flex-col items-center justify-center w-full h-54  ${
-              uploadError === true && DOC_LIST?.length === 0
+            className={`flex flex-col items-center justify-center w-full h-54  ${uploadError === true && DOC_LIST?.length === 0
                 ? "border-2 border-red-600"
                 : CurrDocData?.length <= 0
-                ? "border-2 border-gray-200 border rounded-lg"
-                : ""
-            }`}
+                  ? "border-2 border-gray-200 border rounded-lg"
+                  : ""
+              }`}
           >
             {CurrDocData?.length <= 0 ? (
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -522,13 +516,12 @@ const WoDocumentUpload = ({
             </div>
           ) : (
             DOC_LIST?.map((doc: any, index: any) => {
+           
               const docsize = calFileSize(doc?.DOC_DATA);
               const getExtension = (str: any) =>
                 str.slice(str.lastIndexOf("."));
               const fileExtension = getExtension(doc?.DOC_NAME);
               if (doc.UPLOAD_TYPE === uploadtype) {
-                console.log(doc.UPLOAD_TYPE);
-                console.log(uploadtype, "uploadtype");
                 if (
                   DOC_LIST[index]?.DOC_EXTENTION === "pdf" ||
                   fileExtension === ".pdf"
@@ -554,12 +547,14 @@ const WoDocumentUpload = ({
                 ) {
                   docData = `data:image/heif;base64,` + doc?.DOC_DATA;
                 } else {
-                  docData =
-                    // `data:image/${fileExtension.replace(".", "")};base64,` + doc?.DOC_DATA;
-                    `data:image/jpeg;base64,` + doc?.DOC_DATA;
+                
+                  docData =isAws === false ?
+                 
+                    `data:image/${fileExtension.replace(".", "")};base64,` + doc?.DOC_DATA
+                   : doc?.doc_file === undefined? doc?.DOC_DATA:doc?.doc_file;
                   // }
                 }
-
+         
                 return (
                   <>
                     <div className="imageContainer">
@@ -581,8 +576,8 @@ const WoDocumentUpload = ({
                           {doc.DOC_NAME.length > 15
                             ? doc.DOC_NAME.substring(0, 6) + "..."
                             : doc.DOC_NAME
-                            ? doc.DOC_NAME
-                            : doc.DOC_NAME}
+                              ? doc.DOC_NAME
+                              : doc.DOC_NAME}
                           {doc.DOC_NAME.length > 15
                             ? doc.DOC_EXTENTION === ""
                               ? fileExtension
@@ -606,7 +601,7 @@ const WoDocumentUpload = ({
           className="imageContainer"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          // className={`flex flex-col items-center justify-center w-full h-54
+        // className={`flex flex-col items-center justify-center w-full h-54
         >
           {loading ? (
             <div className="imageContainer  flex justify-center items-center">

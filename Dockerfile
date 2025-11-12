@@ -8,17 +8,19 @@ WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
+COPY . .
+RUN npm run build:staging
 
 # Copy project files (excluding .dockerignore paths)
 COPY . .
 
 # Set environment file (optional)
-# If you use different .env files per environment:
-COPY .env.staging .env
+# # If you use different .env files per environment:
+# COPY .env.staging .env
 
-# Build your React app
-RUN npm run build:staging
+# # Build your React app
+# RUN npm run build:staging
 
 
 # ============================

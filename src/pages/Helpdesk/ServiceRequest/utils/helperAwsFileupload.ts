@@ -31,7 +31,7 @@ export const helperAwsFileupload = async (DOC_LIST: any) => {
   });
 
     if (responseImage.ok) {
-      toast.success("Files uploaded successfully!");
+      // toast.success("Files uploaded successfully!");
     } else {
       toast.error("Upload failed");
     }

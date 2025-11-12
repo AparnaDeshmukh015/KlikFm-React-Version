@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { decryptData } from "../../../utils/encryption_decryption";
 import { scanfileAPI } from "../../../utils/constants";
 import LoaderFileUpload from "../../Loader/LoaderFileUpload";
-
+import {isAws} from "../../../utils/constants";
 const DocumentUpload = ({
   register,
   control,
@@ -56,8 +56,10 @@ const DocumentUpload = ({
       ext === "JPEG"
     ) {
       const file = e.target.files[0];
+      const newFiles: any = [];
       getBase64(file)
         .then(async (result: any) => {
+          
           file["base64"] = result;
           const check = file?.name?.split(".");
           const sameFileName: any = DOC_LIST_VALUE?.filter(
@@ -72,18 +74,25 @@ const DocumentUpload = ({
           if (fileScanStatus === true) {
             if (sameFileName?.length === 0) {
               if (DOC_LIST_VALUE?.length < 5) {
-                append({
+                
+                
+                newFiles.push({
                   DOC_SRNO: DOC_LIST_VALUE?.length + 1,
                   DOC_NAME: file?.name,
-                  DOC_DATA: (file?.base64).split("base64,")[1],
+                  DOC_DATA: isAws === true ?  e.target.files[0]:(file?.base64).split("base64,")[1],
                   DOC_EXTENTION: check[check?.length - 1],
                   DOC_SYS_NAME: uuidv4(),
                   ISDELETE: false,
                   DOC_TYPE: "",
                   UPLOADEDBY: decryptData(localStorage.getItem("USER_NAME")),
+                  UPLOAD_NEW:true ,
+                    doc_file:"true",
                   // FILE: file
                 });
+                  console.log("newFiles",newFiles);
+                append(newFiles);
                 e.target.value = null;
+              
               } else {
                 toast.error(t("Upload only 5 files"));
               }
@@ -112,7 +121,7 @@ const DocumentUpload = ({
       remove(index);
     }
   };
-
+ console.log("DOC_LIST_VALUE",DOC_LIST_VALUE);
   return (
     <div>
       <div className="headingConainer">

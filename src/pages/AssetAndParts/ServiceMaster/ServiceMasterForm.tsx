@@ -24,6 +24,8 @@ import { decryptData } from "../../../utils/encryption_decryption";
 import { selectedLocationTemplate, locationOptionTemplate, FormHeader, OtherDetails } from "./utils/HelperComponent";
 import {getAssetDetails,getScheduleList,getDefaultValues, validationError, saveServiceMaster, helperEventNotificationLocal} from "./utils/helper"
 import ServiceDetails from "./utils/ServiceDetails";
+import {isAws} from "../../../utils/constants";
+import { helperAwsFileupload } from "../../Helpdesk/ServiceRequest/utils/helperAwsFileupload";
 const ServiceMasterForm = (props: any) => {
   const { search } = useLocation();
   const navigate = useNavigate();
@@ -84,6 +86,8 @@ const ServiceMasterForm = (props: any) => {
     try {
        const res :any= await saveServiceMaster(payload, selectedSchedule, payload.SCHEDULE_ID, search, selectedDetails, editStatus)
       if (res?.FLAG === true) {
+          if(isAws === true){
+          await helperAwsFileupload( payload?.DOC_LIST);}
         toast?.success(res?.MSG);
         helperEventNotificationLocal( search, payload,watchAll,User_Name,currentMenu, eventNotification)
        if (location?.state === null) {

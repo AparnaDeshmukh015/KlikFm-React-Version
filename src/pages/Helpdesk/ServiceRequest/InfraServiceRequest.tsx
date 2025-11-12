@@ -1087,7 +1087,7 @@ const InfraServiceRequest = (props: any) => {
           </div>
         </form>
 
-        <Dialog header="" visible={successvisible} style={{ width: "550px" }} className="dialogBoxStyle" onHide={() => ClosePopUp()} >
+         <Dialog header="" visible={successvisible} style={{ width: "550px" }} className="dialogBoxStyle" onHide={() => ClosePopUp()} >
           <form>
             <div className="grid justify-items-center">
               <div className="">
